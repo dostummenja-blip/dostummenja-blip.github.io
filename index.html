@@ -1125,6 +1125,12 @@ const DEFAULT_ORDERS = [
 ];
 
 // ── LOCAL STORAGE ONLY (no external VPS/backend) ──
+
+// Order expiry constants — defined early so pruneExpiredOrders() can use them
+// when called at line ~1151 (before the ORDERS section further down).
+const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const TIMESTAMP_THRESHOLD = 1577836800000; // 2020-01-01 ms — ids below this are demo orders
+
 function lsGet(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch(e) { return fallback; }
@@ -1363,15 +1369,10 @@ function openPost() { openModal('postModal'); }
 /* ════════════════════════════════════
          ORDERS
 ════════════════════════════════════ */
-// Auto-expiry: user-created orders older than 3 days are removed automatically.
-// Order id is Date.now() at creation time (timestamp > 1e12), so it doubles as a timestamp.
-// Default/demo orders have small integer ids (1-8) and are NEVER pruned.
-const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
-const TIMESTAMP_THRESHOLD = 1577836800000; // 2020-01-01 — ids below this are demo orders
 function pruneExpiredOrders(list) {
   const cutoff = Date.now() - ORDER_TTL_MS;
   return list.filter(o => {
-    // Demo orders (small integer ids) are never pruned
+    // Demo orders (small integer ids < year 2020 timestamp) are never pruned
     if (!o.id || o.id < TIMESTAMP_THRESHOLD) return true;
     // User-created orders: keep if newer than 3 days
     return o.id >= cutoff;
