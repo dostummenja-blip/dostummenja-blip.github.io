@@ -1087,6 +1087,7 @@ const LS_ORDERS  = 'fs_orders';
 const LS_USER    = 'fs_user';
 const LS_CHATS   = 'fs_chats';   // shared: fs_chats_<orderId>  — ALL users read/write same key
 const LS_THEME   = 'fs_theme';
+const LS_TALENTS = 'fs_talents';
 
 const DEFAULT_ORDERS = [
   { id:1, title:"Разработка сайта для ресторана", cat:"Разработка",
@@ -1123,31 +1124,63 @@ const DEFAULT_ORDERS = [
     tags:["Акварель","Procreate","Иллюстрация"] },
 ];
 
+// ── SUPABASE (real cross-device backend) ──
+const SB_URL = 'https://efbqxltouqimutbdnhtp.supabase.co';
+const SB_KEY = 'sb_publishable_I5lPBpvJ6NOqOVesbVpFPw_ihXtZ59K';
+const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+
+// Map our localStorage-style keys to Supabase tables/rows.
+// orders/talents -> single row (id=1) holding the whole array as jsonb.
+// fs_chats_<orderId> / fs_talentchats_<talentId> -> one row per chat in `chats` table (id = the key itself).
+// fs_users -> single row (id='all') in `users`-style storage via the `chats` table reused as generic KV,
+// to avoid needing extra tables beyond what was set up.
+function sbTableForKey(key) {
+  if (key === LS_ORDERS) return { table: 'orders', pk: 'id', pkVal: 1 };
+  if (key === LS_TALENTS) return { table: 'talents', pk: 'id', pkVal: 1 };
+  // everything else (chats, users list, per-user chat index, theme, session) goes in generic `chats` table as KV
+  return { table: 'chats', pk: 'id', pkVal: key };
+}
+
+async function sbGet(key) {
+  const t = sbTableForKey(key);
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/${t.table}?${t.pk}=eq.${encodeURIComponent(t.pkVal)}&select=data`, { headers: SB_HEADERS });
+    if (!res.ok) return undefined;
+    const rows = await res.json();
+    if (!rows || !rows.length) return undefined;
+    return rows[0].data;
+  } catch(e) { return undefined; }
+}
+async function sbSet(key, val) {
+  const t = sbTableForKey(key);
+  try {
+    await fetch(`${SB_URL}/rest/v1/${t.table}`, {
+      method: 'POST',
+      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'resolution=merge-duplicates' }),
+      body: JSON.stringify({ [t.pk]: t.pkVal, data: val, updated_at: new Date().toISOString() })
+    });
+  } catch(e) {}
+}
+
 // lsGet/lsSet keep their old synchronous signature so no caller needs to change.
-// Under the hood: localStorage is used as an instant local cache (for sync reads),
-// while every write is mirrored to window.storage (shared:true) so it reaches
-// every device/browser. On load, fresh data is pulled from window.storage
-// asynchronously and merged in via ssRefresh (see bottom of file).
+// localStorage is used as an instant local cache (for sync reads), while every
+// write is also mirrored to Supabase (fire-and-forget) so it reaches every
+// device/browser. On load, fresh data is pulled from Supabase asynchronously
+// and merged in via ssRefresh (see bottom of file).
 function lsGet(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch(e) { return fallback; }
 }
 function lsSet(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-  // Fire-and-forget mirror to shared cross-device storage.
-  if (window.storage && window.storage.set) {
-    window.storage.set(key, JSON.stringify(val), true).catch(function(){});
-  }
+  sbSet(key, val); // fire-and-forget mirror to Supabase
 }
-// Pull a key from shared storage; returns fallback if missing/unavailable.
+// Pull a key from Supabase; returns fallback if missing/unavailable.
 async function ssGet(key, fallback) {
-  if (!window.storage || !window.storage.get) return fallback;
-  try {
-    const res = await window.storage.get(key, true);
-    return res ? JSON.parse(res.value) : fallback;
-  } catch(e) { return fallback; }
+  const res = await sbGet(key);
+  return res === undefined ? fallback : res;
 }
-// Refresh a key from shared storage into localStorage; returns true if it changed.
+// Refresh a key from Supabase into localStorage; returns true if it changed.
 async function ssRefresh(key) {
   const fresh = await ssGet(key, undefined);
   if (fresh === undefined) return false;
@@ -1781,7 +1814,6 @@ function scrollToTalents() {
 /* ════════════════════════════════════
          TALENTS DATA & RENDER
 ════════════════════════════════════ */
-const LS_TALENTS = 'fs_talents';
 const DEFAULT_TALENTS = [
   { id:101, name:'Алина Горбачёва', cat:'Дизайн', role:'UI/UX Designer', desc:'5 лет опыта в создании интерфейсов для мобильных и веб-приложений. Работала с командами в США, Германии и СНГ. Люблю минимализм и пользовательский опыт.', skills:['Figma','Webflow','Illustrator','Branding'], rateMin:25, rateMax:50, initials:'АГ', stars:'⭐⭐⭐⭐⭐', rating:5.0 },
   { id:102, name:'Дмитрий Кравцов', cat:'Разработка', role:'Full-Stack Developer', desc:'React, Node.js, PostgreSQL — полный стек. Разработал более 30 коммерческих проектов. Пишу чистый код, соблюдаю дедлайны, работаю по NDA.', skills:['React','Node.js','TypeScript','Docker'], rateMin:40, rateMax:80, initials:'ДК', stars:'⭐⭐⭐⭐⭐', rating:4.9 },
