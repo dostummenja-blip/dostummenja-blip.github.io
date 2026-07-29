@@ -1124,81 +1124,16 @@ const DEFAULT_ORDERS = [
     tags:["Акварель","Procreate","Иллюстрация"] },
 ];
 
-// ── SUPABASE (real cross-device backend) ──
-const SB_URL = 'https://efbqxltouqimutbdnhtp.supabase.co';
-const SB_KEY = 'sb_publishable_I5lPBpvJ6NOqOVesbVpFPw_ihXtZ59K';
-const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
-
-// Map our localStorage-style keys to Supabase tables/rows.
-// orders/talents -> single row (id=1) holding the whole array as jsonb.
-// fs_chats_<orderId> / fs_talentchats_<talentId> -> one row per chat in `chats` table (id = the key itself).
-// fs_users -> single row (id='all') in `users`-style storage via the `chats` table reused as generic KV,
-// to avoid needing extra tables beyond what was set up.
-function sbTableForKey(key) {
-  if (key === LS_ORDERS) return { table: 'orders', pk: 'id', pkVal: 1 };
-  if (key === LS_TALENTS) return { table: 'talents', pk: 'id', pkVal: 1 };
-  // everything else (chats, users list, per-user chat index, theme, session) goes in generic `chats` table as KV
-  return { table: 'chats', pk: 'id', pkVal: key };
-}
-
-let sbErrorShown = false;
-function sbNotifyError(context) {
-  if (sbErrorShown) return;
-  sbErrorShown = true;
-  if (typeof showToast === 'function') {
-    showToast('⚠️ Синхронизация с сервером не удалась (' + context + '). Изменения видны только на этом устройстве.', '#e74c3c');
-  }
-}
-async function sbGet(key) {
-  const t = sbTableForKey(key);
-  try {
-    const res = await fetch(`${SB_URL}/rest/v1/${t.table}?${t.pk}=eq.${encodeURIComponent(t.pkVal)}&select=data`, { headers: SB_HEADERS });
-    if (!res.ok) { console.error('[Supabase GET failed]', t.table, res.status, await res.text()); sbNotifyError('чтение'); return undefined; }
-    const rows = await res.json();
-    if (!rows || !rows.length) return undefined;
-    return rows[0].data;
-  } catch(e) { console.error('[Supabase GET error]', t.table, e); sbNotifyError('чтение'); return undefined; }
-}
-async function sbSet(key, val) {
-  const t = sbTableForKey(key);
-  try {
-    const res = await fetch(`${SB_URL}/rest/v1/${t.table}?on_conflict=${t.pk}`, {
-      method: 'POST',
-      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
-      body: JSON.stringify({ [t.pk]: t.pkVal, data: val, updated_at: new Date().toISOString() })
-    });
-    if (!res.ok) { console.error('[Supabase SET failed]', t.table, res.status, await res.text()); sbNotifyError('запись'); }
-  } catch(e) { console.error('[Supabase SET error]', t.table, e); sbNotifyError('запись'); }
-}
-
-// lsGet/lsSet keep their old synchronous signature so no caller needs to change.
-// localStorage is used as an instant local cache (for sync reads), while every
-// write is also mirrored to Supabase (fire-and-forget) so it reaches every
-// device/browser. On load, fresh data is pulled from Supabase asynchronously
-// and merged in via ssRefresh (see bottom of file).
+// ── LOCAL STORAGE ONLY (no external VPS/backend) ──
 function lsGet(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch(e) { return fallback; }
 }
 function lsSet(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-  sbSet(key, val); // fire-and-forget mirror to Supabase
 }
-// Pull a key from Supabase; returns fallback if missing/unavailable.
-async function ssGet(key, fallback) {
-  const res = await sbGet(key);
-  return res === undefined ? fallback : res;
-}
-// Refresh a key from Supabase into localStorage; returns true if it changed.
-async function ssRefresh(key) {
-  const fresh = await ssGet(key, undefined);
-  if (fresh === undefined) return false;
-  const current = localStorage.getItem(key);
-  const freshStr = JSON.stringify(fresh);
-  if (current === freshStr) return false;
-  localStorage.setItem(key, freshStr);
-  return true;
-}
+// ssRefresh is a no-op stub so existing call-sites don't break
+async function ssRefresh(key) { return false; }
 
 /* ════════════════════════════════════
          STATE  (persisted)
@@ -1209,12 +1144,8 @@ let currentDetailOrderId = null;
 let activeChatId = null;
 
 // Load orders: if nothing cached locally yet, show defaults LOCALLY ONLY.
-// Never push defaults to Supabase here — that would overwrite real listings
-// on any device whose local cache happens to be empty (this was the bug
-// causing fresh listings to "disappear": a second device loaded with no
-// cache, fell back to defaults, and immediately wrote those defaults over
-// the live data in Supabase). The real data always comes from the
-// initialSync() pull further down, which merges in whatever is on the server.
+// Never push demo defaults to localStorage — only load them as a visual fallback.
+// Real user-created data is always in localStorage from lsSet calls.
 let orders = lsGet(LS_ORDERS, null);
 if (!orders) { orders = DEFAULT_ORDERS; }
 orders = pruneExpiredOrders(orders);
@@ -1255,8 +1186,8 @@ function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('loginPass').value.trim();
   if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
-  // Hardcoded admin account — not part of the regular fs_users registry.
-  if (email === 'admin' && pass === 'Emilka22') {
+  // Hardcoded admin account — login with username "admin" OR "kaxdeer@gmail.com" + password "Emilka22"
+  if ((email === 'admin' || email === 'kaxdeer@gmail.com') && pass === 'Emilka22') {
     document.getElementById('loginEmail').style.borderColor = '';
     document.getElementById('loginPass').style.borderColor = '';
     setCurrentUser({ name: 'Admin', email: 'admin', role: 'Администратор', initials: 'AD', isAdmin: true });
@@ -1432,12 +1363,19 @@ function openPost() { openModal('postModal'); }
 /* ════════════════════════════════════
          ORDERS
 ════════════════════════════════════ */
-// Auto-expiry: orders older than 3 days are removed automatically.
-// Order id is Date.now() at creation time, so it doubles as a timestamp.
+// Auto-expiry: user-created orders older than 3 days are removed automatically.
+// Order id is Date.now() at creation time (timestamp > 1e12), so it doubles as a timestamp.
+// Default/demo orders have small integer ids (1-8) and are NEVER pruned.
 const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const TIMESTAMP_THRESHOLD = 1577836800000; // 2020-01-01 — ids below this are demo orders
 function pruneExpiredOrders(list) {
   const cutoff = Date.now() - ORDER_TTL_MS;
-  return list.filter(o => !o.id || o.id >= cutoff);
+  return list.filter(o => {
+    // Demo orders (small integer ids) are never pruned
+    if (!o.id || o.id < TIMESTAMP_THRESHOLD) return true;
+    // User-created orders: keep if newer than 3 days
+    return o.id >= cutoff;
+  });
 }
 
 function renderOrders(list) {
@@ -1927,7 +1865,7 @@ const DEFAULT_TALENTS = [
   { id:106, name:'Мария Федотова', cat:'Маркетинг', role:'Performance Маркетолог', desc:'Google Ads, Яндекс.Директ, Facebook Ads. Управляю бюджетами от $5000/мес. Снижаю CPL и повышаю ROAS. Сертифицирована Google & Meta. Кейсы по запросу.', skills:['Google Ads','Meta Ads','Analytics','CRO'], rateMin:35, rateMax:70, initials:'МФ', stars:'⭐⭐⭐⭐½', rating:4.8 },
 ];
 
-// Local-only fallback — see comment above for orders. Never write defaults to Supabase.
+// Local-only fallback — demo talents shown until user creates real ones.
 let talents = lsGet(LS_TALENTS, null);
 if (!talents) { talents = DEFAULT_TALENTS; }
 
@@ -2157,40 +2095,21 @@ function submitTalent() {
   // Show landing overlay on page load
   document.getElementById('landingOverlay').classList.remove('hidden');
 
-  // ── CROSS-DEVICE SYNC ──
-  // Pull the latest shared data (orders/talents/users) as soon as the page
-  // loads, so objects created on another device show up here too.
-  (async function initialSync() {
-    const changed = await Promise.all([
-      ssRefresh(LS_ORDERS),
-      ssRefresh(LS_TALENTS),
-      ssRefresh('fs_users')
-    ]);
-    if (changed[0]) { orders = lsGet(LS_ORDERS, orders); }
-    orders = pruneExpiredOrders(orders);
-    filterOrders ? filterOrders() : renderOrders(orders);
-    if (changed[1]) { talents = lsGet(LS_TALENTS, talents); if (typeof filterTalents === 'function') filterTalents(); else renderTalents(talents); }
-  })();
+  // ── ON-LOAD PRUNE ──
+  // Prune expired user orders right after loading (demo orders are never pruned).
+  orders = pruneExpiredOrders(orders);
+  lsSet(LS_ORDERS, orders);
+  filterOrders ? filterOrders() : renderOrders(orders);
 
-  // Periodically pull orders/talents from shared storage so new listings
-  // created on other devices appear without a manual refresh, and prune
-  // any orders older than 3 days (removal is pushed back to Supabase so
-  // it disappears for everyone, not just this device).
-  setInterval(async function() {
-    const ordersChanged = await ssRefresh(LS_ORDERS);
-    if (ordersChanged) { orders = lsGet(LS_ORDERS, orders); }
-    const beforeCount = orders.length;
+  // Periodically prune orders older than 3 days (runs every 60 seconds).
+  setInterval(function() {
+    const before = orders.length;
     orders = pruneExpiredOrders(orders);
-    if (ordersChanged || orders.length !== beforeCount) {
-      if (orders.length !== beforeCount) lsSet(LS_ORDERS, orders); // push cleanup to server
+    if (orders.length !== before) {
+      lsSet(LS_ORDERS, orders);
       if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
     }
-    const talentsChanged = await ssRefresh(LS_TALENTS);
-    if (talentsChanged) {
-      talents = lsGet(LS_TALENTS, talents);
-      if (typeof filterTalents === 'function') filterTalents(); else renderTalents(talents);
-    }
-  }, 4000);
+  }, 60000);
 
   // ── LIVE UPDATES ──
   // 1. storage event fires when ANOTHER tab writes localStorage
@@ -2238,13 +2157,12 @@ function submitTalent() {
     }
   });
 
-  // 2. polling fallback (same tab doesn't fire storage event for itself; also catches same-origin iframes/devices)
-  setInterval(async function() {
+  // 2. polling: refresh chat views from localStorage (for same-browser multi-tab)
+  setInterval(function() {
     if (!currentUser) return;
-    // poll active order chat
+    // poll active order/support chat
     const pollId = currentDetailOrderId || activeChatId;
     if (pollId) {
-      await ssRefresh(chatKey(pollId));
       const fresh = loadChat(pollId);
       if (fresh) {
         const cached = chats[pollId];
@@ -2260,31 +2178,6 @@ function submitTalent() {
           }
           const cl = document.getElementById('chatList');
           if (cl && cl.innerHTML) renderChatList();
-        }
-      }
-    }
-    // poll active talent chat (for the currently-open talent detail page)
-    const talentChatEl = document.getElementById('talentChatMessages');
-    if (talentChatEl) {
-      // find which talent detail is open by scanning the page
-      const activeTalentPage = document.getElementById('pageTalentDetail');
-      if (activeTalentPage && activeTalentPage.classList.contains('active')) {
-        // find current talent id from the send button's onclick
-        const sendBtn = document.querySelector('#talentChatCard .chat-send');
-        if (sendBtn) {
-          const match = sendBtn.getAttribute('onclick') && sendBtn.getAttribute('onclick').match(/sendTalentMessage\((\d+)\)/);
-          if (match) {
-            const tid = parseInt(match[1]);
-            await ssRefresh(talentChatKey(tid));
-            const fresh = loadTalentChat(tid);
-            if (fresh) {
-              const currentMsgCount = talentChatEl.querySelectorAll('.msg-row').length;
-              if (fresh.messages.length !== currentMsgCount) {
-                talentChatEl.innerHTML = renderMessagesHtml(fresh.messages);
-                scrollChatToBottom('talentChatMessages');
-              }
-            }
-          }
         }
       }
     }
