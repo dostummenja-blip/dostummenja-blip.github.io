@@ -65,6 +65,106 @@
     .theme-option.active { border-color: var(--sky); color: var(--sky-deep); background: var(--white); box-shadow: 0 0 0 3px rgba(59,175,218,.15); }
     body.dark .theme-option.active { background: #1a1f2e; }
 
+    /* ── SECTOR POST BANNER ── */
+    .sector-post-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; padding: 22px 30px; border-radius: 20px;
+      background: linear-gradient(135deg, #EBF5FF, #D6EEFF);
+      border: 1.5px solid #B3D9F7; margin-bottom: 44px; flex-wrap: wrap;
+    }
+    .spb-text {}
+    .spb-title { font-weight: 900; font-size: 1.05rem; color: var(--text); margin-bottom: 4px; }
+    .spb-sub { font-size: .88rem; color: var(--text-soft); }
+    body.dark .sector-post-banner { background: linear-gradient(135deg,#1a2d3f,#1e3550); border-color: #2a4a6a; }
+
+    /* ── LANDING SELECTOR ── */
+    .landing-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: linear-gradient(160deg, #0F4C75 0%, #1A6FA8 40%, #3BAFDA 75%, #27AE60 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; padding: 24px;
+    }
+    .landing-overlay.hidden { display: none; }
+    .landing-logo {
+      font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 800;
+      color: var(--white); margin-bottom: 10px; text-shadow: 0 4px 20px rgba(0,0,0,.2);
+    }
+    .landing-logo span { font-style: italic; color: var(--sun-light); }
+    .landing-tagline { color: rgba(255,255,255,.93); font-size: 1.05rem; margin-bottom: 56px; text-align: center; max-width: 400px; line-height: 1.6; }
+    .landing-sun-deco {
+      position: absolute; top: -80px; right: -80px; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,213,80,.25) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .landing-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 780px; }
+    .landing-card {
+      flex: 1; min-width: 280px; max-width: 340px;
+      background: rgba(255,255,255,.12); backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(255,255,255,.25); border-radius: 28px;
+      padding: 44px 36px; text-align: center; cursor: pointer;
+      transition: all .28s cubic-bezier(.34,1.56,.64,1);
+      position: relative; overflow: hidden;
+    }
+    .landing-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 28px;
+      background: rgba(255,255,255,0); transition: background .25s;
+    }
+    .landing-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,.6); box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+    .landing-card:hover::before { background: rgba(255,255,255,.07); }
+    .landing-card-icon { font-size: 3.2rem; margin-bottom: 20px; line-height: 1; }
+    .landing-card h2 { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 800; color: var(--white); margin-bottom: 10px; }
+    .landing-card p { font-size: .92rem; color: rgba(255,255,255,.88); line-height: 1.65; margin-bottom: 28px; }
+    .landing-card-btn {
+      display: inline-block; padding: 12px 28px; border-radius: 50px;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .95rem;
+      border: 2px solid rgba(255,255,255,.6); color: var(--white);
+      background: rgba(255,255,255,.12); transition: all .2s; cursor: pointer;
+    }
+    .landing-card:hover .landing-card-btn { background: var(--white); color: var(--sky-deep); border-color: var(--white); }
+    .lc-work { }
+    .lc-talent { }
+    .landing-footer { margin-top: 36px; color: rgba(255,255,255,.45); font-size: .82rem; }
+
+    /* ── TALENTS PAGE ── */
+    .talent-card {
+      background: var(--white); border-radius: var(--radius); padding: 26px;
+      box-shadow: var(--card-shadow); border: 1.5px solid #EEF4FA;
+      transition: transform .22s ease, box-shadow .22s ease; position: relative; overflow: hidden;
+      cursor: pointer;
+    }
+    .talent-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--leaf), var(--sky)); }
+    .talent-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(58,120,180,.15); }
+    .talent-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .talent-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--sun-light), var(--leaf)); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; color: var(--white); flex-shrink: 0; }
+    .talent-name { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    .talent-role { font-size: .83rem; color: var(--text-soft); margin-top: 2px; }
+    .talent-stars { color: var(--sun); font-size: .85rem; margin-top: 2px; }
+    .talent-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .talent-skills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .talent-skill { background: var(--sand-mid); color: var(--text); font-size: .78rem; font-weight: 700; padding: 4px 11px; border-radius: 50px; }
+    .talent-footer { display: flex; align-items: center; justify-content: space-between; }
+    .talent-rate { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--leaf); }
+    .talent-rate span { font-family: 'Nunito', sans-serif; font-size: .8rem; color: var(--text-soft); font-weight: 600; }
+    .btn-contact { padding: 9px 20px; border-radius: 50px; border: none; background: linear-gradient(135deg, var(--leaf), #1e8a4a); color: var(--white); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .88rem; cursor: pointer; transition: all .2s; }
+    .btn-contact:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(39,174,96,.35); }
+
+    /* post-talent modal */
+    .btn-leaf { background: linear-gradient(135deg, var(--leaf), #1a7a40); color: var(--white); box-shadow: 0 6px 20px rgba(39,174,96,.3); }
+    .btn-leaf:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(39,174,96,.4); }
+
+    /* section switcher pills */
+    .section-switcher {
+      display: flex; align-items: center; justify-content: center; gap: 0;
+      margin-bottom: 0; background: var(--sand-mid); border-radius: 50px;
+      padding: 5px; width: fit-content; margin: 0 auto 40px;
+    }
+    .sw-btn {
+      padding: 11px 28px; border-radius: 50px; border: none; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .95rem;
+      color: var(--text-soft); background: transparent; transition: all .22s;
+    }
+    .sw-btn.active { background: var(--white); color: var(--text); box-shadow: 0 2px 12px rgba(58,120,180,.12); }
+
     /* ── ABOUT PAGE ── */
     .about-page { min-height: 100vh; background: var(--sand); }
     .about-hero {
@@ -73,7 +173,7 @@
     }
     .about-hero::before { content: '☀️'; position: absolute; font-size: 180px; opacity: .07; top: -20px; right: 40px; line-height: 1; }
     .about-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--white); margin-bottom: 14px; font-weight: 800; }
-    .about-hero p { color: rgba(255,255,255,.75); font-size: 1.1rem; max-width: 560px; margin: 0 auto; line-height: 1.7; }
+    .about-hero p { color: rgba(255,255,255,.92); font-size: 1.1rem; max-width: 560px; margin: 0 auto; line-height: 1.7; }
     .about-body { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
     .about-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-bottom: 50px; }
     .about-card {
@@ -314,10 +414,10 @@
     .post-section { background:linear-gradient(135deg,var(--sky-deep),#0F4C75); padding:64px 48px; text-align:center; position:relative; overflow:hidden; }
     .post-section::before { content:'☀️'; position:absolute; font-size:130px; opacity:.07; top:-20px; right:60px; line-height:1; }
     .post-section h2 { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.2rem); color:var(--white); margin-bottom:12px; }
-    .post-section p { color:rgba(255,255,255,.7); margin-bottom:30px; font-size:1rem; }
+    .post-section p { color:rgba(255,255,255,.92); margin-bottom:30px; font-size:1rem; }
 
     /* ── FOOTER ── */
-    footer { background:var(--text); color:rgba(255,255,255,.55); padding:34px 48px; text-align:center; font-size:.88rem; }
+    footer { background:var(--text); color:rgba(255,255,255,.82); padding:34px 48px; text-align:center; font-size:.88rem; }
     footer strong { color:var(--white); }
 
     /* ── TOAST ── */
@@ -378,7 +478,7 @@
     }
     .chat-header-avatar { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; color:var(--white); }
     .chat-header-info h4 { font-size:1rem; font-weight:800; color:var(--white); }
-    .chat-header-info span { font-size:.8rem; color:rgba(255,255,255,.7); }
+    .chat-header-info span { font-size:.8rem; color:rgba(255,255,255,.88); }
     .chat-online { width:8px; height:8px; border-radius:50%; background:#4ADE80; margin-left:auto; flex-shrink:0; box-shadow:0 0 0 2px rgba(255,255,255,.3); }
 
     .chat-messages {
@@ -481,6 +581,28 @@
 </head>
 <body>
 
+<!-- ══════ LANDING SELECTOR ══════ -->
+<div class="landing-overlay" id="landingOverlay">
+  <div class="landing-sun-deco"></div>
+  <div class="landing-logo">Free<span>Sun</span></div>
+  <p class="landing-tagline">Лучшая биржа фриланса — моментальные выплаты, честные условия, без лишних барьеров</p>
+  <div class="landing-cards">
+    <div class="landing-card lc-work" onclick="chooseSector('work')">
+      <div class="landing-card-icon">💼</div>
+      <h2>Найти работу</h2>
+      <p>Для фрилансеров. Просматривайте заказы от предпринимателей, откликайтесь и зарабатывайте.</p>
+      <div class="landing-card-btn">Я фрилансер →</div>
+    </div>
+    <div class="landing-card lc-talent" onclick="chooseSector('talent')">
+      <div class="landing-card-icon">🌟</div>
+      <h2>Найти талант</h2>
+      <p>Для бизнеса. Найдите лучших специалистов — просматривайте профили фрилансеров и нанимайте.</p>
+      <div class="landing-card-btn">Я предприниматель →</div>
+    </div>
+  </div>
+  <div class="landing-footer">FreeSun · Биржа фриланса · 2026</div>
+</div>
+
 <!-- ══════ OVERLAY ══════ -->
 <div class="overlay" id="overlay" onclick="closeAllModals()">
 
@@ -539,6 +661,30 @@
     <button class="btn btn-sun btn-full" onclick="submitOrder()">✨ Опубликовать заказ</button>
   </div>
 
+  <!-- POST TALENT MODAL -->
+  <div class="modal" id="postTalentModal" onclick="event.stopPropagation()" style="display:none">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <h2>Моё портфолио 🌟</h2>
+    <p class="modal-sub">Расскажите о себе — предприниматели найдут вас</p>
+    <div class="form-group"><label>Ваше имя / псевдоним</label><input type="text" id="talentName" placeholder="Иван Иванов"/></div>
+    <div class="form-group">
+      <label>Специализация</label>
+      <select id="talentCat">
+        <option value="">Выберите категорию...</option>
+        <option>🎨 Дизайн</option><option>💻 Разработка</option>
+        <option>✍️ Копирайтинг</option><option>📱 SMM</option>
+        <option>🎬 Видео</option><option>📊 Маркетинг</option>
+      </select>
+    </div>
+    <div class="form-group"><label>О себе</label><textarea id="talentDesc" placeholder="Опишите опыт, подход к работе, достижения..."></textarea></div>
+    <div class="form-group"><label>Навыки (через запятую)</label><input type="text" id="talentSkills" placeholder="Figma, Photoshop, Illustrator"/></div>
+    <div class="price-row">
+      <div class="form-group"><label>Ставка от ($/ч)</label><input type="number" id="talentRateMin" placeholder="15" min="0"/></div>
+      <div class="form-group"><label>Ставка до ($/ч)</label><input type="number" id="talentRateMax" placeholder="40" min="0"/></div>
+    </div>
+    <button class="btn btn-leaf btn-full" onclick="submitTalent()">✨ Опубликовать портфолио</button>
+  </div>
+
 </div><!-- /overlay -->
 
 <!-- ══════════════════════════════════ -->
@@ -550,10 +696,10 @@
   <nav>
     <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
     <div class="nav-links">
-      <a onclick="goPage('pageMain');scrollToOrders()">Заказы</a>
-      <a href="#how">Как это работает</a>
-      <a onclick="requireAuth(()=>openPost())">Разместить заказ</a>
+      <a onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800">💼 Найти работу</a>
+      <a onclick="switchMainSector('talent')" id="navLinkTalent">🌟 Найти талант</a>
       <a onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800">О сайте</a>
+      <a id="navPostLink" onclick="requireAuth(()=>openPost())">Разместить заказ</a>
     </div>
     <div class="nav-actions">
       <div id="navGuest" style="display:flex;gap:10px">
@@ -573,21 +719,45 @@
     </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
+  <!-- HERO — WORK SECTOR -->
+  <section class="hero" id="heroWork">
     <div class="hero-sun"></div>
-    <div class="hero-badge">🌞 Летняя биржа фриланса</div>
-    <h1>Найдите лучших<br><em>фрилансеров</em> для<br>вашего проекта</h1>
-    <p>FreeSun объединяет предпринимателей и талантливых специалистов. Размещайте заказы, получайте предложения и запускайте проекты уже сегодня.</p>
+    <div class="hero-badge">💼 Раздел для фрилансеров</div>
+    <h1>Найдите <em>заказы</em><br>и зарабатывайте<br>на своих навыках</h1>
+    <p>Сотни открытых проектов от предпринимателей — выберите подходящий заказ, напишите в чат и начните работу уже сегодня.</p>
     <div class="hero-ctas">
-      <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">📋 Разместить заказ</button>
-      <button class="btn btn-sky" onclick="scrollToOrders()">🔍 Найти проект</button>
+      <button class="btn btn-sky" onclick="scrollToOrders()">🔍 Смотреть заказы</button>
+      <button class="btn btn-outline" onclick="switchMainSector('talent')">🌟 Я предприниматель</button>
     </div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label">Активных фрилансеров</div></div>
-      <div class="stat"><div class="stat-num">830</div><div class="stat-label">Выполненных проектов</div></div>
+      <div class="stat"><div class="stat-num">830+</div><div class="stat-label">Открытых заказов</div></div>
       <div class="stat"><div class="stat-num">$1.2М</div><div class="stat-label">Выплачено фрилансерам</div></div>
       <div class="stat"><div class="stat-num">4.9⭐</div><div class="stat-label">Средняя оценка</div></div>
+      <div class="stat"><div class="stat-num">0 KYC</div><div class="stat-label">Вывод без верификации</div></div>
+    </div>
+    <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
+  </section>
+
+  <!-- HERO — TALENT SECTOR -->
+  <section class="hero" id="heroTalent" style="display:none; background:linear-gradient(160deg,#e8f8ef 0%,#FFF8EC 55%,#FFF0CC 100%)">
+    <div class="hero-sun" style="background:radial-gradient(circle,rgba(39,174,96,.3) 0%,transparent 70%)"></div>
+    <div class="hero-badge" style="color:var(--leaf);border-color:#a8e6cf">🌟 Раздел для предпринимателей</div>
+    <h1>Найдите <em style="background:linear-gradient(135deg,var(--leaf),var(--sky-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">таланты</em><br>для вашего бизнеса</h1>
+    <p>Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-sky" onclick="setTimeout(()=>document.getElementById('talentsSection').scrollIntoView({behavior:'smooth'}),80)">🌟 Смотреть резюме</button>
+      <button class="btn btn-leaf" onclick="requireAuth(()=>openPost())">📋 Разместить заказ</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label">Фрилансеров в базе</div></div>
+      <div class="stat"><div class="stat-num">⚡ 1ч</div><div class="stat-label">Первый отклик</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Гарантия результата</div></div>
+      <div class="stat"><div class="stat-num">0₽</div><div class="stat-label">Размещение бесплатно</div></div>
+    </div>
+    <!-- Freelancer CTA strip — visible on first screen inside talent hero -->
+    <div style="margin-top:36px;display:inline-flex;align-items:center;gap:14px;background:rgba(39,174,96,.13);border:1.5px solid rgba(39,174,96,.35);border-radius:50px;padding:12px 24px;flex-wrap:wrap;justify-content:center">
+      <span style="font-size:.95rem;font-weight:700;color:var(--text)">☀️ <strong>Вы фрилансер?</strong> Разместите резюме — предприниматели найдут вас</span>
+      <button class="btn btn-leaf btn-sm" onclick="requireAuth(()=>openPostTalent())" style="white-space:nowrap">+ Разместить резюме</button>
     </div>
     <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
   </section>
@@ -605,11 +775,25 @@
     </div>
   </section>
 
-  <!-- ORDERS -->
+  <!-- ═══════════════════════════════════
+       РАЗДЕЛ «НАЙТИ РАБОТУ» — заказы
+       Предприниматели выставляют заказы,
+       фрилансеры их просматривают
+  ════════════════════════════════════ -->
   <section class="section" id="ordersSection">
-    <div class="section-header">
+
+    <!-- Верхний баннер-кнопка для предпринимателей -->
+    <div class="sector-post-banner" id="workPostBanner">
+      <div class="spb-text">
+        <div class="spb-title">📋 Вы предприниматель?</div>
+        <div class="spb-sub">Разместите заказ — фрилансеры увидят его мгновенно</div>
+      </div>
+      <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">+ Разместить заказ</button>
+    </div>
+
+    <div class="section-header" style="margin-top:0">
       <h2>Открытые заказы</h2>
-      <p>Свежие проекты от предпринимателей — нажмите на карточку, чтобы узнать подробности</p>
+      <p>Фрилансеры: выберите проект, нажмите «Подробнее» и напишите предпринимателю</p>
     </div>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." oninput="filterOrders()"/>
@@ -627,14 +811,82 @@
     <div class="orders-grid" id="ordersGrid"></div>
   </section>
 
-  <!-- POST CTA -->
+  <!-- CTA под заказами -->
   <section class="post-section">
-    <h2>Готовы запустить свой проект? 🚀</h2>
+    <h2>Вы предприниматель? 🚀</h2>
     <p>Разместите заказ бесплатно и получите первые отклики уже через час</p>
     <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">📋 Разместить заказ бесплатно</button>
   </section>
 
+  <!-- ═══════════════════════════════════
+       РАЗДЕЛ «НАЙТИ ТАЛАНТ» — резюме
+       Фрилансеры выставляют резюме,
+       предприниматели их просматривают
+  ════════════════════════════════════ -->
+  <section class="section section-alt" id="talentsSection" style="display:none">
+
+    <!-- Верхний баннер-кнопка для фрилансеров -->
+    <div class="sector-post-banner" style="background:linear-gradient(135deg,#e8f8ef,#d0f0e0);border-color:#a8e6c8">
+      <div class="spb-text">
+        <div class="spb-title" style="color:var(--leaf)">🌟 Вы фрилансер?</div>
+        <div class="spb-sub">Разместите резюме — предприниматели найдут вас</div>
+      </div>
+      <button class="btn btn-leaf" onclick="requireAuth(()=>openPostTalent())">+ Разместить резюме</button>
+    </div>
+
+    <div class="section-header" style="margin-top:0">
+      <h2>Каталог фрилансеров</h2>
+      <p>Предприниматели: найдите специалиста, нажмите «Написать» и начните сотрудничество</p>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchTalents" placeholder="🔍  Поиск по специалистам..." oninput="filterTalents()"/>
+      <button onclick="filterTalents()">Найти</button>
+    </div>
+    <div class="chips" id="talentChips">
+      <div class="chip active" onclick="filterTalentCat('',this)">Все</div>
+      <div class="chip" onclick="filterTalentCat('Дизайн',this)">🎨 Дизайн</div>
+      <div class="chip" onclick="filterTalentCat('Разработка',this)">💻 Разработка</div>
+      <div class="chip" onclick="filterTalentCat('Копирайтинг',this)">✍️ Копирайтинг</div>
+      <div class="chip" onclick="filterTalentCat('SMM',this)">📱 SMM</div>
+      <div class="chip" onclick="filterTalentCat('Видео',this)">🎬 Видео</div>
+      <div class="chip" onclick="filterTalentCat('Маркетинг',this)">📊 Маркетинг</div>
+    </div>
+    <div class="orders-grid" id="talentsGrid"></div>
+  </section>
+
+  <!-- CTA под резюме -->
+  <section class="post-section" id="talentPostCta" style="display:none; background:linear-gradient(135deg,#1e8a4a,#27AE60)">
+    <h2>Вы фрилансер? ✨</h2>
+    <p>Разместите резюме бесплатно — сотни предпринимателей ищут таланты прямо сейчас</p>
+    <button class="btn btn-sun" onclick="requireAuth(()=>openPostTalent())">🌟 Разместить резюме бесплатно</button>
+  </section>
+
   <footer><strong>FreeSun</strong> — летняя биржа фриланса &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Все права защищены</footer>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--      PAGE: TALENT DETAIL          -->
+<!-- ══════════════════════════════════ -->
+<div class="page" id="pageTalentDetail">
+  <div class="detail-page">
+    <nav class="detail-nav">
+      <button class="back-btn" onclick="goPage('pageMain');switchMainSector('talent')">← Назад к специалистам</button>
+      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+        <div class="nav-user" id="navUserTalentDetail" style="display:none">
+          <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</button>
+          <div class="user-chip">
+            <div class="user-avatar-sm" id="navAvatarTalentDetail">ИИ</div>
+            <span id="navNameTalentDetail">Иван</span>
+          </div>
+        </div>
+        <div id="navGuestTalentDetail">
+          <button class="btn btn-sky btn-sm" onclick="openAuth('login')">Войти</button>
+        </div>
+      </div>
+    </nav>
+    <div class="detail-body" id="talentDetailBody"></div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════ -->
@@ -956,6 +1208,11 @@ function setCurrentUser(u) {
   const nd = document.getElementById('navUserDetail'); nd.style.display='flex';
   document.getElementById('navAvatarDetail').textContent = u.initials;
   document.getElementById('navNameDetail').textContent = first;
+  // nav talent detail
+  document.getElementById('navGuestTalentDetail').style.display = 'none';
+  const ntd = document.getElementById('navUserTalentDetail'); ntd.style.display='flex';
+  document.getElementById('navAvatarTalentDetail').textContent = u.initials;
+  document.getElementById('navNameTalentDetail').textContent = first;
   // nav chats
   document.getElementById('navAvatarChats').textContent = u.initials;
   document.getElementById('navNameChats').textContent = first;
@@ -983,6 +1240,8 @@ function doLogout() {
   document.getElementById('navUser').classList.remove('show');
   document.getElementById('navGuestDetail').style.display = 'block';
   document.getElementById('navUserDetail').style.display = 'none';
+  document.getElementById('navGuestTalentDetail').style.display = 'block';
+  document.getElementById('navUserTalentDetail').style.display = 'none';
   document.getElementById('navGuestAbout').style.display = 'flex';
   document.getElementById('navUserAbout').classList.remove('show');
   goPage('pageMain');
@@ -1008,7 +1267,7 @@ function goPage(id) {
   }
 }
 function scrollToOrders() {
-  goPage('pageMain');
+  switchMainSector('work');
   setTimeout(()=>document.getElementById('ordersSection').scrollIntoView({behavior:'smooth'}),100);
 }
 
@@ -1384,6 +1643,286 @@ function setTheme(theme) {
   lsSet(LS_THEME, theme);
 }
 
+/* ════════════════════════════════════
+         LANDING SELECTOR
+════════════════════════════════════ */
+let currentSector = 'work'; // 'work' | 'talent'
+
+function chooseSector(sector) {
+  document.getElementById('landingOverlay').classList.add('hidden');
+  // Init both sections visibility first
+  document.getElementById('ordersSection').style.display  = 'none';
+  document.getElementById('talentsSection').style.display = 'none';
+  document.getElementById('talentPostCta').style.display  = 'none';
+  switchMainSector(sector);
+}
+
+function switchMainSector(sector) {
+  currentSector = sector;
+  const isWork   = sector === 'work';
+  const isTalent = sector === 'talent';
+
+  // heroes
+  document.getElementById('heroWork').style.display   = isWork   ? '' : 'none';
+  document.getElementById('heroTalent').style.display = isTalent ? '' : 'none';
+
+  // sections
+  document.getElementById('ordersSection').style.display  = isWork   ? '' : 'none';
+  document.getElementById('talentsSection').style.display = isTalent ? '' : 'none';
+  document.getElementById('talentPostCta').style.display  = isTalent ? '' : 'none';
+
+  // how-it-works – always visible
+  const how = document.getElementById('how');
+  if (how) how.style.display = '';
+
+  // nav link highlights
+  const nlw = document.getElementById('navLinkWork');
+  const nlt = document.getElementById('navLinkTalent');
+  nlw.style.color      = isWork   ? 'var(--sky-deep)' : '';
+  nlw.style.fontWeight = isWork   ? '800' : '600';
+  nlt.style.color      = isTalent ? 'var(--leaf)'     : '';
+  nlt.style.fontWeight = isTalent ? '800' : '600';
+
+  // nav post link
+  const pl = document.getElementById('navPostLink');
+  if (pl) {
+    if (isTalent) {
+      pl.textContent = '+ Разместить резюме';
+      pl.onclick     = () => requireAuth(() => openPostTalent());
+    } else {
+      pl.textContent = '+ Разместить заказ';
+      pl.onclick     = () => requireAuth(() => openPost());
+    }
+  }
+
+  goPage('pageMain');
+  window.scrollTo(0, 0);
+}
+
+function scrollToTalents() {
+  switchMainSector('talent');
+  setTimeout(() => document.getElementById('talentsSection').scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+/* ════════════════════════════════════
+         TALENTS DATA & RENDER
+════════════════════════════════════ */
+const LS_TALENTS = 'fs_talents';
+const DEFAULT_TALENTS = [
+  { id:101, name:'Алина Горбачёва', cat:'Дизайн', role:'UI/UX Designer', desc:'5 лет опыта в создании интерфейсов для мобильных и веб-приложений. Работала с командами в США, Германии и СНГ. Люблю минимализм и пользовательский опыт.', skills:['Figma','Webflow','Illustrator','Branding'], rateMin:25, rateMax:50, initials:'АГ', stars:'⭐⭐⭐⭐⭐', rating:5.0 },
+  { id:102, name:'Дмитрий Кравцов', cat:'Разработка', role:'Full-Stack Developer', desc:'React, Node.js, PostgreSQL — полный стек. Разработал более 30 коммерческих проектов. Пишу чистый код, соблюдаю дедлайны, работаю по NDA.', skills:['React','Node.js','TypeScript','Docker'], rateMin:40, rateMax:80, initials:'ДК', stars:'⭐⭐⭐⭐⭐', rating:4.9 },
+  { id:103, name:'Ольга Семёнова', cat:'Копирайтинг', role:'Копирайтер / SEO', desc:'Пишу продающие тексты, SEO-статьи и сценарии для видео. Специализация: e-commerce, финансы, технологии. Уникальность 98%+, грамотность гарантирована.', skills:['SEO','Copywriting','Email-маркетинг'], rateMin:15, rateMax:30, initials:'ОС', stars:'⭐⭐⭐⭐½', rating:4.7 },
+  { id:104, name:'Артём Волков', cat:'SMM', role:'SMM-специалист', desc:'Веду Instagram и TikTok аккаунты для брендов от 10K до 1M подписчиков. Создаю стратегии, контент-планы, запускаю рекламу. Рост от 30% в первый месяц.', skills:['Instagram','TikTok','Таргет','Reels'], rateMin:20, rateMax:45, initials:'АВ', stars:'⭐⭐⭐⭐⭐', rating:4.8 },
+  { id:105, name:'Кирилл Ильин', cat:'Видео', role:'Видеограф / Монтажёр', desc:'Снимаю и монтирую видео для YouTube, корпоративный контент, рекламные ролики. Работаю с цветокоррекцией, анимацией и саундтреком. Premier Pro + After Effects.', skills:['Premiere Pro','After Effects','DaVinci','Motion'], rateMin:30, rateMax:60, initials:'КИ', stars:'⭐⭐⭐⭐⭐', rating:4.9 },
+  { id:106, name:'Мария Федотова', cat:'Маркетинг', role:'Performance Маркетолог', desc:'Google Ads, Яндекс.Директ, Facebook Ads. Управляю бюджетами от $5000/мес. Снижаю CPL и повышаю ROAS. Сертифицирована Google & Meta. Кейсы по запросу.', skills:['Google Ads','Meta Ads','Analytics','CRO'], rateMin:35, rateMax:70, initials:'МФ', stars:'⭐⭐⭐⭐½', rating:4.8 },
+];
+
+let talents = lsGet(LS_TALENTS, null);
+if (!talents) { talents = DEFAULT_TALENTS; lsSet(LS_TALENTS, talents); }
+
+let activeTalentCat = '';
+
+function renderTalents(list) {
+  const grid = document.getElementById('talentsGrid');
+  if (!list || !list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="es-icon">🌟</div><h3>Специалисты не найдены</h3><p>Попробуйте изменить фильтры</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(t => `
+    <div class="talent-card" onclick="openTalentDetail(${t.id})">
+      <div class="talent-top">
+        <div class="talent-avatar">${t.initials}</div>
+        <div>
+          <div class="talent-name">${t.name}</div>
+          <div class="talent-role">${t.role}</div>
+          <div class="talent-stars">${t.stars} ${t.rating}</div>
+        </div>
+      </div>
+      <div class="order-cat">${t.cat}</div>
+      <div class="talent-desc" style="margin-top:10px">${t.desc}</div>
+      <div class="talent-skills">${t.skills.map(s=>`<span class="talent-skill">${s}</span>`).join('')}</div>
+      <div class="talent-footer">
+        <div class="talent-rate">$${t.rateMin}–$${t.rateMax} <span>/ час</span></div>
+        <button class="btn-contact" onclick="event.stopPropagation();openTalentDetail(${t.id})">Подробнее →</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterTalents() {
+  const q = (document.getElementById('searchTalents')?.value || '').toLowerCase();
+  renderTalents(talents.filter(t => {
+    const mc = !activeTalentCat || t.cat.includes(activeTalentCat);
+    const mq = !q || t.name.toLowerCase().includes(q) || t.role.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+    return mc && mq;
+  }));
+}
+
+function filterTalentCat(cat, el) {
+  activeTalentCat = cat;
+  document.querySelectorAll('#talentChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterTalents();
+}
+
+function contactTalent(talentId) {
+  openTalentDetail(talentId);
+}
+
+const LS_TALENT_CHATS = 'fs_talent_chat';
+function talentChatKey(talentId) { return LS_TALENT_CHATS + '_' + talentId; }
+
+function openTalentDetail(talentId) {
+  talentId = parseInt(talentId) || talentId;
+  const t = talents.find(x => x.id === talentId);
+  if (!t) return;
+
+  const chat = lsGet(talentChatKey(talentId), null);
+  const msgs = chat ? chat.messages : [];
+
+  document.getElementById('talentDetailBody').innerHTML = `
+    <!-- TALENT PROFILE CARD -->
+    <div class="detail-header-card">
+      <div class="detail-author-row">
+        <div class="talent-avatar" style="width:56px;height:56px;font-size:1.2rem;flex-shrink:0">${t.initials}</div>
+        <div class="detail-author-info">
+          <h4 style="font-size:1.1rem">${t.name}</h4>
+          <span>${t.role}</span>
+          <div style="color:var(--sun);font-size:.9rem;margin-top:2px">${t.stars} ${t.rating}</div>
+        </div>
+        <span class="order-cat" style="margin-left:auto">${t.cat}</span>
+      </div>
+      <p class="detail-desc">${t.desc}</p>
+      <div style="margin-bottom:22px">
+        <div class="detail-section-title">🛠 Навыки и технологии</div>
+        <div class="detail-tags">${t.skills.map(s=>`<span class="detail-tag">${s}</span>`).join('')}</div>
+      </div>
+      <div class="detail-info-grid">
+        <div class="detail-info-item">
+          <div class="detail-info-label">💰 Ставка / час</div>
+          <div class="detail-info-value green">$${t.rateMin}–$${t.rateMax}</div>
+        </div>
+        <div class="detail-info-item">
+          <div class="detail-info-label">📂 Специализация</div>
+          <div class="detail-info-value" style="font-family:'Nunito',sans-serif;font-size:1rem">${t.cat}</div>
+        </div>
+        <div class="detail-info-item">
+          <div class="detail-info-label">⭐ Рейтинг</div>
+          <div class="detail-info-value" style="font-family:'Nunito',sans-serif;font-size:1rem">${t.rating} / 5.0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT WITH TALENT -->
+    <div class="chat-card" id="talentChatCard">
+      <div class="chat-header" style="background:linear-gradient(135deg,var(--leaf),#1a7a40)">
+        <div class="chat-header-avatar">${t.initials}</div>
+        <div class="chat-header-info">
+          <h4>Написать специалисту</h4>
+          <span>${t.name} · ${t.role}</span>
+        </div>
+        <div class="chat-online"></div>
+      </div>
+      <div class="chat-messages" id="talentChatMessages">
+        ${msgs.length === 0 ? `
+          <div class="chat-empty">
+            <div class="ce-icon">✉️</div>
+            <p>Опишите задачу и договоритесь об условиях сотрудничества</p>
+          </div>` : renderMessagesHtml(msgs)}
+      </div>
+      <div class="chat-input-area">
+        ${currentUser ? `
+          <textarea class="chat-input" id="talentChatInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleTalentChatKey(event,${t.id})"></textarea>
+          <button class="chat-send" onclick="sendTalentMessage(${t.id})">
+            <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+          </button>
+        ` : `
+          <div style="width:100%;text-align:center;padding:4px 0">
+            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать</button>
+          </div>
+        `}
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:10px 0 20px">
+      <button class="btn btn-ghost" onclick="goPage('pageMain');switchMainSector('talent')" style="font-size:.88rem">← Вернуться к каталогу</button>
+    </div>
+  `;
+
+  // Update nav user state
+  if (currentUser) {
+    document.getElementById('navGuestTalentDetail').style.display = 'none';
+    const nd = document.getElementById('navUserTalentDetail'); nd.style.display = 'flex';
+    document.getElementById('navAvatarTalentDetail').textContent = currentUser.initials;
+    document.getElementById('navNameTalentDetail').textContent = currentUser.name.split(' ')[0];
+  }
+
+  goPage('pageTalentDetail');
+  setTimeout(() => scrollChatToBottom('talentChatMessages'), 100);
+}
+
+function handleTalentChatKey(e, talentId) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTalentMessage(talentId); }
+}
+
+function sendTalentMessage(talentId) {
+  if (!currentUser) { openAuth('login'); return; }
+  const input = document.getElementById('talentChatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const t = talents.find(x => x.id === talentId);
+
+  let chat = lsGet(talentChatKey(talentId), null);
+  if (!chat) {
+    chat = { talentId, talentName: t ? t.name : '', messages: [] };
+  }
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+  chat.messages.push({
+    sender: currentUser.email,
+    senderName: currentUser.name,
+    senderInitials: currentUser.initials,
+    text, time
+  });
+  lsSet(talentChatKey(talentId), chat);
+  input.value = '';
+
+  const container = document.getElementById('talentChatMessages');
+  if (container) {
+    container.innerHTML = renderMessagesHtml(chat.messages);
+    scrollChatToBottom('talentChatMessages');
+  }
+}
+
+function openPostTalent() { openModal('postTalentModal'); }
+
+function submitTalent() {
+  if (!currentUser) { showToast('🔒 Войдите, чтобы разместить портфолио','#F5A623'); return; }
+  const name    = document.getElementById('talentName').value.trim() || currentUser.name;
+  const cat     = document.getElementById('talentCat').value;
+  const desc    = document.getElementById('talentDesc').value.trim();
+  const skillsRaw = document.getElementById('talentSkills').value.trim();
+  const rMin    = parseInt(document.getElementById('talentRateMin').value) || 0;
+  const rMax    = parseInt(document.getElementById('talentRateMax').value) || 0;
+  if (!cat || !desc || !rMin) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  const catClean = cat.replace(/^[^\s]+ /, '');
+  const skills = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const t = {
+    id: Date.now(), name, cat: catClean,
+    role: catClean + ' специалист',
+    desc, skills, rateMin: rMin, rateMax: rMax || rMin,
+    initials: currentUser.initials, stars: '⭐⭐⭐⭐⭐', rating: 5.0
+  };
+  talents.unshift(t);
+  lsSet(LS_TALENTS, talents);
+  ['talentName','talentDesc','talentSkills','talentRateMin','talentRateMax'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('talentCat').value = '';
+  closeAllModals();
+  switchMainSector('talent');
+  filterTalents();
+  showToast('✅ Резюме опубликовано! Предприниматели уже видят вас.');
+}
+
 /* ── INIT ── */
 (function init() {
   // Restore theme
@@ -1395,6 +1934,15 @@ function setTheme(theme) {
   if (savedUser) setCurrentUser(savedUser);
 
   renderOrders(orders);
+  renderTalents(talents);
+
+  // Initial state: hide both sector sections until user picks from landing
+  document.getElementById('ordersSection').style.display  = 'none';
+  document.getElementById('talentsSection').style.display = 'none';
+  document.getElementById('talentPostCta').style.display  = 'none';
+
+  // Show landing overlay on page load
+  document.getElementById('landingOverlay').classList.remove('hidden');
 
   // ── LIVE UPDATES ──
   // 1. storage event fires when ANOTHER tab writes localStorage
