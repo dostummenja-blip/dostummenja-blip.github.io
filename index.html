@@ -1,7 +1,1084 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreeSun — Биржа фриланса</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sun: #F5A623; --sun-light: #FFD580;
+      --sky: #3BAFDA; --sky-deep: #1A6FA8;
+      --leaf: #27AE60; --sand: #FFF8EC; --sand-mid: #FFF0CC;
+      --text: #1C2B3A; --text-soft: #5A7080; --white: #FFFFFF;
+      --card-shadow: 0 4px 24px rgba(58,120,180,0.10); --radius: 18px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Nunito', sans-serif; background: var(--sand); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── OVERLAY ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(28,43,58,0.5); backdrop-filter: blur(5px);
+      z-index: 200; animation: fadeIn .2s ease;
+    }
+    .overlay.active { display: flex; align-items: center; justify-content: center; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    /* ── MODAL BASE ── */
+    .modal {
+      background: var(--white); border-radius: 26px; padding: 42px;
+      width: 92%; max-width: 480px;
+      box-shadow: 0 28px 70px rgba(28,43,58,.28);
+      position: relative; animation: slideUp .32s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes slideUp { from{transform:translateY(44px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal h2 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--text); margin-bottom:6px; }
+    .modal .modal-sub { color:var(--text-soft); font-size:.95rem; margin-bottom:28px; }
+    .modal-close {
+      position:absolute; top:18px; right:22px; background:none; border:none;
+      font-size:1.5rem; color:var(--text-soft); cursor:pointer; line-height:1; transition:color .2s;
+    }
+    .modal-close:hover { color:var(--sun); }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom:18px; }
+    .form-group label {
+      display:block; font-weight:700; font-size:.85rem; color:var(--text-soft);
+      text-transform:uppercase; letter-spacing:.07em; margin-bottom:7px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width:100%; padding:13px 17px; border:2px solid #E8EEF4; border-radius:13px;
+      font-family:'Nunito',sans-serif; font-size:1rem; color:var(--text);
+      background:var(--sand); outline:none; transition:border-color .2s, background .2s; resize:none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color:var(--sky); background:var(--white);
+    }
+    .form-group textarea { min-height:100px; }
+    .price-row { display:flex; gap:12px; }
+    .price-row .form-group { flex:1; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding:13px 26px;
+      border-radius:50px; border:none; font-family:'Nunito',sans-serif; font-weight:800;
+      font-size:1rem; cursor:pointer; transition:all .22s ease; text-decoration:none;
+    }
+    .btn-sun { background:linear-gradient(135deg,var(--sun),#E8960D); color:var(--white); box-shadow:0 6px 20px rgba(245,166,35,.35); }
+    .btn-sun:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(245,166,35,.45); }
+    .btn-sky { background:linear-gradient(135deg,var(--sky),var(--sky-deep)); color:var(--white); box-shadow:0 6px 20px rgba(59,175,218,.30); }
+    .btn-sky:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(59,175,218,.40); }
+    .btn-outline { background:transparent; border:2px solid var(--sky); color:var(--sky-deep); }
+    .btn-outline:hover { background:var(--sky); color:var(--white); }
+    .btn-ghost { background:transparent; border:2px solid #E8EEF4; color:var(--text-soft); }
+    .btn-ghost:hover { border-color:var(--sky); color:var(--sky-deep); }
+    .btn-full { width:100%; justify-content:center; }
+    .btn-sm { padding:9px 18px; font-size:.88rem; }
+
+    /* ── TABS ── */
+    .tabs { display:flex; gap:8px; margin-bottom:26px; }
+    .tab-btn {
+      flex:1; padding:10px; border-radius:12px; border:2px solid #E8EEF4;
+      font-family:'Nunito',sans-serif; font-weight:700; font-size:.95rem;
+      background:transparent; color:var(--text-soft); cursor:pointer; transition:all .2s;
+    }
+    .tab-btn.active {
+      background:linear-gradient(135deg,var(--sky),var(--sky-deep)); color:var(--white);
+      border-color:transparent; box-shadow:0 4px 14px rgba(59,175,218,.3);
+    }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .divider { text-align:center; color:var(--text-soft); font-size:.88rem; margin:14px 0; position:relative; }
+    .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background:#E8EEF4; }
+    .divider::before { left:0; }
+    .divider::after { right:0; }
+
+    /* ── NAVBAR ── */
+    nav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 48px; background:var(--white);
+      box-shadow:0 2px 18px rgba(59,175,218,.10); position:sticky; top:0; z-index:50;
+    }
+    .logo {
+      font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:800; cursor:pointer;
+      background:linear-gradient(135deg,var(--sun),var(--sky-deep));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .logo span { font-style:italic; }
+    .nav-links { display:flex; gap:28px; align-items:center; }
+    .nav-links a { text-decoration:none; color:var(--text-soft); font-weight:600; font-size:.95rem; transition:color .2s; cursor:pointer; }
+    .nav-links a:hover { color:var(--sky-deep); }
+    .nav-actions { display:flex; gap:10px; align-items:center; }
+    .nav-user {
+      display:none; align-items:center; gap:10px;
+    }
+    .nav-user.show { display:flex; }
+    .user-chip {
+      display:flex; align-items:center; gap:8px; padding:7px 16px 7px 8px;
+      background:var(--sand); border-radius:50px; font-weight:700; font-size:.9rem; color:var(--text);
+    }
+    .user-avatar-sm {
+      width:30px; height:30px; border-radius:50%;
+      background:linear-gradient(135deg,var(--sun-light),var(--sky));
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:.75rem; color:var(--white);
+    }
+    .chat-nav-btn {
+      position:relative; padding:8px 16px; border-radius:50px;
+      background:var(--sand-mid); border:none; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem;
+      color:var(--text); transition:all .2s;
+    }
+    .chat-nav-btn:hover { background:var(--sky); color:var(--white); }
+    .chat-badge {
+      position:absolute; top:-4px; right:-4px; width:18px; height:18px;
+      background:var(--sun); border-radius:50%; font-size:.65rem; font-weight:900;
+      color:var(--white); display:flex; align-items:center; justify-content:center;
+    }
+
+    /* ══ MAIN PAGE ══ */
+    /* ── HERO ── */
+    .hero {
+      position:relative; padding:90px 48px 90px; text-align:center; overflow:hidden;
+      background:linear-gradient(160deg,#E8F6FD 0%,var(--sand) 55%,var(--sand-mid) 100%);
+    }
+    .hero-sun {
+      position:absolute; top:-60px; right:-60px; width:320px; height:320px;
+      background:radial-gradient(circle,rgba(255,213,80,.55) 0%,rgba(255,213,80,0) 70%);
+      border-radius:50%; pointer-events:none;
+    }
+    .hero-wave { position:absolute; bottom:-2px; left:0; right:0; }
+    .hero-badge {
+      display:inline-block; background:var(--sand-mid); border:1.5px solid var(--sun-light);
+      color:var(--sun); font-weight:800; font-size:.82rem; padding:5px 16px;
+      border-radius:50px; margin-bottom:22px; text-transform:uppercase; letter-spacing:.08em;
+    }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,5vw,3.6rem); font-weight:800; line-height:1.15; margin-bottom:18px; }
+    .hero h1 em { font-style:italic; background:linear-gradient(135deg,var(--sun),var(--sky-deep)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero p { color:var(--text-soft); font-size:1.1rem; max-width:560px; margin:0 auto 36px; line-height:1.7; }
+    .hero-ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .hero-stats { display:flex; gap:40px; justify-content:center; margin-top:54px; flex-wrap:wrap; }
+    .stat { text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:800; color:var(--text); line-height:1; }
+    .stat-label { font-size:.85rem; color:var(--text-soft); font-weight:600; margin-top:4px; }
+
+    /* ── SECTION ── */
+    .section { padding:70px 48px; }
+    .section-alt { background:var(--white); }
+    .section-header { text-align:center; margin-bottom:46px; }
+    .section-header h2 { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.4rem); font-weight:800; color:var(--text); margin-bottom:10px; }
+    .section-header p { color:var(--text-soft); font-size:1rem; max-width:480px; margin:0 auto; }
+
+    /* ── STEPS ── */
+    .steps { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; max-width:1000px; margin:0 auto; }
+    .step { flex:1; min-width:200px; text-align:center; padding:0 16px; }
+    .step-icon { width:72px; height:72px; border-radius:50%; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
+    .sun-bg { background:linear-gradient(135deg,var(--sun-light),var(--sun)); }
+    .sky-bg { background:linear-gradient(135deg,#B3E5FC,var(--sky)); }
+    .leaf-bg { background:linear-gradient(135deg,#A8E6CF,var(--leaf)); }
+    .step h3 { font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:8px; }
+    .step p { font-size:.9rem; color:var(--text-soft); line-height:1.6; }
+
+    /* ── CHIPS + SEARCH ── */
+    .search-bar { display:flex; gap:12px; max-width:540px; margin:0 auto 34px; }
+    .search-bar input {
+      flex:1; padding:13px 20px; border-radius:50px; border:2px solid #E8EEF4;
+      font-family:'Nunito',sans-serif; font-size:.98rem; outline:none;
+      background:var(--white); color:var(--text); transition:border-color .2s;
+    }
+    .search-bar input:focus { border-color:var(--sky); }
+    .search-bar button {
+      padding:13px 24px; border-radius:50px; border:none;
+      background:linear-gradient(135deg,var(--sun),#E8960D); color:var(--white);
+      font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; cursor:pointer; transition:all .2s;
+    }
+    .search-bar button:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(245,166,35,.4); }
+    .chips { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:36px; }
+    .chip {
+      padding:8px 20px; border-radius:50px; border:2px solid #E8EEF4;
+      font-weight:700; font-size:.88rem; color:var(--text-soft);
+      background:var(--white); cursor:pointer; transition:all .2s;
+    }
+    .chip:hover, .chip.active { background:var(--sky); color:var(--white); border-color:var(--sky); }
+
+    /* ── ORDER CARDS ── */
+    .orders-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; max-width:1200px; margin:0 auto; }
+    .order-card {
+      background:var(--white); border-radius:var(--radius); padding:26px;
+      box-shadow:var(--card-shadow); border:1.5px solid #EEF4FA;
+      transition:transform .22s ease, box-shadow .22s ease; position:relative; overflow:hidden;
+      cursor:pointer;
+    }
+    .order-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--sun),var(--sky)); }
+    .order-card:hover { transform:translateY(-4px); box-shadow:0 12px 36px rgba(58,120,180,.15); }
+    .order-cat {
+      display:inline-block; background:var(--sand-mid); color:var(--sun);
+      font-size:.78rem; font-weight:800; padding:4px 12px; border-radius:50px;
+      text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px;
+    }
+    .badge-new { background:var(--leaf); color:var(--white); font-size:.7rem; font-weight:800; padding:2px 8px; border-radius:50px; text-transform:uppercase; letter-spacing:.06em; margin-left:8px; vertical-align:middle; }
+    .order-title { font-size:1.08rem; font-weight:800; color:var(--text); margin-bottom:8px; line-height:1.4; }
+    .order-desc { font-size:.9rem; color:var(--text-soft); line-height:1.6; margin-bottom:18px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .order-footer { display:flex; align-items:center; justify-content:space-between; }
+    .order-price { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--leaf); }
+    .order-price span { font-family:'Nunito',sans-serif; font-size:.8rem; color:var(--text-soft); font-weight:600; }
+    .order-meta { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .order-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--sun-light),var(--sky)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.82rem; color:var(--white); }
+    .order-author { font-size:.85rem; font-weight:700; color:var(--text); }
+    .order-date { font-size:.78rem; color:var(--text-soft); margin-left:auto; }
+    .btn-take { padding:9px 20px; border-radius:50px; border:none; background:linear-gradient(135deg,var(--sky),var(--sky-deep)); color:var(--white); font-family:'Nunito',sans-serif; font-weight:800; font-size:.88rem; cursor:pointer; transition:all .2s; }
+    .btn-take:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(59,175,218,.35); }
+
+    /* ── POST CTA ── */
+    .post-section { background:linear-gradient(135deg,var(--sky-deep),#0F4C75); padding:64px 48px; text-align:center; position:relative; overflow:hidden; }
+    .post-section::before { content:'☀️'; position:absolute; font-size:130px; opacity:.07; top:-20px; right:60px; line-height:1; }
+    .post-section h2 { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.2rem); color:var(--white); margin-bottom:12px; }
+    .post-section p { color:rgba(255,255,255,.7); margin-bottom:30px; font-size:1rem; }
+
+    /* ── FOOTER ── */
+    footer { background:var(--text); color:rgba(255,255,255,.55); padding:34px 48px; text-align:center; font-size:.88rem; }
+    footer strong { color:var(--white); }
+
+    /* ── TOAST ── */
+    .toast {
+      position:fixed; bottom:28px; right:28px; background:var(--text); color:var(--white);
+      padding:14px 22px; border-radius:14px; font-weight:700; font-size:.95rem;
+      box-shadow:0 8px 24px rgba(28,43,58,.3); z-index:999;
+      transform:translateY(80px); transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+      display:flex; align-items:center; gap:10px; max-width:320px;
+    }
+    .toast.show { transform:translateY(0); }
+
+    /* ══ ORDER DETAIL PAGE ══ */
+    .detail-page { min-height:100vh; background:var(--sand); }
+    .detail-nav {
+      display:flex; align-items:center; gap:16px; padding:16px 48px;
+      background:var(--white); box-shadow:0 2px 18px rgba(59,175,218,.10);
+      position:sticky; top:0; z-index:50;
+    }
+    .back-btn {
+      display:flex; align-items:center; gap:6px; padding:9px 18px; border-radius:50px;
+      border:2px solid #E8EEF4; background:transparent; font-family:'Nunito',sans-serif;
+      font-weight:700; font-size:.9rem; color:var(--text-soft); cursor:pointer; transition:all .2s;
+    }
+    .back-btn:hover { border-color:var(--sky); color:var(--sky-deep); }
+    .detail-body { max-width:760px; margin:0 auto; padding:44px 24px 60px; }
+    .detail-header-card {
+      background:var(--white); border-radius:22px; padding:36px; box-shadow:var(--card-shadow);
+      margin-bottom:24px; border:1.5px solid #EEF4FA; position:relative; overflow:hidden;
+    }
+    .detail-header-card::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:linear-gradient(90deg,var(--sun),var(--sky),var(--leaf)); }
+    .detail-author-row { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+    .detail-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--sun-light),var(--sky)); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; color:var(--white); flex-shrink:0; }
+    .detail-author-info h4 { font-size:1rem; font-weight:800; color:var(--text); }
+    .detail-author-info span { font-size:.83rem; color:var(--text-soft); }
+    .detail-title { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,3vw,2rem); font-weight:800; color:var(--text); line-height:1.25; margin-bottom:16px; }
+    .detail-desc { font-size:1rem; color:var(--text-soft); line-height:1.8; margin-bottom:28px; }
+    .detail-info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:0; }
+    .detail-info-item { background:var(--sand); border-radius:14px; padding:16px 18px; }
+    .detail-info-label { font-size:.75rem; font-weight:800; color:var(--text-soft); text-transform:uppercase; letter-spacing:.07em; margin-bottom:5px; }
+    .detail-info-value { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--text); }
+    .detail-info-value.green { color:var(--leaf); }
+
+    /* ── WHAT NEEDED ── */
+    .detail-section-title { font-size:1.05rem; font-weight:800; color:var(--text); margin-bottom:14px; }
+    .detail-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:0; }
+    .detail-tag { padding:6px 15px; border-radius:50px; background:var(--sand-mid); color:var(--sun); font-size:.82rem; font-weight:700; }
+
+    /* ══ CHAT SECTION ══ */
+    .chat-card {
+      background:var(--white); border-radius:22px; box-shadow:var(--card-shadow);
+      border:1.5px solid #EEF4FA; overflow:hidden; margin-bottom:24px;
+    }
+    .chat-header {
+      padding:20px 26px; border-bottom:1.5px solid #EEF4FA;
+      display:flex; align-items:center; gap:12px;
+      background:linear-gradient(135deg,var(--sky-deep),#0F4C75);
+    }
+    .chat-header-avatar { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; color:var(--white); }
+    .chat-header-info h4 { font-size:1rem; font-weight:800; color:var(--white); }
+    .chat-header-info span { font-size:.8rem; color:rgba(255,255,255,.7); }
+    .chat-online { width:8px; height:8px; border-radius:50%; background:#4ADE80; margin-left:auto; flex-shrink:0; box-shadow:0 0 0 2px rgba(255,255,255,.3); }
+
+    .chat-messages {
+      padding:22px 26px; min-height:220px; max-height:340px; overflow-y:auto;
+      display:flex; flex-direction:column; gap:14px;
+      background:linear-gradient(to bottom,#F0F8FF,var(--sand));
+    }
+    .chat-messages::-webkit-scrollbar { width:4px; }
+    .chat-messages::-webkit-scrollbar-track { background:transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background:#D0DDE8; border-radius:2px; }
+
+    .msg-row { display:flex; align-items:flex-end; gap:10px; }
+    .msg-row.me { flex-direction:row-reverse; }
+    .msg-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.72rem; color:var(--white); flex-shrink:0; }
+    .msg-avatar.them { background:linear-gradient(135deg,var(--sun-light),var(--sun)); }
+    .msg-avatar.me-av { background:linear-gradient(135deg,var(--sky),var(--sky-deep)); }
+    .msg-bubble {
+      max-width:72%; padding:11px 16px; border-radius:18px; font-size:.93rem; line-height:1.55;
+    }
+    .msg-bubble.them { background:var(--white); color:var(--text); border-bottom-left-radius:4px; box-shadow:0 2px 8px rgba(58,120,180,.1); }
+    .msg-bubble.me { background:linear-gradient(135deg,var(--sky),var(--sky-deep)); color:var(--white); border-bottom-right-radius:4px; }
+    .msg-time { font-size:.72rem; color:var(--text-soft); margin-top:4px; }
+    .msg-time.me-t { text-align:right; }
+    .msg-wrap { display:flex; flex-direction:column; }
+    .msg-wrap.me-w { align-items:flex-end; }
+
+    .chat-empty { text-align:center; padding:40px 20px; color:var(--text-soft); }
+    .chat-empty .ce-icon { font-size:2.5rem; margin-bottom:10px; }
+    .chat-empty p { font-size:.9rem; line-height:1.5; }
+
+    .chat-input-area {
+      padding:16px 20px; border-top:1.5px solid #EEF4FA;
+      display:flex; gap:10px; align-items:flex-end; background:var(--white);
+    }
+    .chat-input {
+      flex:1; padding:12px 16px; border-radius:22px; border:2px solid #E8EEF4;
+      font-family:'Nunito',sans-serif; font-size:.95rem; color:var(--text);
+      outline:none; resize:none; max-height:120px; transition:border-color .2s; background:var(--sand);
+      line-height:1.5;
+    }
+    .chat-input:focus { border-color:var(--sky); background:var(--white); }
+    .chat-send {
+      width:46px; height:46px; border-radius:50%; border:none; flex-shrink:0;
+      background:linear-gradient(135deg,var(--sky),var(--sky-deep)); cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:all .2s;
+      box-shadow:0 4px 14px rgba(59,175,218,.35);
+    }
+    .chat-send:hover { transform:scale(1.08); box-shadow:0 6px 20px rgba(59,175,218,.45); }
+    .chat-send svg { width:20px; height:20px; fill:var(--white); }
+
+    /* ── CHATS PAGE ── */
+    .chats-page { min-height:100vh; background:var(--sand); }
+    .chats-layout { display:grid; grid-template-columns:320px 1fr; min-height:calc(100vh - 62px); }
+    .chats-sidebar { background:var(--white); border-right:1.5px solid #EEF4FA; overflow-y:auto; }
+    .chats-sidebar-header { padding:22px 20px 16px; border-bottom:1.5px solid #EEF4FA; }
+    .chats-sidebar-header h3 { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:800; color:var(--text); }
+    .chat-list-item {
+      display:flex; align-items:center; gap:12px; padding:16px 20px;
+      border-bottom:1px solid #F0F4F8; cursor:pointer; transition:background .18s;
+    }
+    .chat-list-item:hover, .chat-list-item.active { background:var(--sand); }
+    .cli-avatar { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; color:var(--white); background:linear-gradient(135deg,var(--sun-light),var(--sky)); }
+    .cli-info { flex:1; min-width:0; }
+    .cli-name { font-weight:800; font-size:.93rem; color:var(--text); }
+    .cli-preview { font-size:.82rem; color:var(--text-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+    .cli-time { font-size:.75rem; color:var(--text-soft); flex-shrink:0; }
+    .cli-unread { background:var(--sky); color:var(--white); font-size:.7rem; font-weight:900; padding:2px 7px; border-radius:50px; flex-shrink:0; }
+
+    .chat-window { display:flex; flex-direction:column; }
+    .chat-window-header { padding:18px 28px; background:var(--white); border-bottom:1.5px solid #EEF4FA; display:flex; align-items:center; gap:14px; }
+    .chat-window-header h4 { font-weight:800; font-size:1rem; color:var(--text); }
+    .chat-window-header span { font-size:.82rem; color:var(--text-soft); display:block; }
+    .chat-window-messages { flex:1; overflow-y:auto; padding:24px 28px; display:flex; flex-direction:column; gap:14px; background:linear-gradient(to bottom,#F0F8FF,var(--sand)); }
+    .chat-window-input { padding:16px 28px; background:var(--white); border-top:1.5px solid #EEF4FA; display:flex; gap:12px; align-items:flex-end; }
+    .chat-window-input textarea { flex:1; padding:12px 16px; border-radius:22px; border:2px solid #E8EEF4; font-family:'Nunito',sans-serif; font-size:.95rem; color:var(--text); outline:none; resize:none; max-height:120px; transition:border-color .2s; background:var(--sand); }
+    .chat-window-input textarea:focus { border-color:var(--sky); background:var(--white); }
+    .no-chat-selected { flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; color:var(--text-soft); }
+    .no-chat-selected .ncs-icon { font-size:3.5rem; }
+    .no-chat-selected h3 { font-size:1.1rem; font-weight:800; color:var(--text); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text-soft); grid-column:1/-1; }
+    .empty-state .es-icon { font-size:3rem; margin-bottom:16px; }
+    .empty-state h3 { font-size:1.15rem; font-weight:800; color:var(--text); margin-bottom:8px; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px) {
+      nav { padding:14px 18px; }
+      .nav-links { display:none; }
+      .hero { padding:60px 18px 70px; }
+      .section { padding:50px 18px; }
+      .post-section { padding:50px 18px; }
+      footer { padding:26px 18px; }
+      .detail-nav { padding:14px 18px; }
+      .detail-info-grid { grid-template-columns:1fr 1fr; }
+      .chats-layout { grid-template-columns:1fr; }
+      .chats-sidebar { max-height:280px; border-right:none; border-bottom:1.5px solid #EEF4FA; }
+    }
+  </style>
+</head>
 <body>
-    <h1>Привет! Это мой первый сайт на GitHub!</h1>
-    <p>У меня всё получилось!</p>
+
+<!-- ══════ OVERLAY ══════ -->
+<div class="overlay" id="overlay" onclick="closeAllModals()">
+
+  <!-- AUTH MODAL -->
+  <div class="modal" id="authModal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <h2>Добро пожаловать ☀️</h2>
+    <p class="modal-sub">Войдите или создайте аккаунт, чтобы начать</p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchAuthTab('login',this)">Вход</button>
+      <button class="tab-btn" onclick="switchAuthTab('register',this)">Регистрация</button>
+    </div>
+    <!-- LOGIN -->
+    <div class="tab-content active" id="tab-login">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+      <button class="btn btn-sky btn-full" onclick="doLogin()">Войти в аккаунт</button>
+      <div class="divider">или</div>
+      <button class="btn btn-outline btn-full" onclick="doGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Войти через Google
+      </button>
+    </div>
+    <!-- REGISTER -->
+    <div class="tab-content" id="tab-register">
+      <div class="form-group"><label>Ваше имя</label><input type="text" id="regName" placeholder="Иван Иванов"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label>Пароль</label><input type="password" id="regPass" placeholder="Минимум 8 символов"/></div>
+      <div class="form-group">
+        <label>Я регистрируюсь как</label>
+        <select id="regRole">
+          <option value="">Выберите роль...</option>
+          <option value="entrepreneur">🏢 Предприниматель — размещаю заказы</option>
+          <option value="freelancer">💼 Фрилансер — ищу проекты</option>
+        </select>
+      </div>
+      <button class="btn btn-sun btn-full" onclick="doRegister()">Создать аккаунт</button>
+    </div>
+  </div>
+
+  <!-- POST ORDER MODAL -->
+  <div class="modal" id="postModal" onclick="event.stopPropagation()" style="display:none">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <h2>Новый заказ 📋</h2>
+    <p class="modal-sub">Опишите задачу — фрилансеры увидят её сразу</p>
+    <div class="form-group"><label>Заголовок заказа</label><input type="text" id="orderTitle" placeholder="Например: Разработка лендинга"/></div>
+    <div class="form-group">
+      <label>Категория</label>
+      <select id="orderCat">
+        <option value="">Выберите категорию...</option>
+        <option>🎨 Дизайн</option><option>💻 Разработка</option>
+        <option>✍️ Копирайтинг</option><option>📱 SMM</option>
+        <option>🎬 Видео</option><option>📊 Маркетинг</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Описание задачи</label><textarea id="orderDesc" placeholder="Подробно опишите, что нужно сделать, требования, сроки..."></textarea></div>
+    <div class="price-row">
+      <div class="form-group"><label>Бюджет от ($)</label><input type="number" id="orderPriceMin" placeholder="500" min="0"/></div>
+      <div class="form-group"><label>Бюджет до ($)</label><input type="number" id="orderPriceMax" placeholder="1500" min="0"/></div>
+    </div>
+    <button class="btn btn-sun btn-full" onclick="submitOrder()">✨ Опубликовать заказ</button>
+  </div>
+
+</div><!-- /overlay -->
+
+<!-- ══════════════════════════════════ -->
+<!--          PAGE: MAIN               -->
+<!-- ══════════════════════════════════ -->
+<div class="page active" id="pageMain">
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+    <div class="nav-links">
+      <a onclick="goPage('pageMain');scrollToOrders()">Заказы</a>
+      <a href="#how">Как это работает</a>
+      <a onclick="requireAuth(()=>openPost())">Разместить заказ</a>
+    </div>
+    <div class="nav-actions">
+      <div id="navGuest" style="display:flex;gap:10px">
+        <button class="btn btn-outline btn-sm" onclick="openAuth('login')">Войти</button>
+        <button class="btn btn-sun btn-sm" onclick="openAuth('register')">Регистрация</button>
+      </div>
+      <div class="nav-user" id="navUser">
+        <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">
+          💬 Чаты <span class="chat-badge" id="chatBadge" style="display:none">1</span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar-sm" id="navAvatar">ИИ</div>
+          <span id="navName">Иван И.</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-sun"></div>
+    <div class="hero-badge">🌞 Летняя биржа фриланса</div>
+    <h1>Найдите лучших<br><em>фрилансеров</em> для<br>вашего проекта</h1>
+    <p>FreeSun объединяет предпринимателей и талантливых специалистов. Размещайте заказы, получайте предложения и запускайте проекты уже сегодня.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">📋 Разместить заказ</button>
+      <button class="btn btn-sky" onclick="scrollToOrders()">🔍 Найти проект</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label">Активных фрилансеров</div></div>
+      <div class="stat"><div class="stat-num">830</div><div class="stat-label">Выполненных проектов</div></div>
+      <div class="stat"><div class="stat-num">$1.2М</div><div class="stat-label">Выплачено фрилансерам</div></div>
+      <div class="stat"><div class="stat-num">4.9⭐</div><div class="stat-label">Средняя оценка</div></div>
+    </div>
+    <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section section-alt" id="how">
+    <div class="section-header">
+      <h2>Как это работает</h2>
+      <p>Три простых шага от идеи до готового проекта</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-icon sun-bg">📋</div><h3>Разместите заказ</h3><p>Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.</p></div>
+      <div class="step"><div class="step-icon sky-bg">💼</div><h3>Получите отклики</h3><p>Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.</p></div>
+      <div class="step"><div class="step-icon leaf-bg">✅</div><h3>Запустите проект</h3><p>Общайтесь в чате, оплачивайте после подтверждения результата.</p></div>
+    </div>
+  </section>
+
+  <!-- ORDERS -->
+  <section class="section" id="ordersSection">
+    <div class="section-header">
+      <h2>Открытые заказы</h2>
+      <p>Свежие проекты от предпринимателей — нажмите на карточку, чтобы узнать подробности</p>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." oninput="filterOrders()"/>
+      <button onclick="filterOrders()">Найти</button>
+    </div>
+    <div class="chips" id="categoryChips">
+      <div class="chip active" onclick="filterCat('',this)">Все</div>
+      <div class="chip" onclick="filterCat('Дизайн',this)">🎨 Дизайн</div>
+      <div class="chip" onclick="filterCat('Разработка',this)">💻 Разработка</div>
+      <div class="chip" onclick="filterCat('Копирайтинг',this)">✍️ Копирайтинг</div>
+      <div class="chip" onclick="filterCat('SMM',this)">📱 SMM</div>
+      <div class="chip" onclick="filterCat('Видео',this)">🎬 Видео</div>
+      <div class="chip" onclick="filterCat('Маркетинг',this)">📊 Маркетинг</div>
+    </div>
+    <div class="orders-grid" id="ordersGrid"></div>
+  </section>
+
+  <!-- POST CTA -->
+  <section class="post-section">
+    <h2>Готовы запустить свой проект? 🚀</h2>
+    <p>Разместите заказ бесплатно и получите первые отклики уже через час</p>
+    <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">📋 Разместить заказ бесплатно</button>
+  </section>
+
+  <footer><strong>FreeSun</strong> — летняя биржа фриланса &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Все права защищены</footer>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--       PAGE: ORDER DETAIL          -->
+<!-- ══════════════════════════════════ -->
+<div class="page" id="pageDetail">
+  <div class="detail-page">
+    <nav class="detail-nav">
+      <button class="back-btn" onclick="goPage('pageMain')">← Назад к заказам</button>
+      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+        <div class="nav-user" id="navUserDetail">
+          <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</button>
+          <div class="user-chip">
+            <div class="user-avatar-sm" id="navAvatarDetail">ИИ</div>
+            <span id="navNameDetail">Иван</span>
+          </div>
+        </div>
+        <div id="navGuestDetail">
+          <button class="btn btn-sky btn-sm" onclick="openAuth('login')">Войти</button>
+        </div>
+      </div>
+    </nav>
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!--         PAGE: CHATS               -->
+<!-- ══════════════════════════════════ -->
+<div class="page" id="pageChats">
+  <nav>
+    <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+    <div class="nav-links">
+      <a onclick="goPage('pageMain')">← К заказам</a>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-user show" id="navUserChats">
+        <div class="user-chip">
+          <div class="user-avatar-sm" id="navAvatarChats">ИИ</div>
+          <span id="navNameChats">Иван</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+      </div>
+    </div>
+  </nav>
+  <div class="chats-layout">
+    <div class="chats-sidebar">
+      <div class="chats-sidebar-header">
+        <h3>💬 Мои чаты</h3>
+      </div>
+      <div id="chatList"></div>
+    </div>
+    <div class="chat-window" id="chatWindow">
+      <div class="no-chat-selected">
+        <div class="ncs-icon">💬</div>
+        <h3>Выберите чат слева</h3>
+        <p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Здесь будет переписка с предпринимателем или фрилансером</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastIcon">✅</span> <span id="toastMsg"></span></div>
+
+<script>
+/* ════════════════════════════════════
+         STATE
+════════════════════════════════════ */
+let currentUser = null; // { name, email, role, initials }
+let activeCategory = '';
+let currentDetailOrderId = null;
+let activeChatId = null;
+
+// chats[chatId] = { orderId, withName, withInitials, messages:[] }
+let chats = {};
+
+let orders = [
+  { id:1, title:"Разработка сайта для ресторана", cat:"Разработка",
+    desc:"Нужен современный сайт с меню, онлайн-бронированием столиков и полностью адаптивным дизайном для мобильных устройств. Стек на ваш выбор — важна скорость загрузки, SEO-оптимизация и красота визуала. Желательно наличие портфолио схожих работ. Возможна долгосрочная поддержка проекта.",
+    priceMin:800, priceMax:1500, author:"АК", authorName:"Алексей К.", date:"Сегодня", isNew:true,
+    tags:["React","Node.js","PostgreSQL","Адаптивный дизайн"] },
+  { id:2, title:"Логотип и фирменный стиль", cat:"Дизайн",
+    desc:"Молодой бренд натуральной косметики ищет дизайнера для создания логотипа, цветовой палитры и базовых элементов брендбука (визитки, фирменный бланк, упаковка). Стиль — минимализм с природными мотивами. Предоставим референсы и бриф.",
+    priceMin:300, priceMax:700, author:"МС", authorName:"Мария С.", date:"Вчера", isNew:true,
+    tags:["Figma","Illustrator","Брендбук"] },
+  { id:3, title:"SMM для Instagram магазина", cat:"SMM",
+    desc:"Веду магазин handmade украшений из серебра. Нужен специалист для комплексного ведения Instagram: разработка контент-плана, создание постов и сторис, настройка таргетированной рекламы, работа с аудиторией. Опыт в fashion/украшениях — плюс.",
+    priceMin:200, priceMax:400, author:"ДП", authorName:"Дарья П.", date:"2 дня назад", isNew:false,
+    tags:["Instagram","Таргет","Контент"] },
+  { id:4, title:"Написание SEO-текстов для сайта", cat:"Копирайтинг",
+    desc:"Требуется опытный копирайтер для написания 10 SEO-оптимизированных статей на тему строительства загородных домов. Объём каждой — от 2000 слов. Ключевые слова и техзадание предоставим. Нужна грамотность, экспертность, уникальность от 95%.",
+    priceMin:150, priceMax:300, author:"ВТ", authorName:"Виктор Т.", date:"3 дня назад", isNew:false,
+    tags:["SEO","Копирайтинг","WordPress"] },
+  { id:5, title:"Мобильное приложение (iOS/Android)", cat:"Разработка",
+    desc:"Стартап в сфере фитнеса ищет разработчика для создания MVP мобильного приложения с трекером тренировок, дневником питания и интеграцией с Apple Health / Google Fit. Важен опыт с React Native или Flutter. Работа по NDA.",
+    priceMin:3000, priceMax:6000, author:"НЛ", authorName:"Никита Л.", date:"3 дня назад", isNew:false,
+    tags:["React Native","Flutter","Firebase"] },
+  { id:6, title:"Монтаж YouTube-роликов", cat:"Видео",
+    desc:"Ищу монтажёра для постоянного сотрудничества. Обработка 8–10 роликов в месяц (~10–15 мин каждый). Тематика — бизнес и финансы. Стиль — динамичный, с анимацией текста, саундтреком, цветокоррекцией. Нужны примеры аналогичных работ.",
+    priceMin:400, priceMax:800, author:"ЕВ", authorName:"Елена В.", date:"4 дня назад", isNew:false,
+    tags:["Premiere Pro","After Effects","Motion"] },
+  { id:7, title:"Настройка Google Ads кампаний", cat:"Маркетинг",
+    desc:"Требуется PPC-специалист для настройки и ведения рекламных кампаний интернет-магазина одежды. Бюджет рекламы — от $2000/мес. Нужен аудит текущих кампаний, реструктуризация, A/B-тесты. Желательно наличие сертификата Google.",
+    priceMin:500, priceMax:1000, author:"РМ", authorName:"Роман М.", date:"5 дней назад", isNew:false,
+    tags:["Google Ads","Analytics","CRO"] },
+  { id:8, title:"Иллюстрации для детской книги", cat:"Дизайн",
+    desc:"Небольшое издательство ищет иллюстратора для создания 20 цветных иллюстраций к детской книге 6+ в тёплом акварельном стиле. Текст и подробное описание сцен предоставим. Права переходят к заказчику. Дедлайн — 6 недель.",
+    priceMin:1200, priceMax:2500, author:"ОК", authorName:"Ольга К.", date:"6 дней назад", isNew:false,
+    tags:["Акварель","Procreate","Иллюстрация"] },
+];
+
+/* ════════════════════════════════════
+         AUTH
+════════════════════════════════════ */
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value.trim();
+  if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
+  const name = email.split('@')[0];
+  const initials = name.substring(0,2).toUpperCase();
+  setCurrentUser({ name, email, role:'freelancer', initials });
+  closeAllModals();
+  showToast('🎉 Вы вошли как ' + name);
+}
+function doGoogleLogin() {
+  setCurrentUser({ name:'Иван Иванов', email:'ivan@gmail.com', role:'freelancer', initials:'ИИ' });
+  closeAllModals();
+  showToast('🎉 Вход через Google выполнен!');
+}
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value.trim();
+  const role  = document.getElementById('regRole').value;
+  if (!name||!email||!pass||!role) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  setCurrentUser({ name, email, role, initials });
+  closeAllModals();
+  showToast('🎉 Добро пожаловать, ' + name + '!');
+}
+function setCurrentUser(u) {
+  currentUser = u;
+  // nav main
+  document.getElementById('navGuest').style.display = 'none';
+  const nu = document.getElementById('navUser'); nu.classList.add('show');
+  document.getElementById('navAvatar').textContent = u.initials;
+  document.getElementById('navName').textContent = u.name.split(' ')[0];
+  // nav detail
+  document.getElementById('navGuestDetail').style.display = 'none';
+  const nd = document.getElementById('navUserDetail'); nd.style.display='flex';
+  document.getElementById('navAvatarDetail').textContent = u.initials;
+  document.getElementById('navNameDetail').textContent = u.name.split(' ')[0];
+  // nav chats
+  document.getElementById('navAvatarChats').textContent = u.initials;
+  document.getElementById('navNameChats').textContent = u.name.split(' ')[0];
+  document.getElementById('chatBadge').style.display = Object.keys(chats).length ? 'flex' : 'none';
+}
+function doLogout() {
+  currentUser = null;
+  document.getElementById('navGuest').style.display = 'flex';
+  document.getElementById('navUser').classList.remove('show');
+  document.getElementById('navGuestDetail').style.display = 'block';
+  document.getElementById('navUserDetail').style.display = 'none';
+  goPage('pageMain');
+  showToast('👋 Вы вышли из аккаунта');
+}
+function requireAuth(cb) {
+  if (!currentUser) { openAuth('login'); showToast('🔒 Сначала войдите в аккаунт','#F5A623'); return; }
+  cb();
+}
+
+/* ════════════════════════════════════
+         PAGES
+════════════════════════════════════ */
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'pageChats') renderChatList();
+}
+function scrollToOrders() {
+  goPage('pageMain');
+  setTimeout(()=>document.getElementById('ordersSection').scrollIntoView({behavior:'smooth'}),100);
+}
+
+/* ════════════════════════════════════
+         MODALS
+════════════════════════════════════ */
+function openModal(id) {
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='block';
+  document.getElementById('overlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeAllModals() {
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow='';
+}
+function openAuth(tab) {
+  openModal('authModal');
+  const btn = document.querySelector(`[onclick="switchAuthTab('${tab}',this)"]`);
+  if(btn) switchAuthTab(tab,btn);
+}
+function switchAuthTab(tab, el) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+function openPost() { openModal('postModal'); }
+
+/* ════════════════════════════════════
+         ORDERS
+════════════════════════════════════ */
+function renderOrders(list) {
+  const grid = document.getElementById('ordersGrid');
+  if (!list.length) {
+    grid.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><h3>Заказы не найдены</h3><p>Попробуйте изменить фильтры</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(o => `
+    <div class="order-card" onclick="openOrderDetail(${o.id})">
+      <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
+      <div class="order-meta">
+        <div class="order-avatar">${o.author}</div>
+        <div class="order-author">${o.authorName}</div>
+        <div class="order-date">${o.date}</div>
+      </div>
+      <div class="order-title">${o.title}</div>
+      <div class="order-desc">${o.desc}</div>
+      <div class="order-footer">
+        <div class="order-price">$${o.priceMin}–$${o.priceMax} <span>/ проект</span></div>
+        <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">Подробнее →</button>
+      </div>
+    </div>
+  `).join('');
+}
+function filterOrders() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderOrders(orders.filter(o=>{
+    const mc = !activeCategory || o.cat.includes(activeCategory);
+    const mq = !q || o.title.toLowerCase().includes(q) || o.desc.toLowerCase().includes(q);
+    return mc && mq;
+  }));
+}
+function filterCat(cat,el) {
+  activeCategory = cat;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); filterOrders();
+}
+function submitOrder() {
+  if (!currentUser) { showToast('🔒 Войдите, чтобы разместить заказ','#F5A623'); return; }
+  const title = document.getElementById('orderTitle').value.trim();
+  const cat   = document.getElementById('orderCat').value;
+  const desc  = document.getElementById('orderDesc').value.trim();
+  const pMin  = parseInt(document.getElementById('orderPriceMin').value)||0;
+  const pMax  = parseInt(document.getElementById('orderPriceMax').value)||0;
+  if (!title||!cat||!desc||!pMin) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  const catClean = cat.replace(/^[^\s]+ /,'');
+  const o = {
+    id:Date.now(), title, cat:catClean, desc, priceMin:pMin, priceMax:pMax||pMin,
+    author:currentUser.initials, authorName:currentUser.name.split(' ')[0],
+    date:'Только что', isNew:true, tags:[]
+  };
+  orders.unshift(o);
+  ['orderTitle','orderDesc','orderPriceMin','orderPriceMax'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('orderCat').value='';
+  closeAllModals(); filterOrders();
+  showToast('✅ Заказ опубликован! Фрилансеры уже видят его.');
+  setTimeout(()=>{ const el=document.querySelector(`[onclick="openOrderDetail(${o.id})"]`); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300);
+}
+
+/* ════════════════════════════════════
+         ORDER DETAIL PAGE
+════════════════════════════════════ */
+function openOrderDetail(id) {
+  currentDetailOrderId = id;
+  const o = orders.find(x=>x.id===id);
+  if (!o) return;
+
+  // build chat messages for this order (if any)
+  const chatId = 'chat_' + id;
+  const existingChat = chats[chatId];
+  const msgs = existingChat ? existingChat.messages : [];
+
+  const tagsHtml = o.tags && o.tags.length
+    ? `<div style="margin-bottom:28px"><div class="detail-section-title">🛠 Технологии / Навыки</div><div class="detail-tags">${o.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div></div>`
+    : '';
+
+  document.getElementById('detailBody').innerHTML = `
+    <!-- ORDER INFO CARD -->
+    <div class="detail-header-card">
+      <div class="detail-author-row">
+        <div class="detail-avatar">${o.author}</div>
+        <div class="detail-author-info">
+          <h4>${o.authorName}</h4>
+          <span>Предприниматель · ${o.date}</span>
+        </div>
+        <span class="order-cat" style="margin-left:auto">${o.cat}</span>
+        ${o.isNew?'<span class="badge-new">new</span>':''}
+      </div>
+      <div class="detail-title">${o.title}</div>
+      <p class="detail-desc">${o.desc}</p>
+      ${tagsHtml}
+      <div class="detail-info-grid">
+        <div class="detail-info-item">
+          <div class="detail-info-label">💰 Бюджет</div>
+          <div class="detail-info-value green">$${o.priceMin}–$${o.priceMax}</div>
+        </div>
+        <div class="detail-info-item">
+          <div class="detail-info-label">📂 Категория</div>
+          <div class="detail-info-value" style="font-family:'Nunito',sans-serif;font-size:1rem">${o.cat}</div>
+        </div>
+        <div class="detail-info-item">
+          <div class="detail-info-label">📅 Опубликован</div>
+          <div class="detail-info-value" style="font-family:'Nunito',sans-serif;font-size:1rem">${o.date}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT WITH ENTREPRENEUR -->
+    <div class="chat-card" id="detailChatCard">
+      <div class="chat-header">
+        <div class="chat-header-avatar">${o.author}</div>
+        <div class="chat-header-info">
+          <h4>Написать ${o.authorName}</h4>
+          <span>Предприниматель · по заказу "${o.title.length>40?o.title.substring(0,40)+'...':o.title}"</span>
+        </div>
+        <div class="chat-online"></div>
+      </div>
+      <div class="chat-messages" id="detailChatMessages">
+        ${msgs.length===0 ? `
+          <div class="chat-empty">
+            <div class="ce-icon">✉️</div>
+            <p>Напишите предпринимателю — задайте вопросы по заказу, предложите своё решение или уточните детали</p>
+          </div>` : renderMessagesHtml(msgs, o)}
+      </div>
+      <div class="chat-input-area" id="chatInputArea">
+        ${currentUser ? `
+          <textarea class="chat-input" id="detailChatInput" placeholder="Напишите сообщение ${o.authorName}..." rows="1" onkeydown="handleChatKey(event,${id})"></textarea>
+          <button class="chat-send" onclick="sendDetailMessage(${id})">
+            <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+          </button>
+        ` : `
+          <div style="width:100%;text-align:center;padding:4px 0">
+            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать предпринимателю</button>
+          </div>
+        `}
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:10px 0 20px">
+      <button class="btn btn-ghost" onclick="goPage('pageMain')" style="font-size:.88rem">← Вернуться к списку заказов</button>
+    </div>
+  `;
+
+  goPage('pageDetail');
+  setTimeout(()=>scrollChatToBottom('detailChatMessages'),100);
+}
+
+function renderMessagesHtml(msgs, o) {
+  return msgs.map(m => {
+    const isMe = m.sender === 'me';
+    return `
+      <div class="msg-row ${isMe?'me':''}">
+        ${!isMe?`<div class="msg-avatar them">${o.author}</div>`:''}
+        <div class="msg-wrap ${isMe?'me-w':''}">
+          <div class="msg-bubble ${isMe?'me':'them'}">${m.text}</div>
+          <div class="msg-time ${isMe?'me-t':''}">${m.time}</div>
+        </div>
+        ${isMe?`<div class="msg-avatar me-av">${currentUser?currentUser.initials:'Вы'}</div>`:''}
+      </div>`;
+  }).join('');
+}
+
+function handleChatKey(e, orderId) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendDetailMessage(orderId); }
+}
+
+function sendDetailMessage(orderId) {
+  if (!currentUser) { openAuth('login'); return; }
+  const input = document.getElementById('detailChatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const o = orders.find(x=>x.id===orderId);
+  const chatId = 'chat_' + orderId;
+  if (!chats[chatId]) {
+    chats[chatId] = {
+      orderId, withName:o.authorName, withInitials:o.author,
+      orderTitle:o.title, messages:[]
+    };
+  }
+  const now = new Date(); const time = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  chats[chatId].messages.push({ sender:'me', text, time });
+  input.value = '';
+
+  // auto-reply after 1.5s
+  const replies = [
+    'Добрый день! Спасибо за интерес к заказу. Расскажите подробнее о вашем опыте?',
+    'Отлично! Готов обсудить детали. Когда вам удобно созвониться?',
+    'Понял вас. Можете прислать примеры похожих работ из портфолио?',
+    'Звучит интересно! Уточните, пожалуйста, предполагаемые сроки с вашей стороны.',
+    'Спасибо за ваше предложение! Рассмотрим все заявки и свяжемся.',
+  ];
+  setTimeout(()=>{
+    const reply = replies[Math.floor(Math.random()*replies.length)];
+    const replyTime = new Date(); const rt = replyTime.getHours()+':'+String(replyTime.getMinutes()).padStart(2,'0');
+    chats[chatId].messages.push({ sender:'them', text:reply, time:rt });
+    // re-render messages
+    const container = document.getElementById('detailChatMessages');
+    if (container) {
+      container.innerHTML = renderMessagesHtml(chats[chatId].messages, o);
+      scrollChatToBottom('detailChatMessages');
+    }
+    document.getElementById('chatBadge').style.display='flex';
+  }, 1400);
+
+  const container = document.getElementById('detailChatMessages');
+  if (container) {
+    container.innerHTML = renderMessagesHtml(chats[chatId].messages, o);
+    scrollChatToBottom('detailChatMessages');
+  }
+}
+
+function scrollChatToBottom(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+/* ════════════════════════════════════
+         CHATS PAGE
+════════════════════════════════════ */
+function renderChatList() {
+  const list = document.getElementById('chatList');
+  const keys = Object.keys(chats);
+  if (!keys.length) {
+    list.innerHTML=`<div style="padding:32px 20px;text-align:center;color:var(--text-soft)"><div style="font-size:2rem;margin-bottom:10px">💬</div><p style="font-size:.9rem">Пока нет чатов.<br>Откликнитесь на заказ, чтобы начать общение.</p></div>`;
+    document.getElementById('chatWindow').innerHTML=`<div class="no-chat-selected"><div class="ncs-icon">💬</div><h3>Нет активных чатов</h3><p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Перейдите к заказу и напишите предпринимателю</p><button class="btn btn-sky" style="margin-top:16px" onclick="goPage('pageMain')">← К заказам</button></div>`;
+    return;
+  }
+  list.innerHTML = keys.map(cid => {
+    const c = chats[cid];
+    const last = c.messages[c.messages.length-1];
+    const isActive = activeChatId === cid;
+    return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow('${cid}')">
+      <div class="cli-avatar">${c.withInitials}</div>
+      <div class="cli-info">
+        <div class="cli-name">${c.withName}</div>
+        <div class="cli-preview">${last ? last.text : 'Нет сообщений'}</div>
+      </div>
+      ${last?`<div class="cli-time">${last.time}</div>`:''}
+    </div>`;
+  }).join('');
+  if (activeChatId) openChatWindow(activeChatId);
+}
+
+function openChatWindow(chatId) {
+  activeChatId = chatId;
+  const c = chats[chatId];
+  const o = orders.find(x=>x.id===c.orderId)||{author:c.withInitials};
+  const win = document.getElementById('chatWindow');
+  win.innerHTML = `
+    <div class="chat-window-header">
+      <div class="detail-avatar" style="width:42px;height:42px;font-size:.9rem;flex-shrink:0">${c.withInitials}</div>
+      <div><h4>${c.withName}</h4><span>По заказу: ${c.orderTitle&&c.orderTitle.length>50?c.orderTitle.substring(0,50)+'...':c.orderTitle}</span></div>
+      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${c.orderId})">Заказ →</button>
+    </div>
+    <div class="chat-window-messages" id="cwMessages">
+      ${c.messages.length ? renderMessagesHtml(c.messages, o) : '<div class="chat-empty"><div class="ce-icon">💬</div><p>Начните диалог</p></div>'}
+    </div>
+    <div class="chat-window-input">
+      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,'${chatId}')"></textarea>
+      <button class="chat-send" onclick="sendCwMessage('${chatId}')">
+        <svg viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  `;
+  renderChatList();
+  setTimeout(()=>scrollChatToBottom('cwMessages'),50);
+}
+function handleCwKey(e,chatId){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCwMessage(chatId);} }
+function sendCwMessage(chatId) {
+  const input = document.getElementById('cwInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const c = chats[chatId];
+  const o = orders.find(x=>x.id===c.orderId)||{author:c.withInitials};
+  const now=new Date(); const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  c.messages.push({sender:'me',text,time});
+  input.value='';
+  const replies=['Хорошо, понял!','Отлично, давайте обсудим детали.','Спасибо за сообщение, скоро отвечу.','Интересно! Расскажите подробнее.'];
+  setTimeout(()=>{
+    const rt=new Date(); const rtime=rt.getHours()+':'+String(rt.getMinutes()).padStart(2,'0');
+    c.messages.push({sender:'them',text:replies[Math.floor(Math.random()*replies.length)],time:rtime});
+    const cw=document.getElementById('cwMessages'); if(cw){cw.innerHTML=renderMessagesHtml(c.messages,o);scrollChatToBottom('cwMessages');}
+  },1200);
+  const cw=document.getElementById('cwMessages'); if(cw){cw.innerHTML=renderMessagesHtml(c.messages,o);scrollChatToBottom('cwMessages');}
+}
+
+/* ════════════════════════════════════
+         TOAST
+════════════════════════════════════ */
+function showToast(msg, bg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.style.background = bg||'var(--text)';
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ── INIT ── */
+renderOrders(orders);
+</script>
 </body>
 </html>
