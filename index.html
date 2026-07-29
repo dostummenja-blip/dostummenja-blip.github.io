@@ -827,7 +827,7 @@
 ════════════════════════════════════ */
 const LS_ORDERS  = 'fs_orders';
 const LS_USER    = 'fs_user';
-const LS_CHATS   = 'fs_chats';
+const LS_CHATS   = 'fs_chats';   // shared: fs_chats_<orderId>  — ALL users read/write same key
 const LS_THEME   = 'fs_theme';
 
 const DEFAULT_ORDERS = [
@@ -885,9 +885,22 @@ let activeChatId = null;
 let orders = lsGet(LS_ORDERS, null);
 if (!orders) { orders = DEFAULT_ORDERS; lsSet(LS_ORDERS, orders); }
 
-// Load chats per user — stored as fs_chats_<email>
-function chatsKey() { return currentUser ? LS_CHATS + '_' + currentUser.email : LS_CHATS + '_guest'; }
-let chats = {};
+// SHARED chat storage — one key per order, visible to ALL users
+// fs_chats_<orderId> = { orderId, orderTitle, messages: [{sender, senderName, senderInitials, text, time}] }
+function chatKey(orderId) { return LS_CHATS + '_' + orderId; }
+function loadChat(orderId) { return lsGet(chatKey(orderId), null); }
+function saveChat(chat) { lsSet(chatKey(chat.orderId), chat); }
+
+// My chats index — which orderIds I've participated in (per user)
+function myChatsKey() { return currentUser ? 'fs_mychats_' + currentUser.email : null; }
+function loadMyOrderIds() { return currentUser ? lsGet(myChatsKey(), []) : []; }
+function addMyOrderId(orderId) {
+  if (!currentUser) return;
+  const ids = loadMyOrderIds();
+  if (!ids.includes(orderId)) { ids.unshift(orderId); lsSet(myChatsKey(), ids); }
+}
+
+let chats = {}; // local cache: orderId -> chat object (rebuilt from localStorage)
 
 /* ════════════════════════════════════
          AUTH
@@ -929,9 +942,9 @@ function doRegister() {
 }
 function setCurrentUser(u) {
   currentUser = u;
-  lsSet(LS_USER, u); // persist session
-  // load this user's chats
-  chats = lsGet(chatsKey(), {});
+  lsSet(LS_USER, u);
+  // rebuild local chats cache from shared store
+  rebuildChatsCache();
   const first = u.name.split(' ')[0];
   // nav main
   document.getElementById('navGuest').style.display = 'none';
@@ -965,6 +978,7 @@ function doLogout() {
   lsSet(LS_USER, null);
   currentUser = null;
   chats = {};
+  activeChatId = null;
   document.getElementById('navGuest').style.display = 'flex';
   document.getElementById('navUser').classList.remove('show');
   document.getElementById('navGuestDetail').style.display = 'block';
@@ -1095,18 +1109,15 @@ function submitOrder() {
   setTimeout(()=>{ const el=document.querySelector(`[onclick="openOrderDetail(${o.id})"]`); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300);
 }
 
-/* ════════════════════════════════════
-         ORDER DETAIL PAGE
-════════════════════════════════════ */
 function openOrderDetail(id) {
+  id = parseInt(id)||id;
   currentDetailOrderId = id;
   const o = orders.find(x=>x.id===id);
   if (!o) return;
 
-  // build chat messages for this order (if any)
-  const chatId = 'chat_' + id;
-  const existingChat = chats[chatId];
-  const msgs = existingChat ? existingChat.messages : [];
+  // load from shared store (fresh, not stale cache)
+  const chat = loadChat(id);
+  const msgs = chat ? chat.messages : [];
 
   const tagsHtml = o.tags && o.tags.length
     ? `<div style="margin-bottom:28px"><div class="detail-section-title">🛠 Технологии / Навыки</div><div class="detail-tags">${o.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div></div>`
@@ -1148,8 +1159,8 @@ function openOrderDetail(id) {
       <div class="chat-header">
         <div class="chat-header-avatar">${o.author}</div>
         <div class="chat-header-info">
-          <h4>Написать ${o.authorName}</h4>
-          <span>Предприниматель · по заказу "${o.title.length>40?o.title.substring(0,40)+'...':o.title}"</span>
+          <h4>Чат по заказу</h4>
+          <span>«${o.title.length>40?o.title.substring(0,40)+'...':o.title}»</span>
         </div>
         <div class="chat-online"></div>
       </div>
@@ -1157,18 +1168,18 @@ function openOrderDetail(id) {
         ${msgs.length===0 ? `
           <div class="chat-empty">
             <div class="ce-icon">✉️</div>
-            <p>Напишите предпринимателю — задайте вопросы по заказу, предложите своё решение или уточните детали</p>
-          </div>` : renderMessagesHtml(msgs, o)}
+            <p>Напишите — задайте вопросы по заказу или предложите своё решение</p>
+          </div>` : renderMessagesHtml(msgs)}
       </div>
       <div class="chat-input-area" id="chatInputArea">
         ${currentUser ? `
-          <textarea class="chat-input" id="detailChatInput" placeholder="Напишите сообщение ${o.authorName}..." rows="1" onkeydown="handleChatKey(event,${id})"></textarea>
+          <textarea class="chat-input" id="detailChatInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleChatKey(event,${id})"></textarea>
           <button class="chat-send" onclick="sendDetailMessage(${id})">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
           </button>
         ` : `
           <div style="width:100%;text-align:center;padding:4px 0">
-            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать предпринимателю</button>
+            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать</button>
           </div>
         `}
       </div>
@@ -1183,17 +1194,19 @@ function openOrderDetail(id) {
   setTimeout(()=>scrollChatToBottom('detailChatMessages'),100);
 }
 
-function renderMessagesHtml(msgs, o) {
+function renderMessagesHtml(msgs) {
   return msgs.map(m => {
-    const isMe = m.sender === 'me';
+    const isMe = currentUser && m.sender === currentUser.email;
+    const initials = m.senderInitials || m.sender.substring(0,2).toUpperCase();
     return `
       <div class="msg-row ${isMe?'me':''}">
-        ${!isMe?`<div class="msg-avatar them">${o.author}</div>`:''}
+        ${!isMe?`<div class="msg-avatar them">${initials}</div>`:''}
         <div class="msg-wrap ${isMe?'me-w':''}">
+          ${!isMe?`<div style="font-size:.72rem;color:var(--text-soft);margin-bottom:3px;padding-left:2px">${m.senderName||initials}</div>`:''}
           <div class="msg-bubble ${isMe?'me':'them'}">${m.text}</div>
           <div class="msg-time ${isMe?'me-t':''}">${m.time}</div>
         </div>
-        ${isMe?`<div class="msg-avatar me-av">${currentUser?currentUser.initials:'Вы'}</div>`:''}
+        ${isMe?`<div class="msg-avatar me-av">${currentUser.initials}</div>`:''}
       </div>`;
   }).join('');
 }
@@ -1208,23 +1221,31 @@ function sendDetailMessage(orderId) {
   const text = input.value.trim();
   if (!text) return;
   const o = orders.find(x=>x.id===orderId);
-  const chatId = 'chat_' + orderId;
-  if (!chats[chatId]) {
-    chats[chatId] = {
-      orderId, withName:o.authorName, withInitials:o.author,
-      orderTitle:o.title, messages:[]
-    };
+
+  // load latest from shared store (don't use stale cache)
+  let chat = loadChat(orderId);
+  if (!chat) {
+    chat = { orderId, orderTitle:o.title, messages:[] };
   }
-  const now = new Date(); const time = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-  chats[chatId].messages.push({ sender:'me', text, time });
+  const now = new Date();
+  const time = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  chat.messages.push({
+    sender: currentUser.email,
+    senderName: currentUser.name,
+    senderInitials: currentUser.initials,
+    text, time
+  });
+  saveChat(chat);              // write to shared store
+  addMyOrderId(orderId);       // mark as participated
+  chats[orderId] = chat;       // update local cache
   input.value = '';
-  lsSet(chatsKey(), chats); // persist chats
 
   const container = document.getElementById('detailChatMessages');
   if (container) {
-    container.innerHTML = renderMessagesHtml(chats[chatId].messages, o);
+    container.innerHTML = renderMessagesHtml(chat.messages, o);
     scrollChatToBottom('detailChatMessages');
   }
+  document.getElementById('chatBadge').style.display = 'flex';
 }
 
 function scrollChatToBottom(containerId) {
@@ -1235,22 +1256,36 @@ function scrollChatToBottom(containerId) {
 /* ════════════════════════════════════
          CHATS PAGE
 ════════════════════════════════════ */
+function rebuildChatsCache() {
+  chats = {};
+  const ids = loadMyOrderIds();
+  ids.forEach(oid => {
+    const c = loadChat(oid);
+    if (c) chats[oid] = c;
+  });
+}
+
 function renderChatList() {
+  rebuildChatsCache();
   const list = document.getElementById('chatList');
-  const keys = Object.keys(chats);
-  if (!keys.length) {
+  const ids = Object.keys(chats);
+  if (!ids.length) {
     list.innerHTML=`<div style="padding:32px 20px;text-align:center;color:var(--text-soft)"><div style="font-size:2rem;margin-bottom:10px">💬</div><p style="font-size:.9rem">Пока нет чатов.<br>Откликнитесь на заказ, чтобы начать общение.</p></div>`;
     document.getElementById('chatWindow').innerHTML=`<div class="no-chat-selected"><div class="ncs-icon">💬</div><h3>Нет активных чатов</h3><p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Перейдите к заказу и напишите предпринимателю</p><button class="btn btn-sky" style="margin-top:16px" onclick="goPage('pageMain')">← К заказам</button></div>`;
     return;
   }
-  list.innerHTML = keys.map(cid => {
-    const c = chats[cid];
+  list.innerHTML = ids.map(oid => {
+    const c = chats[oid];
+    const o = orders.find(x=>x.id==oid);
     const last = c.messages[c.messages.length-1];
-    const isActive = activeChatId === cid;
-    return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow('${cid}')">
-      <div class="cli-avatar">${c.withInitials}</div>
+    const isActive = activeChatId == oid;
+    const other = c.messages.find(m => m.sender !== currentUser.email);
+    const otherInitials = other ? other.senderInitials : (o ? o.author : '??');
+    const otherName = other ? other.senderName : (o ? o.authorName : 'Собеседник');
+    return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow(${oid})">
+      <div class="cli-avatar">${otherInitials}</div>
       <div class="cli-info">
-        <div class="cli-name">${c.withName}</div>
+        <div class="cli-name">${otherName}</div>
         <div class="cli-preview">${last ? last.text : 'Нет сообщений'}</div>
       </div>
       ${last?`<div class="cli-time">${last.time}</div>`:''}
@@ -1259,23 +1294,28 @@ function renderChatList() {
   if (activeChatId) openChatWindow(activeChatId);
 }
 
-function openChatWindow(chatId) {
-  activeChatId = chatId;
-  const c = chats[chatId];
-  const o = orders.find(x=>x.id===c.orderId)||{author:c.withInitials};
+function openChatWindow(orderId) {
+  orderId = parseInt(orderId)||orderId;
+  activeChatId = orderId;
+  const chat = loadChat(orderId) || chats[orderId] || {orderId, messages:[]};
+  chats[orderId] = chat;
+  const o = orders.find(x=>x.id==orderId)||{};
+  const other = chat.messages.find(m => m.sender !== (currentUser&&currentUser.email));
+  const otherInitials = other ? other.senderInitials : (o.author||'??');
+  const otherName = other ? other.senderName : (o.authorName||'Собеседник');
   const win = document.getElementById('chatWindow');
   win.innerHTML = `
     <div class="chat-window-header">
-      <div class="detail-avatar" style="width:42px;height:42px;font-size:.9rem;flex-shrink:0">${c.withInitials}</div>
-      <div><h4>${c.withName}</h4><span>По заказу: ${c.orderTitle&&c.orderTitle.length>50?c.orderTitle.substring(0,50)+'...':c.orderTitle}</span></div>
-      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${c.orderId})">Заказ →</button>
+      <div class="detail-avatar" style="width:42px;height:42px;font-size:.9rem;flex-shrink:0">${otherInitials}</div>
+      <div><h4>${otherName}</h4><span>По заказу: ${(chat.orderTitle||o.title||'').substring(0,50)}</span></div>
+      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${orderId})">Заказ →</button>
     </div>
     <div class="chat-window-messages" id="cwMessages">
-      ${c.messages.length ? renderMessagesHtml(c.messages, o) : '<div class="chat-empty"><div class="ce-icon">💬</div><p>Начните диалог</p></div>'}
+      ${chat.messages.length ? renderMessagesHtml(chat.messages) : '<div class="chat-empty"><div class="ce-icon">💬</div><p>Начните диалог</p></div>'}
     </div>
     <div class="chat-window-input">
-      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,'${chatId}')"></textarea>
-      <button class="chat-send" onclick="sendCwMessage('${chatId}')">
+      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,${orderId})"></textarea>
+      <button class="chat-send" onclick="sendCwMessage(${orderId})">
         <svg viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
     </div>
@@ -1283,18 +1323,27 @@ function openChatWindow(chatId) {
   renderChatList();
   setTimeout(()=>scrollChatToBottom('cwMessages'),50);
 }
-function handleCwKey(e,chatId){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCwMessage(chatId);} }
-function sendCwMessage(chatId) {
+function handleCwKey(e,orderId){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCwMessage(orderId);} }
+function sendCwMessage(orderId) {
   const input = document.getElementById('cwInput');
   const text = input.value.trim();
   if (!text) return;
-  const c = chats[chatId];
-  const o = orders.find(x=>x.id===c.orderId)||{author:c.withInitials};
+  const o = orders.find(x=>x.id===orderId) || {};
+  let chat = loadChat(orderId);
+  if (!chat) chat = { orderId, orderTitle:o.title||'', messages:[] };
   const now=new Date(); const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-  c.messages.push({sender:'me',text,time});
+  chat.messages.push({
+    sender: currentUser.email,
+    senderName: currentUser.name,
+    senderInitials: currentUser.initials,
+    text, time
+  });
+  saveChat(chat);
+  addMyOrderId(orderId);
+  chats[orderId] = chat;
   input.value='';
-  lsSet(chatsKey(), chats); // persist chats
-  const cw=document.getElementById('cwMessages'); if(cw){cw.innerHTML=renderMessagesHtml(c.messages,o);scrollChatToBottom('cwMessages');}
+  const cw=document.getElementById('cwMessages');
+  if(cw){cw.innerHTML=renderMessagesHtml(chat.messages);scrollChatToBottom('cwMessages');}
 }
 
 /* ════════════════════════════════════
@@ -1346,6 +1395,71 @@ function setTheme(theme) {
   if (savedUser) setCurrentUser(savedUser);
 
   renderOrders(orders);
+
+  // ── LIVE UPDATES ──
+  // 1. storage event fires when ANOTHER tab writes localStorage
+  window.addEventListener('storage', function(e) {
+    if (!currentUser) return;
+    if (e.key && e.key.startsWith(LS_CHATS + '_')) {
+      const orderId = parseInt(e.key.replace(LS_CHATS + '_', ''));
+      if (!orderId) return;
+      const fresh = loadChat(orderId);
+      if (!fresh) return;
+      // always update local cache
+      chats[orderId] = fresh;
+      // update detail page if open on this order
+      if (currentDetailOrderId == orderId) {
+        const container = document.getElementById('detailChatMessages');
+        if (container) {
+          container.innerHTML = renderMessagesHtml(fresh.messages);
+          scrollChatToBottom('detailChatMessages');
+        }
+      }
+      // update chat window if open on this order
+      if (activeChatId == orderId) {
+        const cw = document.getElementById('cwMessages');
+        if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
+      }
+      // refresh chat list sidebar
+      const cl = document.getElementById('chatList');
+      if (cl && cl.innerHTML) renderChatList();
+      // show badge if new message from someone else
+      const last = fresh.messages[fresh.messages.length-1];
+      if (last && last.sender !== currentUser.email) {
+        document.getElementById('chatBadge').style.display = 'flex';
+        // also add to my chats if this order is not yet there
+        addMyOrderId(orderId);
+      }
+    }
+    if (e.key === LS_ORDERS) {
+      orders = lsGet(LS_ORDERS, orders);
+      filterOrders();
+    }
+  });
+
+  // 2. polling fallback (same tab doesn't fire storage event for itself; also catches same-origin iframes)
+  setInterval(function() {
+    if (!currentUser) return;
+    // poll active chat
+    const pollId = currentDetailOrderId || activeChatId;
+    if (!pollId) return;
+    const fresh = loadChat(pollId);
+    if (!fresh) return;
+    const cached = chats[pollId];
+    if (!cached || fresh.messages.length !== cached.messages.length) {
+      chats[pollId] = fresh;
+      if (currentDetailOrderId == pollId) {
+        const container = document.getElementById('detailChatMessages');
+        if (container) { container.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('detailChatMessages'); }
+      }
+      if (activeChatId == pollId) {
+        const cw = document.getElementById('cwMessages');
+        if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
+      }
+      const cl = document.getElementById('chatList');
+      if (cl && cl.innerHTML) renderChatList();
+    }
+  }, 1500);
 })();
 </script>
 </body>
