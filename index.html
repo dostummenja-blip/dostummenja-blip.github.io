@@ -823,17 +823,14 @@
 
 <script>
 /* ════════════════════════════════════
-         STATE
+         STORAGE HELPERS
 ════════════════════════════════════ */
-let currentUser = null; // { name, email, role, initials }
-let activeCategory = '';
-let currentDetailOrderId = null;
-let activeChatId = null;
+const LS_ORDERS  = 'fs_orders';
+const LS_USER    = 'fs_user';
+const LS_CHATS   = 'fs_chats';
+const LS_THEME   = 'fs_theme';
 
-// chats[chatId] = { orderId, withName, withInitials, messages:[] }
-let chats = {};
-
-let orders = [
+const DEFAULT_ORDERS = [
   { id:1, title:"Разработка сайта для ресторана", cat:"Разработка",
     desc:"Нужен современный сайт с меню, онлайн-бронированием столиков и полностью адаптивным дизайном для мобильных устройств. Стек на ваш выбор — важна скорость загрузки, SEO-оптимизация и красота визуала. Желательно наличие портфолио схожих работ. Возможна долгосрочная поддержка проекта.",
     priceMin:800, priceMax:1500, author:"АК", authorName:"Алексей К.", date:"Сегодня", isNew:true,
@@ -867,6 +864,30 @@ let orders = [
     priceMin:1200, priceMax:2500, author:"ОК", authorName:"Ольга К.", date:"6 дней назад", isNew:false,
     tags:["Акварель","Procreate","Иллюстрация"] },
 ];
+
+function lsGet(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { return fallback; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+/* ════════════════════════════════════
+         STATE  (persisted)
+════════════════════════════════════ */
+let currentUser = null;
+let activeCategory = '';
+let currentDetailOrderId = null;
+let activeChatId = null;
+
+// Load orders: if none saved yet, use defaults and persist them
+let orders = lsGet(LS_ORDERS, null);
+if (!orders) { orders = DEFAULT_ORDERS; lsSet(LS_ORDERS, orders); }
+
+// Load chats per user — stored as fs_chats_<email>
+function chatsKey() { return currentUser ? LS_CHATS + '_' + currentUser.email : LS_CHATS + '_guest'; }
+let chats = {};
 
 /* ════════════════════════════════════
          AUTH
@@ -908,6 +929,9 @@ function doRegister() {
 }
 function setCurrentUser(u) {
   currentUser = u;
+  lsSet(LS_USER, u); // persist session
+  // load this user's chats
+  chats = lsGet(chatsKey(), {});
   const first = u.name.split(' ')[0];
   // nav main
   document.getElementById('navGuest').style.display = 'none';
@@ -938,7 +962,9 @@ function setCurrentUser(u) {
   document.getElementById('profileNameInput').value = u.name;
 }
 function doLogout() {
+  lsSet(LS_USER, null);
   currentUser = null;
+  chats = {};
   document.getElementById('navGuest').style.display = 'flex';
   document.getElementById('navUser').classList.remove('show');
   document.getElementById('navGuestDetail').style.display = 'block';
@@ -961,6 +987,11 @@ function goPage(id) {
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   if (id === 'pageChats') renderChatList();
+  if (id === 'pageProfile') {
+    const isDark = document.body.classList.contains('dark');
+    document.getElementById('themeLight').classList.toggle('active', !isDark);
+    document.getElementById('themeDark').classList.toggle('active', isDark);
+  }
 }
 function scrollToOrders() {
   goPage('pageMain');
@@ -1047,6 +1078,7 @@ function submitOrder() {
     date:'Только что', isNew:true, tags:[]
   };
   orders.unshift(o);
+  lsSet(LS_ORDERS, orders); // persist so other tabs/accounts see it
   ['orderTitle','orderDesc','orderPriceMin','orderPriceMax'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('orderCat').value='';
   // Reset filters so new order is always visible
@@ -1186,6 +1218,7 @@ function sendDetailMessage(orderId) {
   const now = new Date(); const time = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
   chats[chatId].messages.push({ sender:'me', text, time });
   input.value = '';
+  lsSet(chatsKey(), chats); // persist chats
 
   const container = document.getElementById('detailChatMessages');
   if (container) {
@@ -1260,6 +1293,7 @@ function sendCwMessage(chatId) {
   const now=new Date(); const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
   c.messages.push({sender:'me',text,time});
   input.value='';
+  lsSet(chatsKey(), chats); // persist chats
   const cw=document.getElementById('cwMessages'); if(cw){cw.innerHTML=renderMessagesHtml(c.messages,o);scrollChatToBottom('cwMessages');}
 }
 
@@ -1284,7 +1318,7 @@ function saveProfileName() {
   if (!newName) { showToast('⚠️ Введите имя','#F5A623'); return; }
   currentUser.name = newName;
   currentUser.initials = newName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-  setCurrentUser(currentUser);
+  setCurrentUser(currentUser); // also calls lsSet(LS_USER)
   showToast('✅ Имя обновлено!');
 }
 
@@ -1298,10 +1332,21 @@ function setTheme(theme) {
     document.getElementById('themeLight').classList.add('active');
     document.getElementById('themeDark').classList.remove('active');
   }
+  lsSet(LS_THEME, theme);
 }
 
 /* ── INIT ── */
-renderOrders(orders);
+(function init() {
+  // Restore theme
+  const savedTheme = lsGet(LS_THEME, 'light');
+  if (savedTheme === 'dark') setTheme('dark');
+
+  // Restore session
+  const savedUser = lsGet(LS_USER, null);
+  if (savedUser) setCurrentUser(savedUser);
+
+  renderOrders(orders);
+})();
 </script>
 </body>
 </html>
