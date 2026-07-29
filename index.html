@@ -623,7 +623,7 @@
     </div>
     <!-- LOGIN -->
     <div class="tab-content active" id="tab-login">
-      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label>Email</label><input type="text" id="loginEmail" placeholder="your@email.com"/></div>
       <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
       <button class="btn btn-sky btn-full" onclick="doLogin()">Войти в аккаунт</button>
     </div>
@@ -1141,25 +1141,34 @@ function sbTableForKey(key) {
   return { table: 'chats', pk: 'id', pkVal: key };
 }
 
+let sbErrorShown = false;
+function sbNotifyError(context) {
+  if (sbErrorShown) return;
+  sbErrorShown = true;
+  if (typeof showToast === 'function') {
+    showToast('⚠️ Синхронизация с сервером не удалась (' + context + '). Изменения видны только на этом устройстве.', '#e74c3c');
+  }
+}
 async function sbGet(key) {
   const t = sbTableForKey(key);
   try {
     const res = await fetch(`${SB_URL}/rest/v1/${t.table}?${t.pk}=eq.${encodeURIComponent(t.pkVal)}&select=data`, { headers: SB_HEADERS });
-    if (!res.ok) return undefined;
+    if (!res.ok) { console.error('[Supabase GET failed]', t.table, res.status, await res.text()); sbNotifyError('чтение'); return undefined; }
     const rows = await res.json();
     if (!rows || !rows.length) return undefined;
     return rows[0].data;
-  } catch(e) { return undefined; }
+  } catch(e) { console.error('[Supabase GET error]', t.table, e); sbNotifyError('чтение'); return undefined; }
 }
 async function sbSet(key, val) {
   const t = sbTableForKey(key);
   try {
-    await fetch(`${SB_URL}/rest/v1/${t.table}`, {
+    const res = await fetch(`${SB_URL}/rest/v1/${t.table}?on_conflict=${t.pk}`, {
       method: 'POST',
-      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'resolution=merge-duplicates' }),
+      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
       body: JSON.stringify({ [t.pk]: t.pkVal, data: val, updated_at: new Date().toISOString() })
     });
-  } catch(e) {}
+    if (!res.ok) { console.error('[Supabase SET failed]', t.table, res.status, await res.text()); sbNotifyError('запись'); }
+  } catch(e) { console.error('[Supabase SET error]', t.table, e); sbNotifyError('запись'); }
 }
 
 // lsGet/lsSet keep their old synchronous signature so no caller needs to change.
@@ -1199,15 +1208,34 @@ let activeCategory = '';
 let currentDetailOrderId = null;
 let activeChatId = null;
 
-// Load orders: if none saved yet, use defaults and persist them
+// Load orders: if nothing cached locally yet, show defaults LOCALLY ONLY.
+// Never push defaults to Supabase here — that would overwrite real listings
+// on any device whose local cache happens to be empty (this was the bug
+// causing fresh listings to "disappear": a second device loaded with no
+// cache, fell back to defaults, and immediately wrote those defaults over
+// the live data in Supabase). The real data always comes from the
+// initialSync() pull further down, which merges in whatever is on the server.
 let orders = lsGet(LS_ORDERS, null);
-if (!orders) { orders = DEFAULT_ORDERS; lsSet(LS_ORDERS, orders); }
+if (!orders) { orders = DEFAULT_ORDERS; }
+orders = pruneExpiredOrders(orders);
 
 // SHARED chat storage — one key per order, visible to ALL users
 // fs_chats_<orderId> = { orderId, orderTitle, messages: [{sender, senderName, senderInitials, text, time}] }
 function chatKey(orderId) { return LS_CHATS + '_' + orderId; }
 function loadChat(orderId) { return lsGet(chatKey(orderId), null); }
 function saveChat(chat) { lsSet(chatKey(chat.orderId), chat); }
+
+// ── SUPPORT CHAT ──
+// Each regular user gets one dedicated support thread with the admin,
+// keyed by their email. The admin has an index of every support thread
+// (all users who ever wrote in) so they can see and answer every one.
+function supportChatId(userEmail) { return 'support_' + userEmail; }
+function isSupportChat(id) { return typeof id === 'string' && id.indexOf('support_') === 0; }
+function loadSupportIndex() { return lsGet('fs_support_index', []); } // list of user emails who have a support thread
+function addToSupportIndex(userEmail) {
+  const idx = loadSupportIndex();
+  if (!idx.includes(userEmail)) { idx.unshift(userEmail); lsSet('fs_support_index', idx); }
+}
 
 // My chats index — which orderIds I've participated in (per user)
 function myChatsKey() { return currentUser ? 'fs_mychats_' + currentUser.email : null; }
@@ -1227,6 +1255,15 @@ function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('loginPass').value.trim();
   if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
+  // Hardcoded admin account — not part of the regular fs_users registry.
+  if (email === 'admin' && pass === 'Emilka22') {
+    document.getElementById('loginEmail').style.borderColor = '';
+    document.getElementById('loginPass').style.borderColor = '';
+    setCurrentUser({ name: 'Admin', email: 'admin', role: 'Администратор', initials: 'AD', isAdmin: true });
+    closeAllModals();
+    showToast('🛠️ Вы вошли как администратор');
+    return;
+  }
   const users = lsGet('fs_users', []);
   const found = users.find(u => u.email === email);
   if (!found) {
@@ -1395,6 +1432,14 @@ function openPost() { openModal('postModal'); }
 /* ════════════════════════════════════
          ORDERS
 ════════════════════════════════════ */
+// Auto-expiry: orders older than 3 days are removed automatically.
+// Order id is Date.now() at creation time, so it doubles as a timestamp.
+const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+function pruneExpiredOrders(list) {
+  const cutoff = Date.now() - ORDER_TTL_MS;
+  return list.filter(o => !o.id || o.id >= cutoff);
+}
+
 function renderOrders(list) {
   const grid = document.getElementById('ordersGrid');
   if (!list.length) {
@@ -1404,6 +1449,7 @@ function renderOrders(list) {
   grid.innerHTML = list.map(o => `
     <div class="order-card" onclick="openOrderDetail(${o.id})">
       <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
+      ${currentUser && currentUser.isAdmin ? `<button class="btn-take" style="position:absolute;top:10px;right:10px;background:#e74c3c;padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();adminDeleteOrder(${o.id})">🗑 Удалить</button>` : ''}
       <div class="order-meta">
         <div class="order-avatar">${o.author}</div>
         <div class="order-author">${o.authorName}</div>
@@ -1417,6 +1463,14 @@ function renderOrders(list) {
       </div>
     </div>
   `).join('');
+}
+function adminDeleteOrder(orderId) {
+  if (!currentUser || !currentUser.isAdmin) return;
+  if (!confirm('Удалить это объявление безвозвратно?')) return;
+  orders = orders.filter(o => o.id !== orderId);
+  lsSet(LS_ORDERS, orders);
+  if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
+  showToast('🗑 Объявление удалено');
 }
 function filterOrders() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -1492,6 +1546,7 @@ function openOrderDetail(id) {
       <div class="detail-title">${o.title}</div>
       <p class="detail-desc">${o.desc}</p>
       ${tagsHtml}
+      ${currentUser && currentUser.isAdmin ? `<button class="btn" style="background:#e74c3c;color:#fff;margin-bottom:20px" onclick="adminDeleteOrder(${o.id});goPage('pageMain')">🗑 Удалить объявление (админ)</button>` : ''}
       <div class="detail-info-grid">
         <div class="detail-info-item">
           <div class="detail-info-label">💰 Бюджет</div>
@@ -1617,12 +1672,28 @@ function rebuildChatsCache() {
     const c = loadChat(oid);
     if (c) chats[oid] = c;
   });
+  if (!currentUser) return;
+  if (currentUser.isAdmin) {
+    // Admin sees every user's support thread, even ones with no messages yet
+    // won't show (only threads that exist), so just load what's indexed.
+    loadSupportIndex().forEach(email => {
+      const sid = supportChatId(email);
+      const c = loadChat(sid);
+      chats[sid] = c || { orderId: sid, messages: [], supportUserEmail: email };
+    });
+  } else {
+    // Regular user always has their own support thread available, even if empty.
+    const sid = supportChatId(currentUser.email);
+    const c = loadChat(sid);
+    chats[sid] = c || { orderId: sid, messages: [], supportUserEmail: currentUser.email };
+  }
 }
 
 function renderChatList() {
   rebuildChatsCache();
   const list = document.getElementById('chatList');
-  const ids = Object.keys(chats);
+  // Support thread(s) always first, then regular order chats.
+  const ids = Object.keys(chats).sort((a,b) => (isSupportChat(a)?-1:0) - (isSupportChat(b)?-1:0));
   if (!ids.length) {
     list.innerHTML=`<div style="padding:32px 20px;text-align:center;color:var(--text-soft)"><div style="font-size:2rem;margin-bottom:10px">💬</div><p style="font-size:.9rem">Пока нет чатов.<br>Откликнитесь на заказ, чтобы начать общение.</p></div>`;
     document.getElementById('chatWindow').innerHTML=`<div class="no-chat-selected"><div class="ncs-icon">💬</div><h3>Нет активных чатов</h3><p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Перейдите к заказу и напишите предпринимателю</p><button class="btn btn-sky" style="margin-top:16px" onclick="goPage('pageMain')">← К заказам</button></div>`;
@@ -1630,13 +1701,24 @@ function renderChatList() {
   }
   list.innerHTML = ids.map(oid => {
     const c = chats[oid];
-    const o = orders.find(x=>x.id==oid);
     const last = c.messages[c.messages.length-1];
     const isActive = activeChatId == oid;
-    const other = c.messages.find(m => m.sender !== currentUser.email);
-    const otherInitials = other ? other.senderInitials : (o ? o.author : '??');
-    const otherName = other ? other.senderName : (o ? o.authorName : 'Собеседник');
-    return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow(${oid})">
+    let otherInitials, otherName;
+    if (isSupportChat(oid)) {
+      if (currentUser.isAdmin) {
+        otherInitials = 'SU';
+        otherName = '🎧 Поддержка · ' + (c.supportUserEmail || '');
+      } else {
+        otherInitials = 'SU';
+        otherName = '🎧 Поддержка';
+      }
+    } else {
+      const o = orders.find(x=>x.id==oid);
+      const other = c.messages.find(m => m.sender !== currentUser.email);
+      otherInitials = other ? other.senderInitials : (o ? o.author : '??');
+      otherName = other ? other.senderName : (o ? o.authorName : 'Собеседник');
+    }
+    return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow('${oid}')">
       <div class="cli-avatar">${otherInitials}</div>
       <div class="cli-info">
         <div class="cli-name">${otherName}</div>
@@ -1649,27 +1731,36 @@ function renderChatList() {
 }
 
 function openChatWindow(orderId) {
-  orderId = parseInt(orderId)||orderId;
+  const isSupport = isSupportChat(orderId);
+  if (!isSupport) orderId = parseInt(orderId)||orderId;
   activeChatId = orderId;
   const chat = loadChat(orderId) || chats[orderId] || {orderId, messages:[]};
   chats[orderId] = chat;
-  const o = orders.find(x=>x.id==orderId)||{};
-  const other = chat.messages.find(m => m.sender !== (currentUser&&currentUser.email));
-  const otherInitials = other ? other.senderInitials : (o.author||'??');
-  const otherName = other ? other.senderName : (o.authorName||'Собеседник');
+  let otherInitials, otherName, headerSubtitle;
+  if (isSupport) {
+    otherInitials = 'SU';
+    otherName = currentUser.isAdmin ? ('🎧 ' + (chat.supportUserEmail || '')) : '🎧 Поддержка FreeSun';
+    headerSubtitle = currentUser.isAdmin ? 'Обращение в поддержку' : 'Мы отвечаем как можно скорее';
+  } else {
+    const o = orders.find(x=>x.id==orderId)||{};
+    const other = chat.messages.find(m => m.sender !== (currentUser&&currentUser.email));
+    otherInitials = other ? other.senderInitials : (o.author||'??');
+    otherName = other ? other.senderName : (o.authorName||'Собеседник');
+    headerSubtitle = 'По заказу: ' + (chat.orderTitle||o.title||'').substring(0,50);
+  }
   const win = document.getElementById('chatWindow');
   win.innerHTML = `
     <div class="chat-window-header">
       <div class="detail-avatar" style="width:42px;height:42px;font-size:.9rem;flex-shrink:0">${otherInitials}</div>
-      <div><h4>${otherName}</h4><span>По заказу: ${(chat.orderTitle||o.title||'').substring(0,50)}</span></div>
-      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${orderId})">Заказ →</button>
+      <div><h4>${otherName}</h4><span>${headerSubtitle}</span></div>
+      ${isSupport ? '' : `<button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${orderId})">Заказ →</button>`}
     </div>
     <div class="chat-window-messages" id="cwMessages">
       ${chat.messages.length ? renderMessagesHtml(chat.messages) : '<div class="chat-empty"><div class="ce-icon">💬</div><p>Начните диалог</p></div>'}
     </div>
     <div class="chat-window-input">
-      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,${orderId})"></textarea>
-      <button class="chat-send" onclick="sendCwMessage(${orderId})">
+      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,'${orderId}')"></textarea>
+      <button class="chat-send" onclick="sendCwMessage('${orderId}')">
         <svg viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
     </div>
@@ -1679,21 +1770,34 @@ function openChatWindow(orderId) {
 }
 function handleCwKey(e,orderId){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCwMessage(orderId);} }
 function sendCwMessage(orderId) {
+  const isSupport = isSupportChat(orderId);
+  if (!isSupport) orderId = parseInt(orderId)||orderId;
   const input = document.getElementById('cwInput');
   const text = input.value.trim();
   if (!text) return;
-  const o = orders.find(x=>x.id===orderId) || {};
   let chat = loadChat(orderId);
-  if (!chat) chat = { orderId, orderTitle:o.title||'', messages:[] };
+  if (!chat) {
+    if (isSupport) {
+      const ownerEmail = currentUser.isAdmin ? (chats[orderId] && chats[orderId].supportUserEmail) : currentUser.email;
+      chat = { orderId, orderTitle:'Поддержка', messages:[], supportUserEmail: ownerEmail };
+    } else {
+      const o = orders.find(x=>x.id===orderId) || {};
+      chat = { orderId, orderTitle:o.title||'', messages:[] };
+    }
+  }
   const now=new Date(); const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
   chat.messages.push({
     sender: currentUser.email,
-    senderName: currentUser.name,
-    senderInitials: currentUser.initials,
+    senderName: currentUser.isAdmin ? 'Поддержка FreeSun' : currentUser.name,
+    senderInitials: currentUser.isAdmin ? 'SU' : currentUser.initials,
     text, time
   });
   saveChat(chat);
-  addMyOrderId(orderId);
+  if (isSupport) {
+    addToSupportIndex(chat.supportUserEmail || currentUser.email);
+  } else {
+    addMyOrderId(orderId);
+  }
   chats[orderId] = chat;
   input.value='';
   const cw=document.getElementById('cwMessages');
@@ -1823,8 +1927,9 @@ const DEFAULT_TALENTS = [
   { id:106, name:'Мария Федотова', cat:'Маркетинг', role:'Performance Маркетолог', desc:'Google Ads, Яндекс.Директ, Facebook Ads. Управляю бюджетами от $5000/мес. Снижаю CPL и повышаю ROAS. Сертифицирована Google & Meta. Кейсы по запросу.', skills:['Google Ads','Meta Ads','Analytics','CRO'], rateMin:35, rateMax:70, initials:'МФ', stars:'⭐⭐⭐⭐½', rating:4.8 },
 ];
 
+// Local-only fallback — see comment above for orders. Never write defaults to Supabase.
 let talents = lsGet(LS_TALENTS, null);
-if (!talents) { talents = DEFAULT_TALENTS; lsSet(LS_TALENTS, talents); }
+if (!talents) { talents = DEFAULT_TALENTS; }
 
 let activeTalentCat = '';
 
@@ -2061,16 +2166,23 @@ function submitTalent() {
       ssRefresh(LS_TALENTS),
       ssRefresh('fs_users')
     ]);
-    if (changed[0]) { orders = lsGet(LS_ORDERS, orders); filterOrders ? filterOrders() : renderOrders(orders); }
+    if (changed[0]) { orders = lsGet(LS_ORDERS, orders); }
+    orders = pruneExpiredOrders(orders);
+    filterOrders ? filterOrders() : renderOrders(orders);
     if (changed[1]) { talents = lsGet(LS_TALENTS, talents); if (typeof filterTalents === 'function') filterTalents(); else renderTalents(talents); }
   })();
 
   // Periodically pull orders/talents from shared storage so new listings
-  // created on other devices appear without a manual refresh.
+  // created on other devices appear without a manual refresh, and prune
+  // any orders older than 3 days (removal is pushed back to Supabase so
+  // it disappears for everyone, not just this device).
   setInterval(async function() {
     const ordersChanged = await ssRefresh(LS_ORDERS);
-    if (ordersChanged) {
-      orders = lsGet(LS_ORDERS, orders);
+    if (ordersChanged) { orders = lsGet(LS_ORDERS, orders); }
+    const beforeCount = orders.length;
+    orders = pruneExpiredOrders(orders);
+    if (ordersChanged || orders.length !== beforeCount) {
+      if (orders.length !== beforeCount) lsSet(LS_ORDERS, orders); // push cleanup to server
       if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
     }
     const talentsChanged = await ssRefresh(LS_TALENTS);
