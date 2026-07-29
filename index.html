@@ -33,6 +33,12 @@
     body.dark .chats-sidebar { background: #1e2535; border-color: #3a4558; }
     body.dark .chat-input, body.dark .chat-window-input textarea { background: #1a1f2e; border-color: #3a4558; color: #e8edf5; }
     body.dark .msg-bubble.them { background: #2d3650; color: #e8edf5; }
+    body.dark .msg-bubble.me { color: #ffffff; }
+    body.dark .chat-empty p { color: #8a9bb5; }
+    body.dark .chat-messages { background: #1a1f2e; }
+    body.dark #talentChatMessages { background: #1a1f2e; color: #e8edf5; }
+    body.dark #talentChatCard .chat-input-area { background: #242b3d; border-top-color: #3a4558; }
+    body.dark #talentChatCard .chat-input { background: #1a1f2e; border-color: #3a4558; color: #e8edf5; }
     body.dark .detail-info-item { background: #1a1f2e; }
     body.dark .search-bar input { background: #242b3d; color: #e8edf5; border-color: #3a4558; }
     body.dark .user-chip { background: #1a1f2e; }
@@ -1158,14 +1164,26 @@ let chats = {}; // local cache: orderId -> chat object (rebuilt from localStorag
          AUTH
 ════════════════════════════════════ */
 function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('loginPass').value.trim();
   if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
-  const name = email.split('@')[0];
-  const initials = name.substring(0,2).toUpperCase();
-  setCurrentUser({ name, email, role:'freelancer', initials });
+  const users = lsGet('fs_users', []);
+  const found = users.find(u => u.email === email);
+  if (!found) {
+    showToast('⚠️ Аккаунт с таким email не найден','#e74c3c');
+    document.getElementById('loginEmail').style.borderColor = '#e74c3c';
+    return;
+  }
+  if (found.pass !== pass) {
+    showToast('⚠️ Неверный пароль','#e74c3c');
+    document.getElementById('loginPass').style.borderColor = '#e74c3c';
+    return;
+  }
+  document.getElementById('loginEmail').style.borderColor = '';
+  document.getElementById('loginPass').style.borderColor = '';
+  setCurrentUser({ name: found.name, email: found.email, role: found.role, initials: found.initials });
   closeAllModals();
-  showToast('🎉 Вы вошли как ' + name);
+  showToast('🎉 Вы вошли как ' + found.name);
 }
 
 function validateEmail(email) {
@@ -1175,8 +1193,8 @@ function validateEmail(email) {
 }
 
 function doRegister() {
-  const name = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('regPass').value.trim();
   const role  = document.getElementById('regRole').value;
   if (!name||!email||!pass||!role) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
@@ -1185,9 +1203,26 @@ function doRegister() {
     document.getElementById('regEmail').style.borderColor = '#e74c3c';
     return;
   }
-  document.getElementById('regEmail').style.borderColor = '';
   if (pass.length < 8) { showToast('⚠️ Пароль должен быть минимум 8 символов','#F5A623'); return; }
+  const users = lsGet('fs_users', []);
+  // Check duplicate email
+  if (users.find(u => u.email === email)) {
+    showToast('⚠️ Аккаунт с таким email уже существует','#e74c3c');
+    document.getElementById('regEmail').style.borderColor = '#e74c3c';
+    return;
+  }
+  // Check duplicate name
+  if (users.find(u => u.name.toLowerCase() === name.toLowerCase())) {
+    showToast('⚠️ Это имя уже занято. Выберите другое.','#e74c3c');
+    document.getElementById('regName').style.borderColor = '#e74c3c';
+    return;
+  }
+  document.getElementById('regEmail').style.borderColor = '';
+  document.getElementById('regName').style.borderColor = '';
   const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  // Save to users registry with password
+  users.push({ name, email, pass, role, initials });
+  lsSet('fs_users', users);
   setCurrentUser({ name, email, role, initials });
   closeAllModals();
   showToast('🎉 Добро пожаловать, ' + name + '!');
@@ -1624,9 +1659,21 @@ function saveProfileName() {
   if (!currentUser) return;
   const newName = document.getElementById('profileNameInput').value.trim();
   if (!newName) { showToast('⚠️ Введите имя','#F5A623'); return; }
+  // Check if this name is already taken by another account
+  const users = lsGet('fs_users', []);
+  const conflict = users.find(u => u.name.toLowerCase() === newName.toLowerCase() && u.email !== currentUser.email);
+  if (conflict) {
+    showToast('⚠️ Это имя уже занято другим пользователем','#e74c3c');
+    document.getElementById('profileNameInput').style.borderColor = '#e74c3c';
+    return;
+  }
+  document.getElementById('profileNameInput').style.borderColor = '';
+  // Update name in the users registry too
+  const idx = users.findIndex(u => u.email === currentUser.email);
+  if (idx !== -1) { users[idx].name = newName; lsSet('fs_users', users); }
   currentUser.name = newName;
   currentUser.initials = newName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-  setCurrentUser(currentUser); // also calls lsSet(LS_USER)
+  setCurrentUser(currentUser);
   showToast('✅ Имя обновлено!');
 }
 
@@ -1771,6 +1818,8 @@ function contactTalent(talentId) {
 
 const LS_TALENT_CHATS = 'fs_talent_chat';
 function talentChatKey(talentId) { return LS_TALENT_CHATS + '_' + talentId; }
+function loadTalentChat(talentId) { return lsGet(talentChatKey(talentId), null); }
+function saveTalentChat(chat) { lsSet(talentChatKey(chat.talentId), chat); }
 
 function openTalentDetail(talentId) {
   talentId = parseInt(talentId) || talentId;
@@ -1872,7 +1921,7 @@ function sendTalentMessage(talentId) {
   if (!text) return;
   const t = talents.find(x => x.id === talentId);
 
-  let chat = lsGet(talentChatKey(talentId), null);
+  let chat = loadTalentChat(talentId);
   if (!chat) {
     chat = { talentId, talentName: t ? t.name : '', messages: [] };
   }
@@ -1884,7 +1933,7 @@ function sendTalentMessage(talentId) {
     senderInitials: currentUser.initials,
     text, time
   });
-  lsSet(talentChatKey(talentId), chat);
+  saveTalentChat(chat);   // ← use proper save helper (triggers storage event in other tabs)
   input.value = '';
 
   const container = document.getElementById('talentChatMessages');
@@ -1948,35 +1997,40 @@ function submitTalent() {
   // 1. storage event fires when ANOTHER tab writes localStorage
   window.addEventListener('storage', function(e) {
     if (!currentUser) return;
+    // ── order chats ──
     if (e.key && e.key.startsWith(LS_CHATS + '_')) {
       const orderId = parseInt(e.key.replace(LS_CHATS + '_', ''));
       if (!orderId) return;
       const fresh = loadChat(orderId);
       if (!fresh) return;
-      // always update local cache
       chats[orderId] = fresh;
-      // update detail page if open on this order
       if (currentDetailOrderId == orderId) {
         const container = document.getElementById('detailChatMessages');
-        if (container) {
-          container.innerHTML = renderMessagesHtml(fresh.messages);
-          scrollChatToBottom('detailChatMessages');
-        }
+        if (container) { container.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('detailChatMessages'); }
       }
-      // update chat window if open on this order
       if (activeChatId == orderId) {
         const cw = document.getElementById('cwMessages');
         if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
       }
-      // refresh chat list sidebar
       const cl = document.getElementById('chatList');
       if (cl && cl.innerHTML) renderChatList();
-      // show badge if new message from someone else
       const last = fresh.messages[fresh.messages.length-1];
       if (last && last.sender !== currentUser.email) {
         document.getElementById('chatBadge').style.display = 'flex';
-        // also add to my chats if this order is not yet there
         addMyOrderId(orderId);
+      }
+    }
+    // ── talent chats ──
+    if (e.key && e.key.startsWith(LS_TALENT_CHATS + '_')) {
+      const talentId = parseInt(e.key.replace(LS_TALENT_CHATS + '_', ''));
+      if (!talentId) return;
+      const fresh = loadTalentChat(talentId);
+      if (!fresh) return;
+      // if the talent detail page is currently open for this talent, refresh messages
+      const container = document.getElementById('talentChatMessages');
+      if (container) {
+        container.innerHTML = renderMessagesHtml(fresh.messages);
+        scrollChatToBottom('talentChatMessages');
       }
     }
     if (e.key === LS_ORDERS) {
@@ -1988,24 +2042,50 @@ function submitTalent() {
   // 2. polling fallback (same tab doesn't fire storage event for itself; also catches same-origin iframes)
   setInterval(function() {
     if (!currentUser) return;
-    // poll active chat
+    // poll active order chat
     const pollId = currentDetailOrderId || activeChatId;
-    if (!pollId) return;
-    const fresh = loadChat(pollId);
-    if (!fresh) return;
-    const cached = chats[pollId];
-    if (!cached || fresh.messages.length !== cached.messages.length) {
-      chats[pollId] = fresh;
-      if (currentDetailOrderId == pollId) {
-        const container = document.getElementById('detailChatMessages');
-        if (container) { container.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('detailChatMessages'); }
+    if (pollId) {
+      const fresh = loadChat(pollId);
+      if (fresh) {
+        const cached = chats[pollId];
+        if (!cached || fresh.messages.length !== cached.messages.length) {
+          chats[pollId] = fresh;
+          if (currentDetailOrderId == pollId) {
+            const container = document.getElementById('detailChatMessages');
+            if (container) { container.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('detailChatMessages'); }
+          }
+          if (activeChatId == pollId) {
+            const cw = document.getElementById('cwMessages');
+            if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
+          }
+          const cl = document.getElementById('chatList');
+          if (cl && cl.innerHTML) renderChatList();
+        }
       }
-      if (activeChatId == pollId) {
-        const cw = document.getElementById('cwMessages');
-        if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
+    }
+    // poll active talent chat (for the currently-open talent detail page)
+    const talentChatEl = document.getElementById('talentChatMessages');
+    if (talentChatEl) {
+      // find which talent detail is open by scanning the page
+      const activeTalentPage = document.getElementById('pageTalentDetail');
+      if (activeTalentPage && activeTalentPage.classList.contains('active')) {
+        // find current talent id from the send button's onclick
+        const sendBtn = document.querySelector('#talentChatCard .chat-send');
+        if (sendBtn) {
+          const match = sendBtn.getAttribute('onclick') && sendBtn.getAttribute('onclick').match(/sendTalentMessage\((\d+)\)/);
+          if (match) {
+            const tid = parseInt(match[1]);
+            const fresh = loadTalentChat(tid);
+            if (fresh) {
+              const currentMsgCount = talentChatEl.querySelectorAll('.msg-row').length;
+              if (fresh.messages.length !== currentMsgCount) {
+                talentChatEl.innerHTML = renderMessagesHtml(fresh.messages);
+                scrollChatToBottom('talentChatMessages');
+              }
+            }
+          }
+        }
       }
-      const cl = document.getElementById('chatList');
-      if (cl && cl.innerHTML) renderChatList();
     }
   }, 1500);
 })();
