@@ -2239,21 +2239,399 @@ function submitTalent() {
   }
 
   // ── CONFIG — ЗАПОЛНИТЕ ПОСЛЕ ДЕПЛОЯ ──
-  const ESCROW_CONTRACT_ADDRESS = "0xYOUR_DEPLOYED_CONTRACT_ADDRESS"; // <-- вставьте адрес после деплоя в Remix
+  const ESCROW_CONTRACT_ADDRESS = "0x60D7AA71CE9746D09A53a85A8D7C83f24f59D8B5"; // задеплоенный FreelanceEscrow на Sepolia
   const TARGET_CHAIN_ID = 11155111; // Sepolia. Для Polygon Amoy поставьте 80002
 
   const ESCROW_ABI = [
-    "function createInvoice(address _client, uint256 _amount) external returns (uint256 invoiceId)",
-    "function payInvoice(uint256 _invoiceId) external payable",
-    "function confirmCompletion(uint256 _invoiceId) external",
-    "function autoConfirmCompletion(uint256 _invoiceId) external",
-    "function withdrawFunds(uint256 _invoiceId) external",
-    "function getInvoice(uint256 _invoiceId) external view returns (address freelancer, address client, uint256 amount, uint8 status, uint256 paidTimestamp, uint256 completionTimestamp, uint256 unlockTimestamp, uint256 autoConfirmAvailableAt, bool autoConfirmed)",
-    "event InvoiceCreated(uint256 indexed invoiceId, address indexed freelancer, address indexed client, uint256 amount)",
-    "event InvoicePaid(uint256 indexed invoiceId, address indexed client, uint256 amount)",
-    "event CompletionConfirmed(uint256 indexed invoiceId, uint256 unlockTimestamp)",
-    "event CompletionAutoConfirmed(uint256 indexed invoiceId, uint256 unlockTimestamp)",
-    "event FundsWithdrawn(uint256 indexed invoiceId, address indexed freelancer, uint256 freelancerAmount, uint256 platformFee)"
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "autoConfirmCompletion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "_platformOwner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "unlockTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "CompletionAutoConfirmed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "unlockTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "CompletionConfirmed",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "confirmCompletion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_client",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "createInvoice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "freelancerAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "platformFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "FundsWithdrawn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvoiceCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "invoiceId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvoicePaid",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "payInvoice",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawFunds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    },
+    {
+      "inputs": [],
+      "name": "AUTO_CONFIRM_TIMEOUT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_invoiceId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getInvoice",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum FreelanceEscrow.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "paidTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completionTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "unlockTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "autoConfirmAvailableAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "autoConfirmed",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "invoiceCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "invoices",
+      "outputs": [
+        {
+          "internalType": "address payable",
+          "name": "freelancer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum FreelanceEscrow.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "paidTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completionTimestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "autoConfirmed",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PLATFORM_FEE_PERCENT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "platformOwner",
+      "outputs": [
+        {
+          "internalType": "address payable",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TIMELOCK_DURATION",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ];
 
   const SUPPORTED_NETWORKS = {
