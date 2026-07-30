@@ -506,21 +506,7 @@
       .wbb-tokens { display: none; }
     }
 
-    /* ── DEVTOOLS BLOCKER ── */
-    #devtoolsBlock {
-      display: none;
-      position: fixed; inset: 0; z-index: 99999;
-      background: linear-gradient(160deg, #0F4C75, #1A6FA8, #3BAFDA);
-      align-items: center; justify-content: center; flex-direction: column;
-      text-align: center; padding: 40px;
-    }
-    #devtoolsBlock.show { display: flex; }
-    #devtoolsBlock h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem; color: #fff; margin-bottom: 14px;
-    }
-    #devtoolsBlock p { color: rgba(255,255,255,.85); font-size: 1rem; max-width: 400px; line-height: 1.7; }
-    #devtoolsBlock .dt-icon { font-size: 4rem; margin-bottom: 20px; }
+    /* devtools blocker removed */
 
     /* ── NAVBAR ── */
     nav {
@@ -930,12 +916,7 @@
 </head>
 <body>
 
-<!-- ══════ DEVTOOLS BLOCK ══════ -->
-<div id="devtoolsBlock">
-  <div class="dt-icon">🔒</div>
-  <h1>Доступ закрыт</h1>
-  <p>Инструменты разработчика отключены на этом сайте из соображений безопасности. Пожалуйста, закройте консоль браузера для продолжения работы.</p>
-</div>
+<!-- devtools blocker removed -->
 
 <!-- ══════ WALLET BALANCE BAR ══════ -->
 <div id="walletBalanceBar">
@@ -1154,7 +1135,7 @@
   <section class="hero" id="heroTalent" style="display:none; background:linear-gradient(160deg,#e8f8ef 0%,#FFF8EC 55%,#FFF0CC 100%)">
     <div class="hero-sun" style="background:radial-gradient(circle,rgba(39,174,96,.3) 0%,transparent 70%)"></div>
     <div class="hero-badge" style="color:var(--leaf);border-color:#a8e6cf">🌟 Раздел для предпринимателей</div>
-    <h1>Найдите <em style="background:linear-gradient(135deg,var(--leaf),var(--sky-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">таланты</em><br>для вашего бизнеса</h1>
+    <h1 style="color:#1C2B3A">Найдите <em style="background:linear-gradient(135deg,#F5A623,#E8960D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic">таланты</em><br><span style="color:#1C2B3A">для вашего бизнеса</span></h1>
     <p>Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.</p>
     <div class="hero-ctas">
       <button class="btn btn-sky" onclick="setTimeout(()=>document.getElementById('talentsSection').scrollIntoView({behavior:'smooth'}),80)">🌟 Смотреть резюме</button>
@@ -3441,6 +3422,12 @@ function submitTalent() {
 
   // ── WALLET CONNECTION ──
   async function connectWallet() {
+    // Require FreeSun login before MetaMask can be connected
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      if (typeof openAuth === 'function') openAuth('login');
+      if (typeof showToast === 'function') showToast('\u{1F512} Сначала войдите в аккаунт, чтобы подключить кошелёк', '#F5A623');
+      return;
+    }
     if (!isConfigured()) {
       showEscrowError('Контракт ещё не настроен: впишите ESCROW_CONTRACT_ADDRESS в коде после деплоя (см. гайд по деплою).');
       return;
@@ -3504,6 +3491,8 @@ function submitTalent() {
   }
 
   async function tryAutoConnect() {
+    // Only auto-connect if the FreeSun user is already logged in
+    if (typeof currentUser === 'undefined' || !currentUser) return;
     if (typeof window.ethereum === 'undefined' || !isConfigured()) return;
     try {
       const p = new ethers.providers.Web3Provider(window.ethereum, 'any');
@@ -3641,6 +3630,15 @@ function submitTalent() {
     if (!mount) return;
     clearEscrowCountdown();
 
+    // If user not logged in to FreeSun, show login prompt instead of MetaMask button
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      mount.innerHTML = escrowCardWrapper(
+        '<p class="escrow-hint">Войдите в аккаунт FreeSun, чтобы подключить MetaMask и воспользоваться системой эскроу.</p>' +
+        '<button class="btn btn-sky btn-full" onclick="openAuth(\'login\')">🔒 Войти в аккаунт</button>' +
+        '<div id="escrowStatusMsg"></div>'
+      );
+      return;
+    }
     if (!userAddress) {
       mount.innerHTML = escrowCardWrapper(
         '<p class="escrow-hint">Подключите MetaMask, чтобы выставить чек фрилансеру или оплатить уже выставленный чек по этому заказу.</p>' +
@@ -3800,100 +3798,7 @@ function submitTalent() {
 
 })();
 
-/* ══════════════════════════════════════════════════
-   DEVTOOLS BLOCKER
-   Используем несколько методов детектирования
-══════════════════════════════════════════════════ */
-(function() {
-  'use strict';
-
-  var blocked = false;
-
-  function block() {
-    if (blocked) return;
-    blocked = true;
-    document.getElementById('devtoolsBlock').classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function unblock() {
-    if (!blocked) return;
-    blocked = false;
-    document.getElementById('devtoolsBlock').classList.remove('show');
-    document.body.style.overflow = '';
-  }
-
-  // Метод 1: размер окна — разница означает открытую панель
-  function checkWindowSize() {
-    var threshold = 160;
-    var widthDiff = window.outerWidth - window.innerWidth;
-    var heightDiff = window.outerHeight - window.innerHeight;
-    if (widthDiff > threshold || heightDiff > threshold) {
-      block();
-    } else {
-      unblock();
-    }
-  }
-
-  // Метод 2: console.log с геттером (срабатывает при открытой консоли)
-  var devtoolsOpen = false;
-  var element = new Image();
-  Object.defineProperty(element, 'id', {
-    get: function() {
-      devtoolsOpen = true;
-    }
-  });
-
-  // Метод 3: debugger timing
-  function checkDebugger() {
-    var start = new Date();
-    debugger;
-    var end = new Date();
-    if (end - start > 100) {
-      block();
-    }
-  }
-
-  // Перехват клавиш F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-  document.addEventListener('keydown', function(e) {
-    // F12
-    if (e.keyCode === 123) {
-      e.preventDefault();
-      e.stopPropagation();
-      block();
-      return false;
-    }
-    // Ctrl+Shift+I или Ctrl+Shift+J (DevTools)
-    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) {
-      e.preventDefault();
-      e.stopPropagation();
-      block();
-      return false;
-    }
-    // Ctrl+U (view source)
-    if (e.ctrlKey && e.keyCode === 85) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-    // Ctrl+S (save)
-    if (e.ctrlKey && e.keyCode === 83) {
-      e.preventDefault();
-      return false;
-    }
-  }, true);
-
-  // Отключить правую кнопку мыши
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    return false;
-  });
-
-  // Проверка размера окна каждые 500мс
-  setInterval(checkWindowSize, 500);
-  checkWindowSize();
-
-})();
+/* devtools blocker removed */
 
 
 /* ══════════════════════════════════════════════════
