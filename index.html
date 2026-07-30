@@ -1109,13 +1109,34 @@
 
 <script>
 /* ════════════════════════════════════
-         STORAGE HELPERS
+         STORAGE HELPERS  (сервер + localStorage fallback)
 ════════════════════════════════════ */
 const LS_ORDERS  = 'fs_orders';
 const LS_USER    = 'fs_user';
 const LS_CHATS   = 'fs_chats';   // shared: fs_chats_<orderId>  — ALL users read/write same key
 const LS_THEME   = 'fs_theme';
 const LS_TALENTS = 'fs_talents';
+
+// ── SERVER API ──
+// api.php должен лежать рядом с index.html на вашем VPS
+const API_URL = './api.php';
+
+async function serverGet(key) {
+  try {
+    const r = await fetch(API_URL + '?action=get&key=' + encodeURIComponent(key));
+    const d = await r.json();
+    return d.ok ? d.value : null;
+  } catch(e) { return null; }
+}
+async function serverSet(key, val) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'set', key, value: val})
+    });
+  } catch(e) { /* offline — не страшно */ }
+}
 
 const DEFAULT_ORDERS = [
   { id:1, title:"Разработка сайта для ресторана", cat:"Разработка",
@@ -1165,9 +1186,92 @@ function lsGet(key, fallback) {
 }
 function lsSet(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  // Ключи, которые должны быть видны на всех устройствах — синхронизируем с сервером.
+  // Пользовательские данные (LS_USER, тема) остаются только в localStorage.
+  const SHARED_PREFIXES = [LS_ORDERS, LS_CHATS, LS_TALENTS, 'fs_users', 'fs_support_index', 'fs_mychats_', 'fs_talent_chat'];
+  const isShared = SHARED_PREFIXES.some(p => key === p || key.startsWith(p));
+  if (isShared) { serverSet(key, val); }
 }
 // ssRefresh is a no-op stub so existing call-sites don't break
 async function ssRefresh(key) { return false; }
+
+// ── Загрузка общих данных с сервера при старте ──
+async function loadSharedDataFromServer() {
+  // Загружаем заказы
+  const srvOrders = await serverGet(LS_ORDERS);
+  if (srvOrders && Array.isArray(srvOrders) && srvOrders.length > 0) {
+    try { localStorage.setItem(LS_ORDERS, JSON.stringify(srvOrders)); } catch(e) {}
+    orders = srvOrders;
+    orders = pruneExpiredOrders(orders);
+    filterOrders ? filterOrders() : renderOrders(orders);
+  }
+  // Загружаем таланты
+  const srvTalents = await serverGet(LS_TALENTS);
+  if (srvTalents && Array.isArray(srvTalents) && srvTalents.length > 0) {
+    try { localStorage.setItem(LS_TALENTS, JSON.stringify(srvTalents)); } catch(e) {}
+    talents = srvTalents;
+    filterTalents ? filterTalents() : renderTalents(talents);
+  }
+  // Загружаем пользователей
+  const srvUsers = await serverGet('fs_users');
+  if (srvUsers && Array.isArray(srvUsers)) {
+    try { localStorage.setItem('fs_users', JSON.stringify(srvUsers)); } catch(e) {}
+  }
+  // Загружаем support index
+  const srvSupportIdx = await serverGet('fs_support_index');
+  if (srvSupportIdx && Array.isArray(srvSupportIdx)) {
+    try { localStorage.setItem('fs_support_index', JSON.stringify(srvSupportIdx)); } catch(e) {}
+  }
+}
+
+// Периодически обновляем заказы с сервера (polling каждые 5 секунд)
+async function pollServerOrders() {
+  const srvOrders = await serverGet(LS_ORDERS);
+  if (srvOrders && Array.isArray(srvOrders)) {
+    const local = lsGet(LS_ORDERS, []);
+    if (JSON.stringify(srvOrders) !== JSON.stringify(local)) {
+      try { localStorage.setItem(LS_ORDERS, JSON.stringify(srvOrders)); } catch(e) {}
+      orders = srvOrders;
+      orders = pruneExpiredOrders(orders);
+      if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
+    }
+  }
+}
+async function pollServerTalents() {
+  const srvTalents = await serverGet(LS_TALENTS);
+  if (srvTalents && Array.isArray(srvTalents)) {
+    const local = lsGet(LS_TALENTS, []);
+    if (JSON.stringify(srvTalents) !== JSON.stringify(local)) {
+      try { localStorage.setItem(LS_TALENTS, JSON.stringify(srvTalents)); } catch(e) {}
+      talents = srvTalents;
+      if (typeof filterTalents === 'function') filterTalents(); else renderTalents(talents);
+    }
+  }
+}
+async function pollActiveChat() {
+  const pollId = currentDetailOrderId || activeChatId;
+  if (!pollId || !currentUser) return;
+  const key = typeof pollId === 'string' && pollId.startsWith('support_')
+    ? pollId
+    : (LS_CHATS + '_' + pollId);
+  const srvChat = await serverGet(key);
+  if (!srvChat) return;
+  const cached = chats[pollId];
+  if (!cached || srvChat.messages.length !== cached.messages.length) {
+    try { localStorage.setItem(key, JSON.stringify(srvChat)); } catch(e) {}
+    chats[pollId] = srvChat;
+    if (currentDetailOrderId == pollId) {
+      const el = document.getElementById('detailChatMessages');
+      if (el) { el.innerHTML = renderMessagesHtml(srvChat.messages); scrollChatToBottom('detailChatMessages'); }
+    }
+    if (activeChatId == pollId) {
+      const el = document.getElementById('cwMessages');
+      if (el) { el.innerHTML = renderMessagesHtml(srvChat.messages); scrollChatToBottom('cwMessages'); }
+    }
+    const cl = document.getElementById('chatList');
+    if (cl && cl.innerHTML) renderChatList();
+  }
+}
 
 /* ════════════════════════════════════
          STATE  (persisted)
@@ -1356,7 +1460,18 @@ function goPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
-  if (id === 'pageChats') renderChatList();
+  if (id === 'pageChats') {
+    // Обновляем список чатов с сервера перед отрисовкой
+    if (currentUser) {
+      serverGet('fs_mychats_' + currentUser.email).then(srvIds => {
+        if (srvIds && Array.isArray(srvIds)) {
+          const merged = [...new Set([...srvIds, ...loadMyOrderIds()])];
+          lsSet(myChatsKey(), merged);
+        }
+        renderChatList();
+      });
+    } else { renderChatList(); }
+  }
   if (id === 'pageProfile') {
     const isDark = document.body.classList.contains('dark');
     document.getElementById('themeLight').classList.toggle('active', !isDark);
@@ -1491,6 +1606,17 @@ function openOrderDetail(id) {
   if (!o) return;
 
   // load from shared store (fresh, not stale cache)
+  // Также тихо подгружаем с сервера в фоне
+  serverGet(chatKey(id)).then(srvChat => {
+    if (!srvChat) return;
+    const localChat = loadChat(id);
+    if (!localChat || srvChat.messages.length > localChat.messages.length) {
+      lsSet(chatKey(id), srvChat);
+      chats[id] = srvChat;
+      const el = document.getElementById('detailChatMessages');
+      if (el) { el.innerHTML = renderMessagesHtml(srvChat.messages); scrollChatToBottom('detailChatMessages'); }
+    }
+  });
   const chat = loadChat(id);
   const msgs = chat ? chat.messages : [];
 
@@ -2143,6 +2269,15 @@ function submitTalent() {
     }
   }, 60000);
 
+  // ── SERVER SYNC ──
+  // Загружаем общие данные с сервера при старте (перезаписывает localStorage)
+  loadSharedDataFromServer();
+
+  // Polling: обновляем заказы и таланты каждые 5 секунд с сервера
+  setInterval(pollServerOrders, 5000);
+  setInterval(pollServerTalents, 10000);
+  setInterval(pollActiveChat, 2000);
+
   // ── LIVE UPDATES ──
   // 1. storage event fires when ANOTHER tab writes localStorage
   window.addEventListener('storage', function(e) {
@@ -2189,31 +2324,7 @@ function submitTalent() {
     }
   });
 
-  // 2. polling: refresh chat views from localStorage (for same-browser multi-tab)
-  setInterval(function() {
-    if (!currentUser) return;
-    // poll active order/support chat
-    const pollId = currentDetailOrderId || activeChatId;
-    if (pollId) {
-      const fresh = loadChat(pollId);
-      if (fresh) {
-        const cached = chats[pollId];
-        if (!cached || fresh.messages.length !== cached.messages.length) {
-          chats[pollId] = fresh;
-          if (currentDetailOrderId == pollId) {
-            const container = document.getElementById('detailChatMessages');
-            if (container) { container.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('detailChatMessages'); }
-          }
-          if (activeChatId == pollId) {
-            const cw = document.getElementById('cwMessages');
-            if (cw) { cw.innerHTML = renderMessagesHtml(fresh.messages); scrollChatToBottom('cwMessages'); }
-          }
-          const cl = document.getElementById('chatList');
-          if (cl && cl.innerHTML) renderChatList();
-        }
-      }
-    }
-  }, 1500);
+  // 2. polling через сервер — уже запущен выше (pollActiveChat каждые 2 сек)
 })();
 </script>
 <!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
