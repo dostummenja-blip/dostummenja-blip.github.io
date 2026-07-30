@@ -280,11 +280,81 @@
     .divider::before { left:0; }
     .divider::after { right:0; }
 
+    /* ── WALLET BALANCE BAR ── */
+    #walletBalanceBar {
+      display: none;
+      width: 100%;
+      background: linear-gradient(90deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      padding: 8px 48px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 51;
+      box-shadow: 0 2px 14px rgba(108,92,231,.25);
+      flex-wrap: wrap;
+    }
+    #walletBalanceBar.show { display: flex; }
+    .wbb-left { display: flex; align-items: center; gap: 10px; }
+    .wbb-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #4ADE80;
+      box-shadow: 0 0 6px #4ADE80;
+      animation: wbb-pulse 2s infinite;
+    }
+    @keyframes wbb-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .wbb-addr {
+      font-family: monospace; font-size: .82rem; color: rgba(255,255,255,.6);
+    }
+    .wbb-total {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; font-weight: 800;
+      color: #fff;
+      letter-spacing: .01em;
+    }
+    .wbb-total span { color: #4ADE80; }
+    .wbb-tokens { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .wbb-token {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.08); border-radius: 50px;
+      padding: 3px 11px; font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.85);
+    }
+    .wbb-token-icon { font-size: .9rem; }
+    .wbb-loading { color: rgba(255,255,255,.5); font-size: .82rem; font-style: italic; }
+    .wbb-refresh {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.7); border-radius: 50px; padding: 3px 10px;
+      font-size: .75rem; cursor: pointer; transition: all .2s;
+      font-family: 'Nunito', sans-serif;
+    }
+    .wbb-refresh:hover { background: rgba(255,255,255,.2); color: #fff; }
+    @media(max-width:768px) {
+      #walletBalanceBar { padding: 8px 14px; }
+      .wbb-tokens { display: none; }
+    }
+
+    /* ── DEVTOOLS BLOCKER ── */
+    #devtoolsBlock {
+      display: none;
+      position: fixed; inset: 0; z-index: 99999;
+      background: linear-gradient(160deg, #0F4C75, #1A6FA8, #3BAFDA);
+      align-items: center; justify-content: center; flex-direction: column;
+      text-align: center; padding: 40px;
+    }
+    #devtoolsBlock.show { display: flex; }
+    #devtoolsBlock h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; color: #fff; margin-bottom: 14px;
+    }
+    #devtoolsBlock p { color: rgba(255,255,255,.85); font-size: 1rem; max-width: 400px; line-height: 1.7; }
+    #devtoolsBlock .dt-icon { font-size: 4rem; margin-bottom: 20px; }
+
     /* ── NAVBAR ── */
     nav {
       display:flex; align-items:center; justify-content:space-between;
       padding:16px 48px; background:var(--white);
-      box-shadow:0 2px 18px rgba(59,175,218,.10); position:sticky; top:0; z-index:50;
+      box-shadow:0 2px 18px rgba(59,175,218,.10); position:sticky; top:62px; z-index:50;
     }
     .logo {
       font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:800; cursor:pointer;
@@ -614,6 +684,26 @@
   </style>
 </head>
 <body>
+
+<!-- ══════ DEVTOOLS BLOCK ══════ -->
+<div id="devtoolsBlock">
+  <div class="dt-icon">🔒</div>
+  <h1>Доступ закрыт</h1>
+  <p>Инструменты разработчика отключены на этом сайте из соображений безопасности. Пожалуйста, закройте консоль браузера для продолжения работы.</p>
+</div>
+
+<!-- ══════ WALLET BALANCE BAR ══════ -->
+<div id="walletBalanceBar">
+  <div class="wbb-left">
+    <div class="wbb-dot"></div>
+    <div class="wbb-addr" id="wbbAddr">0x0000…0000</div>
+    <div class="wbb-total">Баланс: <span id="wbbTotal">$0.00</span></div>
+  </div>
+  <div class="wbb-tokens" id="wbbTokens">
+    <span class="wbb-loading">Загружаем балансы…</span>
+  </div>
+  <button class="wbb-refresh" onclick="wbbRefresh()">🔄 Обновить</button>
+</div>
 
 <!-- ══════ LANDING SELECTOR ══════ -->
 <div class="landing-overlay" id="landingOverlay">
@@ -3192,6 +3282,295 @@ function submitTalent() {
   }
 
   tryAutoConnect();
+
+  // ── WALLET BALANCE BAR — hook into connectWallet ──
+  // После подключения кошелька обновляем бар
+  const _origConnectWallet = connectWallet;
+  window.__wbbConnectAndRefresh = async function() {
+    await _origConnectWallet();
+    if (userAddress) wbbRefresh();
+  };
+
+})();
+
+/* ══════════════════════════════════════════════════
+   DEVTOOLS BLOCKER
+   Используем несколько методов детектирования
+══════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  var blocked = false;
+
+  function block() {
+    if (blocked) return;
+    blocked = true;
+    document.getElementById('devtoolsBlock').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unblock() {
+    if (!blocked) return;
+    blocked = false;
+    document.getElementById('devtoolsBlock').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  // Метод 1: размер окна — разница означает открытую панель
+  function checkWindowSize() {
+    var threshold = 160;
+    var widthDiff = window.outerWidth - window.innerWidth;
+    var heightDiff = window.outerHeight - window.innerHeight;
+    if (widthDiff > threshold || heightDiff > threshold) {
+      block();
+    } else {
+      unblock();
+    }
+  }
+
+  // Метод 2: console.log с геттером (срабатывает при открытой консоли)
+  var devtoolsOpen = false;
+  var element = new Image();
+  Object.defineProperty(element, 'id', {
+    get: function() {
+      devtoolsOpen = true;
+    }
+  });
+
+  // Метод 3: debugger timing
+  function checkDebugger() {
+    var start = new Date();
+    debugger;
+    var end = new Date();
+    if (end - start > 100) {
+      block();
+    }
+  }
+
+  // Перехват клавиш F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+  document.addEventListener('keydown', function(e) {
+    // F12
+    if (e.keyCode === 123) {
+      e.preventDefault();
+      e.stopPropagation();
+      block();
+      return false;
+    }
+    // Ctrl+Shift+I или Ctrl+Shift+J (DevTools)
+    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) {
+      e.preventDefault();
+      e.stopPropagation();
+      block();
+      return false;
+    }
+    // Ctrl+U (view source)
+    if (e.ctrlKey && e.keyCode === 85) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+    // Ctrl+S (save)
+    if (e.ctrlKey && e.keyCode === 83) {
+      e.preventDefault();
+      return false;
+    }
+  }, true);
+
+  // Отключить правую кнопку мыши
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // Проверка размера окна каждые 500мс
+  setInterval(checkWindowSize, 500);
+  checkWindowSize();
+
+})();
+
+
+/* ══════════════════════════════════════════════════
+   WALLET BALANCE BAR
+   Показывает ETH + ERC-20 токены в USD
+══════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  // Цены кешируются на 60 сек
+  var priceCache = null;
+  var priceCacheTime = 0;
+  var CACHE_TTL = 60000;
+
+  // Основные токены для показа (контракты ERC-20 на Ethereum mainnet)
+  // Если пользователь в тестнете — только нативный токен
+  var TOKEN_LIST = [
+    { symbol: 'USDT', icon: '💵', contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 18 },
+    { symbol: 'USDC', icon: '💲', contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6  },
+    { symbol: 'BNB',  icon: '🟡', contract: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52', decimals: 18 },
+    { symbol: 'MATIC',icon: '🟣', contract: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', decimals: 18 },
+  ];
+
+  // ERC-20 минимальный ABI для balanceOf
+  var ERC20_ABI = [
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)'
+  ];
+
+  async function fetchPrices(symbols) {
+    var now = Date.now();
+    if (priceCache && (now - priceCacheTime) < CACHE_TTL) return priceCache;
+    try {
+      // CoinGecko публичный API (без ключа, лимит 10-30 rps)
+      var ids = {
+        ETH: 'ethereum', POL: 'matic-network', MATIC: 'matic-network',
+        USDT: 'tether', USDC: 'usd-coin', BNB: 'binancecoin',
+        BTC: 'bitcoin', SOL: 'solana', AVAX: 'avalanche-2'
+      };
+      var needed = symbols.filter(function(s){ return ids[s]; });
+      var coinIds = [...new Set(needed.map(function(s){ return ids[s]; }))].join(',');
+      var url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + coinIds + '&vs_currencies=usd';
+      var resp = await fetch(url);
+      var data = await resp.json();
+      // Нормализуем в { SYMBOL: price }
+      var result = {};
+      needed.forEach(function(s) {
+        var id = ids[s];
+        if (data[id] && data[id].usd) result[s] = data[id].usd;
+      });
+      priceCache = result;
+      priceCacheTime = now;
+      return result;
+    } catch(e) {
+      return priceCache || {};
+    }
+  }
+
+  function shortAddr(addr) {
+    return addr ? addr.slice(0,6) + '…' + addr.slice(-4) : '';
+  }
+
+  async function wbbUpdate() {
+    if (typeof window.ethereum === 'undefined') return;
+    var accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (!accounts || accounts.length === 0) {
+      document.getElementById('walletBalanceBar').classList.remove('show');
+      return;
+    }
+    var addr = accounts[0];
+    document.getElementById('walletBalanceBar').classList.add('show');
+    document.getElementById('wbbAddr').textContent = shortAddr(addr);
+    document.getElementById('wbbTotal').textContent = '…';
+    document.getElementById('wbbTokens').innerHTML = '<span class="wbb-loading">Загружаем балансы…</span>';
+
+    // Получаем chainId
+    var chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+    var chainId = parseInt(chainIdHex, 16);
+
+    // Нативная монета
+    var nativeSymbol = 'ETH';
+    if (chainId === 137) nativeSymbol = 'POL';
+    else if (chainId === 56) nativeSymbol = 'BNB';
+    else if (chainId === 43114) nativeSymbol = 'AVAX';
+    else if (chainId === 80001 || chainId === 80002) nativeSymbol = 'POL';
+
+    // Баланс нативной монеты
+    var balHex = await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [addr, 'latest']
+    });
+    var nativeBal = parseInt(balHex, 16) / 1e18;
+
+    // Получаем цены
+    var symbolsToFetch = [nativeSymbol, 'USDT', 'USDC', 'BNB', 'MATIC'];
+    var prices = await fetchPrices(symbolsToFetch);
+
+    var nativePrice = prices[nativeSymbol] || 0;
+    var totalUsd = nativeBal * nativePrice;
+
+    var tokens = [{
+      symbol: nativeSymbol,
+      icon: nativeSymbol === 'ETH' ? '🔷' : nativeSymbol === 'POL' ? '🟣' : nativeSymbol === 'BNB' ? '🟡' : '🔶',
+      bal: nativeBal,
+      usd: nativeBal * nativePrice
+    }];
+
+    // ERC-20 только на mainnet (1) или Polygon (137)
+    if (chainId === 1 || chainId === 137) {
+      var rpcUrl = chainId === 1
+        ? 'https://eth.llamarpc.com'
+        : 'https://polygon-rpc.com';
+
+      for (var i = 0; i < TOKEN_LIST.length; i++) {
+        var tok = TOKEN_LIST[i];
+        if (chainId === 137 && tok.symbol === 'MATIC') continue; // нативный
+        try {
+          var data = '0x70a08231' + addr.slice(2).toLowerCase().padStart(64,'0');
+          var res = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0', id: i+1, method: 'eth_call',
+              params: [{ to: tok.contract, data: data }, 'latest']
+            })
+          });
+          var rj = await res.json();
+          if (rj.result && rj.result !== '0x') {
+            var rawBal = parseInt(rj.result, 16);
+            var tokBal = rawBal / Math.pow(10, tok.decimals);
+            if (tokBal > 0.001) {
+              // USDT/USDC стейблы = $1
+              var tokPrice = (tok.symbol === 'USDT' || tok.symbol === 'USDC') ? 1 : (prices[tok.symbol] || 0);
+              var tokUsd = tokBal * tokPrice;
+              totalUsd += tokUsd;
+              tokens.push({ symbol: tok.symbol, icon: tok.icon, bal: tokBal, usd: tokUsd });
+            }
+          }
+        } catch(e) { /* пропускаем */ }
+      }
+    }
+
+    // Рендерим
+    document.getElementById('wbbTotal').textContent = '$' + totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    var html = tokens.map(function(t) {
+      var balStr = t.bal < 0.0001 ? t.bal.toFixed(6) : t.bal < 1 ? t.bal.toFixed(4) : t.bal.toFixed(3);
+      var usdStr = '$' + t.usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return '<div class="wbb-token">' +
+        '<span class="wbb-token-icon">' + t.icon + '</span>' +
+        '<span>' + balStr + ' ' + t.symbol + '</span>' +
+        '<span style="color:rgba(255,255,255,.5);font-size:.75rem">' + usdStr + '</span>' +
+        '</div>';
+    }).join('');
+    document.getElementById('wbbTokens').innerHTML = html || '<span class="wbb-loading">Нет токенов</span>';
+  }
+
+  window.wbbRefresh = function() { wbbUpdate().catch(function(){}); };
+
+  // Слушаем изменения аккаунта
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.on('accountsChanged', function(accs) {
+      if (accs && accs.length > 0) { wbbUpdate().catch(function(){}); }
+      else { document.getElementById('walletBalanceBar').classList.remove('show'); }
+    });
+    window.ethereum.on('chainChanged', function() {
+      wbbUpdate().catch(function(){});
+    });
+    // Авто-проверка при загрузке
+    window.addEventListener('load', function() {
+      wbbUpdate().catch(function(){});
+    });
+  }
+
+  // Патчим connectWallet чтобы после подключения обновлялся бар
+  var _origOnConnected = window.__escrow && window.__escrow.connect;
+  if (window.__escrow) {
+    var _origEscrowConnect = window.__escrow.connect;
+    window.__escrow.connect = async function() {
+      await _origEscrowConnect.apply(this, arguments);
+      setTimeout(function() { wbbUpdate().catch(function(){}); }, 1000);
+    };
+  }
+
 })();
 
 </script>
