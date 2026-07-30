@@ -3863,6 +3863,21 @@ function submitTalent() {
 
   async function wbbUpdate() {
     if (typeof window.ethereum === 'undefined') return;
+
+    // Bar must only show for a user who is (a) logged into FreeSun and
+    // (b) has explicitly connected their wallet via connectWallet().
+    // eth_accounts alone is NOT enough: MetaMask can return a previously
+    // authorized account even if the user never clicked "Connect" on
+    // this site in this session — that's what caused the balance bar
+    // to appear with a stale balance for logged-out / never-connected
+    // visitors.
+    var loggedIn = (typeof currentUser !== 'undefined' && currentUser);
+    var explicitlyConnected = (typeof userAddress !== 'undefined' && userAddress);
+    if (!loggedIn || !explicitlyConnected) {
+      document.getElementById('walletBalanceBar').classList.remove('show');
+      return;
+    }
+
     var accounts = await window.ethereum.request({ method: 'eth_accounts' });
     if (!accounts || accounts.length === 0) {
       document.getElementById('walletBalanceBar').classList.remove('show');
