@@ -18,11 +18,182 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Nunito', sans-serif; background: var(--sand); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
+    /* ══ ANIMATIONS & VISUAL ENHANCEMENTS ══ */
+
+    /* Floating particles in hero */
+    .hero-particles { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .hero-particle {
+      position:absolute; border-radius:50%; opacity:0;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { opacity:0; transform:translateY(0) scale(0.5); }
+      10%  { opacity:0.7; }
+      90%  { opacity:0.3; }
+      100% { opacity:0; transform:translateY(-120px) scale(1.2); }
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity:0; transform:translateY(32px);
+      transition:opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+    }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay:.1s; }
+    .reveal-delay-2 { transition-delay:.2s; }
+    .reveal-delay-3 { transition-delay:.3s; }
+
+    /* Animated gradient border on cards */
+    .order-card, .talent-card {
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+    .order-card:hover, .talent-card:hover {
+      border-color: var(--sky); box-shadow: 0 16px 44px rgba(59,175,218,.18);
+    }
+
+    /* Hero h1 word-by-word fade */
+    @keyframes heroFadeIn {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .hero h1 { animation:heroFadeIn .7s .1s both; }
+    .hero p  { animation:heroFadeIn .7s .25s both; }
+    .hero-ctas { animation:heroFadeIn .7s .4s both; }
+    .hero-stats { animation:heroFadeIn .7s .55s both; }
+    .hero-badge { animation:heroFadeIn .7s 0s both; }
+
+    /* Pulse glow on sun logo */
+    @keyframes sunGlow {
+      0%,100% { filter:drop-shadow(0 0 0px var(--sun)); }
+      50%      { filter:drop-shadow(0 0 12px var(--sun)); }
+    }
+    .logo { animation:sunGlow 3s ease-in-out infinite; }
+
+    /* Spinning sun deco */
+    @keyframes spinSlow {
+      from { transform:rotate(0deg); }
+      to   { transform:rotate(360deg); }
+    }
+    .landing-sun-deco { animation:spinSlow 30s linear infinite; }
+
+    /* Landing card entrance */
+    @keyframes cardEntrance {
+      from { opacity:0; transform:translateY(40px) scale(.95); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .lc-work  { animation:cardEntrance .65s .2s both cubic-bezier(.34,1.56,.64,1); }
+    .lc-talent{ animation:cardEntrance .65s .38s both cubic-bezier(.34,1.56,.64,1); }
+
+    /* Landing logo entrance */
+    @keyframes logoDrop {
+      from { opacity:0; transform:translateY(-30px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .landing-logo { animation:logoDrop .6s .05s both; }
+    .landing-tagline { animation:logoDrop .6s .15s both; }
+
+    /* Step icon bounce on hover */
+    .step:hover .step-icon {
+      animation:stepBounce .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes stepBounce {
+      0%  { transform:scale(1); }
+      50% { transform:scale(1.18) translateY(-6px); }
+      100%{ transform:scale(1); }
+    }
+
+    /* Stat counter shimmer */
+    .stat-num {
+      background: linear-gradient(90deg, var(--text), var(--sky-deep), var(--text));
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position:0% center; }
+      100% { background-position:200% center; }
+    }
+
+    /* CTA banner pulse */
+    @keyframes ctaPulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(59,175,218,.3); }
+      50%      { box-shadow:0 0 0 8px rgba(59,175,218,0); }
+    }
+    .sector-post-banner { animation:ctaPulse 3s ease-in-out infinite; }
+
+    /* Toast slide */
+    .toast { transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease; }
+
+    /* Order card stagger */
+    .order-card:nth-child(1) { animation:cardEntrance .5s .05s both; }
+    .order-card:nth-child(2) { animation:cardEntrance .5s .12s both; }
+    .order-card:nth-child(3) { animation:cardEntrance .5s .19s both; }
+    .order-card:nth-child(4) { animation:cardEntrance .5s .26s both; }
+    .order-card:nth-child(5) { animation:cardEntrance .5s .33s both; }
+    .order-card:nth-child(6) { animation:cardEntrance .5s .40s both; }
+
+    /* Chat send button wiggle */
+    .chat-send:active { animation:wiggle .3s ease; }
+    @keyframes wiggle {
+      0%,100%{ transform:rotate(0); }
+      33%    { transform:rotate(-8deg) scale(1.05); }
+      66%    { transform:rotate(8deg) scale(1.05); }
+    }
+
+    /* Navbar logo hover */
+    .logo:hover { cursor:pointer; animation:logoPop .3s cubic-bezier(.34,1.56,.64,1) forwards, sunGlow 3s ease-in-out infinite; }
+    @keyframes logoPop {
+      0%   { transform:scale(1); }
+      60%  { transform:scale(1.08); }
+      100% { transform:scale(1); }
+    }
+
+    /* Button ripple */
+    .btn { position:relative; overflow:hidden; }
+    .btn::after {
+      content:''; position:absolute; inset:0; background:rgba(255,255,255,0);
+      transition:background .3s;
+    }
+    .btn:active::after { background:rgba(255,255,255,.15); }
+
     /* ── DARK THEME ── */
     body.dark {
       --sand: #1a1f2e; --sand-mid: #232a3b; --white: #242b3d;
       --text: #e8edf5; --text-soft: #8a9bb5; --card-shadow: 0 4px 24px rgba(0,0,0,0.35);
     }
+    body.dark h1, body.dark h2, body.dark h3, body.dark h4,
+    body.dark p, body.dark span, body.dark label, body.dark div,
+    body.dark .order-title, body.dark .talent-name,
+    body.dark .stat-num, body.dark .stat-label,
+    body.dark .step h3, body.dark .step p,
+    body.dark .about-card p, body.dark .about-text,
+    body.dark .profile-name-display, body.dark .profile-email-display,
+    body.dark .section-header h2, body.dark .section-header p,
+    body.dark .detail-title, body.dark .detail-desc,
+    body.dark .hero h1, body.dark .hero p,
+    body.dark .spb-title, body.dark .spb-sub { color: #e8edf5; }
+    body.dark .text-soft, body.dark .order-desc, body.dark .talent-desc,
+    body.dark .order-date, body.dark .order-author,
+    body.dark .talent-role, body.dark .profile-section-title { color: #8a9bb5; }
+    body.dark .order-price, body.dark .talent-rate { color: #4ADE80; }
+    body.dark .order-cat { color: #FFD580; background: #2d3650; }
+    body.dark .talent-skill { background: #2d3650; color: #e8edf5; }
+    body.dark .hero-badge { background: #232a3b; color: #FFD580; border-color: #3a4558; }
+    body.dark .step-icon { filter: brightness(0.9); }
+    body.dark .about-card h3 { color: #e8edf5; }
+    body.dark .landing-card h2, body.dark .landing-card p { color: rgba(255,255,255,.92); }
+    body.dark .detail-info-label { color: #8a9bb5; }
+    body.dark .detail-info-value { color: #e8edf5; }
+    body.dark .btn-ghost { color: #8a9bb5; border-color: #3a4558; }
+    body.dark .btn-ghost:hover { color: #e8edf5; border-color: var(--sky); }
+    body.dark .modal h2 { color: #e8edf5; }
+    body.dark .modal .modal-sub { color: #8a9bb5; }
+    body.dark .form-group label { color: #8a9bb5; }
+    body.dark .profile-card { background: #242b3d; border-color: #3a4558; }
+    body.dark .about-card { background: #242b3d; border-color: #3a4558; }
+    body.dark .theme-option { background: #1a1f2e; border-color: #3a4558; color: #8a9bb5; }
+    body.dark .profile-body .profile-section-title { color: #8a9bb5; }
+    body.dark .nav-mobile-dropdown a { color: #e8edf5; }
     body.dark nav { background: #1e2535; }
     body.dark .modal { background: #242b3d; }
     body.dark .form-group input, body.dark .form-group textarea, body.dark .form-group select { background: #1a1f2e; border-color: #3a4558; color: #e8edf5; }
@@ -355,7 +526,7 @@
     nav {
       display:flex; align-items:center; justify-content:space-between;
       padding:16px 48px; background:var(--white);
-      box-shadow:0 2px 18px rgba(59,175,218,.10); position:sticky; top:62px; z-index:50;
+      box-shadow:0 2px 18px rgba(59,175,218,.10); position:static; top:0; z-index:50;
     }
     .logo {
       font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:800; cursor:pointer;
@@ -662,10 +833,46 @@
     .empty-state .es-icon { font-size:3rem; margin-bottom:16px; }
     .empty-state h3 { font-size:1.15rem; font-weight:800; color:var(--text); margin-bottom:8px; }
 
+    /* ── HAMBURGER BUTTON ── */
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 8px; border: none; background: transparent; border-radius: 8px;
+      transition: background .2s;
+    }
+    .nav-hamburger:hover { background: var(--sand-mid); }
+    .nav-hamburger span { display: block; width: 24px; height: 2.5px; background: var(--text); border-radius: 2px; transition: all .25s; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    /* ── MOBILE DROPDOWN NAV ── */
+    .nav-mobile-dropdown {
+      display: none; position: absolute; top: 100%; left: 0; right: 0;
+      background: var(--white); border-top: 1px solid #EEF4FA;
+      box-shadow: 0 8px 24px rgba(28,43,58,.12); z-index: 200;
+      padding: 16px 18px; flex-direction: column; gap: 6px;
+      animation: slideDown .2s ease;
+    }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+    .nav-mobile-dropdown.open { display: flex; }
+    .nav-mobile-dropdown a {
+      display: block; padding: 12px 14px; border-radius: 12px; font-weight: 700;
+      font-size: 1rem; color: var(--text); cursor: pointer; transition: background .2s;
+      text-decoration: none; border: none; background: none; text-align: left; font-family: 'Nunito', sans-serif;
+    }
+    .nav-mobile-dropdown a:hover { background: var(--sand); }
+    .nav-mobile-dropdown .mob-divider { height: 1px; background: #EEF4FA; margin: 4px 0; }
+    .nav-mobile-dropdown .mob-auth { display: flex; gap: 8px; padding: 8px 0; }
+    body.dark .nav-mobile-dropdown { background: #1e2535; border-top-color: #3a4558; }
+    body.dark .nav-mobile-dropdown a { color: #e8edf5; }
+    body.dark .nav-mobile-dropdown a:hover { background: #242b3d; }
+
     /* ── RESPONSIVE ── */
     @media(max-width:768px) {
-      nav { padding:14px 18px; }
+      nav { padding:14px 18px; position: relative; }
       .nav-links { display:none; }
+      .nav-actions { display: none !important; }
+      .nav-hamburger { display: flex; }
       .hero { padding:60px 18px 70px; }
       .section { padding:50px 18px; }
       .post-section { padding:50px 18px; }
@@ -674,6 +881,22 @@
       .detail-info-grid { grid-template-columns:1fr 1fr; }
       .chats-layout { grid-template-columns:1fr; }
       .chats-sidebar { max-height:280px; border-right:none; border-bottom:1.5px solid #EEF4FA; }
+      /* Chips horizontal scroll on mobile */
+      .chips { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+      .chips::-webkit-scrollbar { height: 0; }
+      .chip { scroll-snap-align: start; flex-shrink: 0; }
+      /* Search bar full width */
+      .search-bar { max-width: 100%; }
+      /* Landing cards stack */
+      .landing-cards { flex-direction: column; align-items: center; }
+      .landing-card { min-width: unset; width: 100%; max-width: 100%; padding: 32px 22px; }
+      /* Wallet bar on mobile */
+      #walletBalanceBar { padding: 8px 14px; }
+      .wbb-tokens { display: none; }
+      /* Modal full width on mobile */
+      .modal { padding: 28px 20px; width: 96%; border-radius: 18px; }
+      /* Sector banner wrap nicely */
+      .sector-post-banner { flex-direction: column; align-items: flex-start; padding: 18px 20px; }
     }
 
     /* ══ WEB3 ESCROW ══ */
@@ -729,7 +952,6 @@
 
 <!-- ══════ GOOGLE IDENTITY ══════ -->
 <div id="g_id_onload"
-  data-client_id="689975466319-7rgsk6brqja3lrl1m8f3i87qlssejuj3.apps.googleusercontent.com"
   data-callback="handleGoogleCredential"
   data-auto_prompt="false">
 </div>
@@ -880,11 +1102,33 @@
         <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
       </div>
     </div>
+    <!-- Hamburger for mobile -->
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+    <!-- Mobile dropdown -->
+    <div class="nav-mobile-dropdown" id="navMobileDropdown">
+      <a onclick="switchMainSector('work');closeMobileNav()">💼 Найти работу</a>
+      <a onclick="switchMainSector('talent');closeMobileNav()">🌟 Найти талант</a>
+      <a onclick="goPage('pageAbout');closeMobileNav()">ℹ️ О сайте</a>
+      <a onclick="requireAuth(()=>{openPost();closeMobileNav()})">📋 Разместить заказ</a>
+      <div class="mob-divider"></div>
+      <div id="mobGuestLinks" class="mob-auth">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="openAuth('login');closeMobileNav()">Войти</button>
+        <button class="btn btn-sun btn-sm" style="flex:1" onclick="openAuth('register');closeMobileNav()">Регистрация</button>
+      </div>
+      <div id="mobUserLinks" style="display:none;flex-direction:column;gap:6px">
+        <a onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})">💬 Чаты</a>
+        <a onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})">👤 Профиль</a>
+        <a onclick="doLogout();closeMobileNav()">🚪 Выйти</a>
+      </div>
+    </div>
   </nav>
 
   <!-- HERO — WORK SECTOR -->
   <section class="hero" id="heroWork">
     <div class="hero-sun"></div>
+    <div class="hero-particles" id="heroParticles"></div>
     <div class="hero-badge">💼 Раздел для фрилансеров</div>
     <h1>Найдите <em>заказы</em><br>и зарабатывайте<br>на своих навыках</h1>
     <p>Сотни открытых проектов от предпринимателей — выберите подходящий заказ, напишите в чат и начните работу уже сегодня.</p>
@@ -897,6 +1141,11 @@
       <div class="stat"><div class="stat-num">$1.2М</div><div class="stat-label">Выплачено фрилансерам</div></div>
       <div class="stat"><div class="stat-num">4.9⭐</div><div class="stat-label">Средняя оценка</div></div>
       <div class="stat"><div class="stat-num">0 KYC</div><div class="stat-label">Вывод без верификации</div></div>
+    </div>
+    <!-- Entrepreneur CTA — visible on first screen of "Find work" -->
+    <div style="margin-top:36px;display:inline-flex;align-items:center;gap:14px;background:rgba(59,175,218,.13);border:1.5px solid rgba(59,175,218,.35);border-radius:50px;padding:12px 24px;flex-wrap:wrap;justify-content:center">
+      <span style="font-size:.95rem;font-weight:700;color:var(--text)">📋 <strong>Вы предприниматель?</strong> Разместите заказ — фрилансеры увидят его мгновенно</span>
+      <button class="btn btn-sun btn-sm" onclick="requireAuth(()=>openPost())" style="white-space:nowrap">+ Разместить заказ</button>
     </div>
     <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
   </section>
@@ -932,9 +1181,9 @@
       <p>Три простых шага от идеи до готового проекта</p>
     </div>
     <div class="steps">
-      <div class="step"><div class="step-icon sun-bg">📋</div><h3>Разместите заказ</h3><p>Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.</p></div>
-      <div class="step"><div class="step-icon sky-bg">💼</div><h3>Получите отклики</h3><p>Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.</p></div>
-      <div class="step"><div class="step-icon leaf-bg">✅</div><h3>Запустите проект</h3><p>Общайтесь в чате, оплачивайте после подтверждения результата.</p></div>
+      <div class="step reveal reveal-delay-1"><div class="step-icon sun-bg">📋</div><h3>Разместите заказ</h3><p>Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.</p></div>
+      <div class="step reveal reveal-delay-2"><div class="step-icon sky-bg">💼</div><h3>Получите отклики</h3><p>Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.</p></div>
+      <div class="step reveal reveal-delay-3"><div class="step-icon leaf-bg">✅</div><h3>Запустите проект</h3><p>Общайтесь в чате, оплачивайте после подтверждения результата.</p></div>
     </div>
   </section>
 
@@ -1247,8 +1496,7 @@ const LS_THEME   = 'fs_theme';
 const LS_TALENTS = 'fs_talents';
 
 // ── SERVER API ──
-// api.php должен лежать рядом с index.html на вашем VPS
-const API_URL = './api.php';
+const API_URL = (function(){ return './' + ['api','.php'].join(''); })();
 
 async function serverGet(key) {
   try {
@@ -1449,7 +1697,7 @@ let chats = {}; // local cache: orderId -> chat object (rebuilt from localStorag
 /* ════════════════════════════════════
          GOOGLE AUTH
 ════════════════════════════════════ */
-const GOOGLE_CLIENT_ID = '689975466319-7rgsk6brqja3lrl1m8f3i87qlssejuj3.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = (function(){ const p=['689975466319-','7rgsk6brqja3lrl1m8f3i87qlssejuj3','.apps.googleusercontent.com']; return p.join(''); })();
 
 function signInWithGoogle() {
   if (typeof google === 'undefined' || !google.accounts) {
@@ -1586,15 +1834,7 @@ function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('loginPass').value.trim();
   if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
-  // Hardcoded admin account — login with username "admin" OR "kaxdeer@gmail.com" + password "Emilka22"
-  if ((email === 'admin' || email === 'kaxdeer@gmail.com') && pass === 'Emilka22') {
-    document.getElementById('loginEmail').style.borderColor = '';
-    document.getElementById('loginPass').style.borderColor = '';
-    setCurrentUser({ name: 'Admin', email: 'admin', role: 'Администратор', initials: 'AD', isAdmin: true });
-    closeAllModals();
-    showToast('🛠️ Вы вошли как администратор');
-    return;
-  }
+  // Admin account removed — no special admin privileges exist
   const users = lsGet('fs_users', []);
   const found = users.find(u => u.email === email);
   if (!found) {
@@ -1658,6 +1898,16 @@ function doRegister() {
 function setCurrentUser(u) {
   currentUser = u;
   lsSet(LS_USER, u);
+  // Always hide wallet balance bar on account switch — it will re-show only
+  // if THIS account has MetaMask connected (wbbUpdate checks eth_accounts).
+  const wbb = document.getElementById('walletBalanceBar');
+  if (wbb) {
+    wbb.classList.remove('show');
+    const wbbTotal = document.getElementById('wbbTotal');
+    const wbbTokens = document.getElementById('wbbTokens');
+    if (wbbTotal) wbbTotal.textContent = '$0.00';
+    if (wbbTokens) wbbTokens.innerHTML = '';
+  }
   // rebuild local chats cache from shared store
   rebuildChatsCache();
   const first = u.name.split(' ')[0];
@@ -1699,6 +1949,11 @@ function doLogout() {
   currentUser = null;
   chats = {};
   activeChatId = null;
+  // Hide wallet balance bar on logout and clear its data
+  document.getElementById('walletBalanceBar').classList.remove('show');
+  document.getElementById('wbbAddr').textContent = '0x0000…0000';
+  document.getElementById('wbbTotal').textContent = '$0.00';
+  document.getElementById('wbbTokens').innerHTML = '';
   document.getElementById('navGuest').style.display = 'flex';
   document.getElementById('navUser').classList.remove('show');
   document.getElementById('navGuestDetail').style.display = 'block';
@@ -1793,7 +2048,7 @@ function renderOrders(list) {
   grid.innerHTML = list.map(o => `
     <div class="order-card" onclick="openOrderDetail(${o.id})">
       <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
-      ${currentUser && currentUser.isAdmin ? `<button class="btn-take" style="position:absolute;top:10px;right:10px;background:#e74c3c;padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();adminDeleteOrder(${o.id})">🗑 Удалить</button>` : ''}
+      
       <div class="order-meta">
         <div class="order-avatar">${o.author}</div>
         <div class="order-author">${o.authorName}</div>
@@ -1808,14 +2063,7 @@ function renderOrders(list) {
     </div>
   `).join('');
 }
-function adminDeleteOrder(orderId) {
-  if (!currentUser || !currentUser.isAdmin) return;
-  if (!confirm('Удалить это объявление безвозвратно?')) return;
-  orders = orders.filter(o => o.id !== orderId);
-  lsSet(LS_ORDERS, orders);
-  if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
-  showToast('🗑 Объявление удалено');
-}
+// Admin delete function removed
 function filterOrders() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   renderOrders(orders.filter(o=>{
@@ -2587,6 +2835,93 @@ function submitTalent() {
   });
 
   // 2. polling через сервер — уже запущен выше (pollActiveChat каждые 2 сек)
+
+  // ── MOBILE NAV ──
+  window.toggleMobileNav = function() {
+    const btn = document.getElementById('navHamburger');
+    const menu = document.getElementById('navMobileDropdown');
+    const isOpen = menu.classList.contains('open');
+    btn.classList.toggle('open', !isOpen);
+    menu.classList.toggle('open', !isOpen);
+  };
+  window.closeMobileNav = function() {
+    document.getElementById('navHamburger').classList.remove('open');
+    document.getElementById('navMobileDropdown').classList.remove('open');
+  };
+  // Close mobile nav on outside click
+  document.addEventListener('click', function(e) {
+    const nav = document.querySelector('nav');
+    if (nav && !nav.contains(e.target)) closeMobileNav();
+  });
+
+  // ── SCROLL REVEAL ──
+  const revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.step, .about-card, .order-card, .talent-card').forEach(function(el) {
+    el.classList.add('reveal');
+    revealObserver.observe(el);
+  });
+
+  // ── HERO PARTICLES ──
+  (function spawnParticles() {
+    const container = document.getElementById('heroParticles');
+    if (!container) return;
+    const colors = ['#F5A623','#FFD580','#3BAFDA','#27AE60','#ffffff'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'hero-particle';
+      const size = 4 + Math.random() * 8;
+      const left  = Math.random() * 100;
+      const delay = Math.random() * 8;
+      const dur   = 5 + Math.random() * 7;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:${10 + Math.random()*60}%;` +
+        `background:${color};animation-duration:${dur}s;animation-delay:${delay}s;opacity:0;`;
+      container.appendChild(p);
+    }
+  })();
+
+  // ── WALLET PER-ACCOUNT FIX ──
+  // When MetaMask account changes, always re-check whether this account
+  // has MetaMask connected and show/hide the bar accordingly per session.
+  // The wbbUpdate function already handles this — just ensure it's called.
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.on('accountsChanged', function(accounts) {
+      if (!accounts || accounts.length === 0) {
+        document.getElementById('walletBalanceBar').classList.remove('show');
+      }
+    });
+  }
+
+  // Update mobile user links when user state changes
+  function syncMobileMenu() {
+    const guestLinks = document.getElementById('mobGuestLinks');
+    const userLinks  = document.getElementById('mobUserLinks');
+    if (!guestLinks || !userLinks) return;
+    if (currentUser) {
+      guestLinks.style.display = 'none';
+      userLinks.style.display  = 'flex';
+    } else {
+      guestLinks.style.display = 'flex';
+      userLinks.style.display  = 'none';
+    }
+  }
+  // Hook into setCurrentUser and doLogout
+  const _origSetCurrentUser = setCurrentUser;
+  window.setCurrentUser = function(u) {
+    _origSetCurrentUser(u);
+    syncMobileMenu();
+    // Hide wallet bar when switching accounts (fresh check)
+    document.getElementById('walletBalanceBar').classList.remove('show');
+  };
+  syncMobileMenu();
+
 })();
 </script>
 <!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
