@@ -583,6 +583,34 @@
       .chats-layout { grid-template-columns:1fr; }
       .chats-sidebar { max-height:280px; border-right:none; border-bottom:1.5px solid #EEF4FA; }
     }
+
+    /* ══ WEB3 ESCROW ══ */
+    :root { --web3-accent:#6C5CE7; --web3-accent-deep:#4C3FC0; }
+    .escrow-card {
+      background:var(--white); border-radius:22px; padding:30px; box-shadow:var(--card-shadow);
+      margin-bottom:24px; border:1.5px solid #EEF4FA; position:relative; overflow:hidden;
+    }
+    .escrow-card::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:linear-gradient(90deg,var(--web3-accent),var(--sky)); }
+    .escrow-wallet-row { display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--sand); border-radius:12px; padding:10px 16px; margin-bottom:18px; font-weight:700; font-size:.88rem; }
+    .escrow-hint { color:var(--text-soft); font-size:.92rem; line-height:1.6; margin-bottom:16px; }
+    .escrow-countdown { text-align:center; font-family:'Playfair Display',serif; font-weight:700; font-size:1.1rem; color:var(--web3-accent-deep); background:var(--sand); border-radius:12px; padding:14px; margin-bottom:16px; }
+    .escrow-success { color:var(--leaf); font-weight:800; text-align:center; padding:10px 0; }
+    .escrow-addr { font-family:monospace; font-size:1rem; }
+    .escrow-msg { margin-top:14px; padding:12px 16px; border-radius:12px; font-size:.88rem; font-weight:700; }
+    .escrow-msg-pending { background:var(--sand-mid); color:var(--sky-deep); }
+    .escrow-msg-error { background:#FDEDEC; color:#C0392B; }
+    .escrow-msg-ok { background:#EAFAF1; color:var(--leaf); }
+    .escrow-status-0 { color:var(--sky-deep); }
+    .escrow-status-1 { color:var(--sun); }
+    .escrow-status-2 { color:var(--web3-accent-deep); }
+    .escrow-status-3 { color:var(--leaf); }
+    body.dark .escrow-card { background:#242b3d; border-color:#3a4558; }
+    body.dark .escrow-wallet-row { background:#1a1f2e; }
+    body.dark .escrow-countdown { background:#1a1f2e; }
+    body.dark .escrow-msg-pending { background:#1e2535; }
+    body.dark .escrow-msg-error { background:#3a1f22; color:#e88; }
+    body.dark .escrow-msg-ok { background:#1a2e22; }
+    @media(max-width:768px) { .escrow-card { padding:22px; } }
   </style>
 </head>
 <body>
@@ -1502,6 +1530,9 @@ function openOrderDetail(id) {
       </div>
     </div>
 
+    <!-- WEB3 ESCROW (заполняется скриптом web3-escrow.js ниже) -->
+    <div id="escrowSection"></div>
+
     <!-- CHAT WITH ENTREPRENEUR -->
     <div class="chat-card" id="detailChatCard">
       <div class="chat-header">
@@ -2184,6 +2215,496 @@ function submitTalent() {
     }
   }, 1500);
 })();
+</script>
+<!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════
+   FREESUN — WEB3 ESCROW INTEGRATION (ethers.js v5)
+   Работает в паре со смарт-контрактом FreelanceEscrow.sol.
+   Включает предохранитель: если заказчик оплатил, но не подтвердил
+   выполнение за AUTO_CONFIRM_TIMEOUT (14 дней в контракте) — фрилансер
+   может подтвердить сам через autoConfirmCompletion().
+
+   ЧТО СДЕЛАТЬ ПЕРЕД ИСПОЛЬЗОВАНИЕМ (см. гайд по деплою):
+   1. Задеплойте FreelanceEscrow.sol в Remix на Sepolia (или Polygon Amoy).
+   2. Впишите адрес задеплоенного контракта в ESCROW_CONTRACT_ADDRESS ниже.
+   3. Если используете Polygon Amoy — поменяйте TARGET_CHAIN_ID на 80002.
+   ════════════════════════════════════════════════════════════════ */
+
+(function () {
+  if (typeof ethers === 'undefined') {
+    console.error('ethers.js не загрузился — проверьте интернет-соединение и CDN-ссылку.');
+    return;
+  }
+
+  // ── CONFIG — ЗАПОЛНИТЕ ПОСЛЕ ДЕПЛОЯ ──
+  const ESCROW_CONTRACT_ADDRESS = "0xYOUR_DEPLOYED_CONTRACT_ADDRESS"; // <-- вставьте адрес после деплоя в Remix
+  const TARGET_CHAIN_ID = 11155111; // Sepolia. Для Polygon Amoy поставьте 80002
+
+  const ESCROW_ABI = [
+    "function createInvoice(address _client, uint256 _amount) external returns (uint256 invoiceId)",
+    "function payInvoice(uint256 _invoiceId) external payable",
+    "function confirmCompletion(uint256 _invoiceId) external",
+    "function autoConfirmCompletion(uint256 _invoiceId) external",
+    "function withdrawFunds(uint256 _invoiceId) external",
+    "function getInvoice(uint256 _invoiceId) external view returns (address freelancer, address client, uint256 amount, uint8 status, uint256 paidTimestamp, uint256 completionTimestamp, uint256 unlockTimestamp, uint256 autoConfirmAvailableAt, bool autoConfirmed)",
+    "event InvoiceCreated(uint256 indexed invoiceId, address indexed freelancer, address indexed client, uint256 amount)",
+    "event InvoicePaid(uint256 indexed invoiceId, address indexed client, uint256 amount)",
+    "event CompletionConfirmed(uint256 indexed invoiceId, uint256 unlockTimestamp)",
+    "event CompletionAutoConfirmed(uint256 indexed invoiceId, uint256 unlockTimestamp)",
+    "event FundsWithdrawn(uint256 indexed invoiceId, address indexed freelancer, uint256 freelancerAmount, uint256 platformFee)"
+  ];
+
+  const SUPPORTED_NETWORKS = {
+    11155111: {
+      name: "Sepolia", currency: "ETH",
+      rpcUrls: ["https://rpc.sepolia.org"],
+      explorer: "https://sepolia.etherscan.io"
+    },
+    80002: {
+      name: "Polygon Amoy", currency: "POL",
+      rpcUrls: ["https://rpc-amoy.polygon.technology/"],
+      explorer: "https://amoy.polygonscan.com"
+    }
+  };
+
+  // ── STATE ──
+  let provider = null;
+  let signer = null;
+  let contract = null;
+  let userAddress = null;
+  let escrowCountdownTimer = null;
+  let currentEscrowOrderId = null;
+
+  const LS_ESCROW = 'fs_escrow_invoices';
+
+  // ── HELPERS ──
+  function isConfigured() {
+    return typeof ESCROW_CONTRACT_ADDRESS === 'string'
+      && ethers.utils.isAddress(ESCROW_CONTRACT_ADDRESS)
+      && ESCROW_CONTRACT_ADDRESS !== '0xYOUR_DEPLOYED_CONTRACT_ADDRESS';
+  }
+  function toNum(x) {
+    if (x && typeof x.toNumber === 'function') return x.toNumber();
+    return Number(x);
+  }
+  function shortAddr(addr) {
+    return addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : '';
+  }
+  function currentNetworkCurrency() {
+    const net = SUPPORTED_NETWORKS[TARGET_CHAIN_ID];
+    return net ? net.currency : 'ETH';
+  }
+  function formatRemaining(remaining) {
+    const d = Math.floor(remaining / 86400);
+    const h = Math.floor((remaining % 86400) / 3600);
+    const m = Math.floor((remaining % 3600) / 60);
+    const s = remaining % 60;
+    if (d > 0) return d + 'д ' + h + 'ч ' + m + 'м';
+    return h + 'ч ' + m + 'м ' + s + 'с';
+  }
+  function getEscrowMap() {
+    try { return JSON.parse(localStorage.getItem(LS_ESCROW) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function setEscrowRecordForOrder(orderId, invoiceId, amountEth) {
+    const map = getEscrowMap();
+    map[orderId] = { invoiceId: String(invoiceId), amountEth: String(amountEth) };
+    localStorage.setItem(LS_ESCROW, JSON.stringify(map));
+  }
+  function getEscrowRecordForOrder(orderId) {
+    const map = getEscrowMap();
+    return map[orderId] || null;
+  }
+
+  // ── STATUS / ERROR OUTPUT ──
+  function setEscrowStatus(msg, kind) {
+    const el = document.getElementById('escrowStatusMsg');
+    if (!el) return;
+    const cls = kind === 'error' ? 'escrow-msg-error' : (kind === 'pending' ? 'escrow-msg-pending' : 'escrow-msg-ok');
+    el.innerHTML = '<div class="escrow-msg ' + cls + '">' + msg + '</div>';
+  }
+  function showEscrowError(msg) {
+    setEscrowStatus('⚠️ ' + msg, 'error');
+    if (typeof showToast === 'function') showToast('⚠️ ' + msg, '#e74c3c');
+  }
+  function handleWeb3Error(err) {
+    console.error(err);
+    let msg = 'Произошла ошибка. Подробности — в консоли браузера.';
+    if (err.code === 4001 || err.code === 'ACTION_REJECTED') {
+      msg = 'Транзакция отклонена в MetaMask.';
+    } else if (err.reason) {
+      msg = err.reason;
+    } else if (err.data && err.data.message) {
+      msg = err.data.message;
+    } else if (err.error && err.error.message) {
+      msg = err.error.message;
+    } else if (err.message) {
+      msg = err.message.length > 180 ? err.message.slice(0, 180) + '…' : err.message;
+    }
+    showEscrowError(msg);
+  }
+  function requireWallet() {
+    if (!contract || !userAddress) {
+      showEscrowError('Сначала подключите MetaMask.');
+      return false;
+    }
+    return true;
+  }
+
+  // ── WALLET CONNECTION ──
+  async function connectWallet() {
+    if (!isConfigured()) {
+      showEscrowError('Контракт ещё не настроен: впишите ESCROW_CONTRACT_ADDRESS в коде после деплоя (см. гайд по деплою).');
+      return;
+    }
+    if (typeof window.ethereum === 'undefined') {
+      showEscrowError('MetaMask не найден. Установите расширение и обновите страницу.');
+      window.open('https://metamask.io/download/', '_blank');
+      return;
+    }
+    try {
+      provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+      await provider.send('eth_requestAccounts', []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      contract = new ethers.Contract(ESCROW_CONTRACT_ADDRESS, ESCROW_ABI, signer);
+
+      await ensureCorrectNetwork();
+
+      if (typeof showToast === 'function') showToast('✅ Кошелёк подключен: ' + shortAddr(userAddress));
+      if (currentEscrowOrderId !== null) renderEscrowSection(currentEscrowOrderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  function disconnectWalletUI() {
+    provider = null; signer = null; contract = null; userAddress = null;
+    clearEscrowCountdown();
+    if (typeof showToast === 'function') showToast('Кошелёк отключен от сайта');
+    if (currentEscrowOrderId !== null) renderEscrowSection(currentEscrowOrderId);
+  }
+
+  async function ensureCorrectNetwork() {
+    const network = await provider.getNetwork();
+    if (network.chainId !== TARGET_CHAIN_ID) {
+      await switchNetwork(TARGET_CHAIN_ID);
+    }
+  }
+
+  async function switchNetwork(chainId) {
+    const hexChainId = '0x' + chainId.toString(16);
+    const netCfg = SUPPORTED_NETWORKS[chainId];
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexChainId }] });
+    } catch (switchError) {
+      if (switchError.code === 4902 && netCfg) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: hexChainId,
+            chainName: netCfg.name,
+            nativeCurrency: { name: netCfg.currency, symbol: netCfg.currency, decimals: 18 },
+            rpcUrls: netCfg.rpcUrls,
+            blockExplorerUrls: [netCfg.explorer]
+          }]
+        });
+      } else {
+        throw switchError;
+      }
+    }
+  }
+
+  async function tryAutoConnect() {
+    if (typeof window.ethereum === 'undefined' || !isConfigured()) return;
+    try {
+      const p = new ethers.providers.Web3Provider(window.ethereum, 'any');
+      const accounts = await p.listAccounts();
+      if (accounts.length > 0) {
+        provider = p;
+        signer = provider.getSigner();
+        userAddress = accounts[0];
+        contract = new ethers.Contract(ESCROW_CONTRACT_ADDRESS, ESCROW_ABI, signer);
+      }
+    } catch (e) { /* тихо игнорируем — просто не автоподключаемся */ }
+  }
+
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.on('accountsChanged', function () { window.location.reload(); });
+    window.ethereum.on('chainChanged', function () { window.location.reload(); });
+  }
+
+  // ── ACTIONS ──
+  async function createInvoiceAction(orderId) {
+    if (!requireWallet()) return;
+    const clientInput = document.getElementById('escrowClientAddress_' + orderId);
+    const amountInput = document.getElementById('escrowAmount_' + orderId);
+    const clientAddr = clientInput ? clientInput.value.trim() : '';
+    const amountEth = amountInput ? amountInput.value.trim() : '';
+
+    if (!clientAddr || !ethers.utils.isAddress(clientAddr)) {
+      showEscrowError('Некорректный адрес кошелька заказчика.');
+      return;
+    }
+    if (!amountEth || isNaN(Number(amountEth)) || Number(amountEth) <= 0) {
+      showEscrowError('Укажите корректную сумму больше нуля.');
+      return;
+    }
+
+    try {
+      setEscrowStatus('Отправляем транзакцию createInvoice в MetaMask…', 'pending');
+      const amountWei = ethers.utils.parseEther(amountEth);
+      const tx = await contract.createInvoice(clientAddr, amountWei);
+      setEscrowStatus('Ждём подтверждения в блокчейне…', 'pending');
+      const receipt = await tx.wait();
+
+      const event = (receipt.events || []).find(function (e) { return e.event === 'InvoiceCreated'; });
+      if (!event) {
+        showEscrowError('Чек создан, но номер не удалось прочитать из события. Хэш транзакции: ' + tx.hash);
+        return;
+      }
+      const invoiceId = event.args.invoiceId.toString();
+
+      setEscrowRecordForOrder(orderId, invoiceId, amountEth);
+      if (typeof showToast === 'function') showToast('✅ Чек №' + invoiceId + ' выставлен на ' + amountEth + ' ' + currentNetworkCurrency());
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  async function payInvoiceAction(orderId) {
+    if (!requireWallet()) return;
+    const record = getEscrowRecordForOrder(orderId);
+    if (!record) return;
+    try {
+      const inv = await contract.getInvoice(record.invoiceId);
+      setEscrowStatus('Отправляем оплату в MetaMask…', 'pending');
+      const tx = await contract.payInvoice(record.invoiceId, { value: inv.amount });
+      setEscrowStatus('Ждём подтверждения оплаты…', 'pending');
+      await tx.wait();
+      if (typeof showToast === 'function') showToast('✅ Оплата прошла — средства заблокированы в эскроу');
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  async function confirmCompletionAction(orderId) {
+    if (!requireWallet()) return;
+    const record = getEscrowRecordForOrder(orderId);
+    if (!record) return;
+    try {
+      setEscrowStatus('Подтверждаем выполнение…', 'pending');
+      const tx = await contract.confirmCompletion(record.invoiceId);
+      await tx.wait();
+      if (typeof showToast === 'function') showToast('✅ Подтверждено! Таймлок на 2 часа запущен.');
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  async function autoConfirmAction(orderId) {
+    if (!requireWallet()) return;
+    const record = getEscrowRecordForOrder(orderId);
+    if (!record) return;
+    try {
+      setEscrowStatus('Вызываем предохранитель — автоподтверждение по таймауту…', 'pending');
+      const tx = await contract.autoConfirmCompletion(record.invoiceId);
+      await tx.wait();
+      if (typeof showToast === 'function') showToast('⏰ Заказчик не ответил — сработал предохранитель. Таймлок на 2 часа запущен.');
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  async function withdrawFundsAction(orderId) {
+    if (!requireWallet()) return;
+    const record = getEscrowRecordForOrder(orderId);
+    if (!record) return;
+    try {
+      setEscrowStatus('Забираем средства…', 'pending');
+      const tx = await contract.withdrawFunds(record.invoiceId);
+      await tx.wait();
+      if (typeof showToast === 'function') showToast('✅ Средства выведены: 90% вам, 10% — комиссия платформы');
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  // ── RENDERING ──
+  function escrowCardWrapper(innerHtml) {
+    return '<div class="escrow-card"><div class="detail-section-title">🔐 Web3-эскроу сделки</div>' + innerHtml + '</div>';
+  }
+
+  function walletRow() {
+    return '<div class="escrow-wallet-row"><span>🦊 ' + shortAddr(userAddress) + '</span><span>' +
+      '<button class="btn btn-ghost btn-sm" onclick="window.__escrow.refresh()">🔄 Обновить</button> ' +
+      '<button class="btn btn-ghost btn-sm" onclick="window.__escrow.disconnect()">Отключить</button>' +
+      '</span></div>';
+  }
+
+  async function renderEscrowSection(orderId) {
+    currentEscrowOrderId = orderId;
+    const mount = document.getElementById('escrowSection');
+    if (!mount) return;
+    clearEscrowCountdown();
+
+    if (!userAddress) {
+      mount.innerHTML = escrowCardWrapper(
+        '<p class="escrow-hint">Подключите MetaMask, чтобы выставить чек фрилансеру или оплатить уже выставленный чек по этому заказу.</p>' +
+        '<button class="btn btn-sun btn-full" onclick="window.__escrow.connect()">🦊 Подключить MetaMask</button>' +
+        '<div id="escrowStatusMsg"></div>'
+      );
+      return;
+    }
+
+    const record = getEscrowRecordForOrder(orderId);
+
+    if (!record) {
+      mount.innerHTML = escrowCardWrapper(
+        walletRow() +
+        '<p class="escrow-hint">Чек по этому заказу ещё не выставлен. Если вы исполнитель — выставите чек заказчику ниже.</p>' +
+        '<div class="form-group"><label>Адрес кошелька заказчика</label><input type="text" id="escrowClientAddress_' + orderId + '" placeholder="0x..."/></div>' +
+        '<div class="form-group"><label>Сумма (' + currentNetworkCurrency() + ')</label><input type="number" step="0.0001" min="0" id="escrowAmount_' + orderId + '" placeholder="0.05"/></div>' +
+        '<button class="btn btn-sky btn-full" onclick="window.__escrow.createInvoice(' + orderId + ')">📝 Выставить чек</button>' +
+        '<div id="escrowStatusMsg"></div>'
+      );
+      return;
+    }
+
+    mount.innerHTML = escrowCardWrapper(walletRow() + '<div id="escrowStatusMsg"></div>');
+    setEscrowStatus('Загружаем статус сделки из блокчейна…', 'pending');
+    try {
+      const inv = await contract.getInvoice(record.invoiceId);
+      renderInvoiceState(orderId, record, inv);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
+  function renderInvoiceState(orderId, record, inv) {
+    const mount = document.getElementById('escrowSection');
+    if (!mount) return;
+
+    const statusNames = ['Ожидает оплаты', 'Оплачен (в эскроу)', 'Подтверждён — идёт таймлок', 'Завершён'];
+    const statusNum = toNum(inv.status);
+    const isClient = userAddress.toLowerCase() === inv.client.toLowerCase();
+    const isFreelancer = userAddress.toLowerCase() === inv.freelancer.toLowerCase();
+
+    let actionHtml = '';
+    let extraHtml = '';
+    let autoConfirmNote = '';
+
+    if (statusNum === 0) {
+      actionHtml = isClient
+        ? '<button class="btn btn-sun btn-full" onclick="window.__escrow.pay(' + orderId + ')">💸 Оплатить чек №' + record.invoiceId + '</button>'
+        : '<p class="escrow-hint">Ожидаем оплату от заказчика.</p>';
+
+    } else if (statusNum === 1) { // Paid
+      if (isClient) {
+        actionHtml = '<button class="btn btn-sun btn-full" onclick="window.__escrow.confirm(' + orderId + ')">✅ Подтвердить выполнение услуги</button>';
+      } else if (isFreelancer) {
+        const autoAt = toNum(inv.autoConfirmAvailableAt);
+        const remaining = autoAt - Math.floor(Date.now() / 1000);
+        extraHtml = '<div id="escrowAutoConfirmCountdown" class="escrow-countdown">…</div>' +
+          '<p class="escrow-hint">🛟 Предохранитель: если заказчик не подтвердит, здесь появится возможность подтвердить самому.</p>';
+        actionHtml = '<button class="btn btn-sun btn-full" id="escrowAutoConfirmBtn" onclick="window.__escrow.autoConfirm(' + orderId + ')"' +
+          (remaining > 0 ? ' disabled' : '') + '>' +
+          (remaining > 0 ? '🔒 Подтвердить по таймауту (заказчик не отвечает)' : '⏰ Подтвердить по таймауту (заказчик не отвечает)') +
+          '</button>';
+      } else {
+        actionHtml = '<p class="escrow-hint">Средства в эскроу. Ожидаем подтверждения от заказчика.</p>';
+      }
+
+    } else if (statusNum === 2) { // Confirmed
+      extraHtml = '<div id="escrowCountdown" class="escrow-countdown">…</div>';
+      actionHtml = isFreelancer
+        ? '<button class="btn btn-sun btn-full" id="escrowWithdrawBtn" onclick="window.__escrow.withdraw(' + orderId + ')" disabled>🔒 Забрать 90% (ждём таймлок)</button>'
+        : '<p class="escrow-hint">Выполнение подтверждено. Идёт таймлок 2 часа перед выплатой фрилансеру.</p>';
+      if (inv.autoConfirmed) {
+        autoConfirmNote = '<p class="escrow-hint">⏰ Подтверждено автоматически предохранителем — заказчик не отреагировал вовремя.</p>';
+      }
+
+    } else { // Withdrawn
+      actionHtml = '<p class="escrow-success">✅ Сделка завершена — средства выплачены.</p>';
+      if (inv.autoConfirmed) {
+        autoConfirmNote = '<p class="escrow-hint">⏰ Эта сделка была подтверждена автоматически предохранителем, а не заказчиком.</p>';
+      }
+    }
+
+    const cardBody = walletRow() +
+      '<div class="detail-info-grid" style="grid-template-columns:1fr 1fr">' +
+        '<div class="detail-info-item"><div class="detail-info-label">Чек №</div><div class="detail-info-value">' + record.invoiceId + '</div></div>' +
+        '<div class="detail-info-item"><div class="detail-info-label">Статус</div><div class="detail-info-value escrow-status-' + statusNum + '">' + statusNames[statusNum] + '</div></div>' +
+        '<div class="detail-info-item"><div class="detail-info-label">Сумма</div><div class="detail-info-value green">' + record.amountEth + ' ' + currentNetworkCurrency() + '</div></div>' +
+        '<div class="detail-info-item"><div class="detail-info-label">Заказчик</div><div class="detail-info-value escrow-addr">' + shortAddr(inv.client) + '</div></div>' +
+      '</div>' +
+      extraHtml + autoConfirmNote + actionHtml + '<div id="escrowStatusMsg"></div>';
+
+    mount.innerHTML = escrowCardWrapper(cardBody);
+
+    if (statusNum === 1 && isFreelancer) {
+      startCountdown(toNum(inv.autoConfirmAvailableAt), 'escrowAutoConfirmCountdown', 'escrowAutoConfirmBtn', '⏰ Подтвердить по таймауту (заказчик не отвечает)');
+    } else if (statusNum === 2) {
+      startCountdown(toNum(inv.unlockTimestamp), 'escrowCountdown', 'escrowWithdrawBtn', '💰 Забрать 90%');
+    }
+  }
+
+  // ── COUNTDOWN (используется и для таймлока вывода, и для таймаута предохранителя) ──
+  function clearEscrowCountdown() {
+    if (escrowCountdownTimer) { clearInterval(escrowCountdownTimer); escrowCountdownTimer = null; }
+  }
+  function startCountdown(unlockTimestamp, elId, btnId, btnLabelWhenReady) {
+    clearEscrowCountdown();
+    const tick = function () {
+      const el = document.getElementById(elId);
+      if (!el) { clearEscrowCountdown(); return; } // ушли со страницы — гасим таймер
+      const remaining = unlockTimestamp - Math.floor(Date.now() / 1000);
+      if (remaining <= 0) {
+        el.innerHTML = '⏰ Время ожидания истекло';
+        const btn = document.getElementById(btnId);
+        if (btn) { btn.disabled = false; btn.textContent = btnLabelWhenReady; }
+        clearEscrowCountdown();
+        return;
+      }
+      el.innerHTML = '⏳ Осталось: ' + formatRemaining(remaining);
+    };
+    tick();
+    escrowCountdownTimer = setInterval(tick, 1000);
+  }
+
+  // ── PUBLIC BRIDGE (нужен, т.к. onclick-атрибуты выполняются в глобальной области) ──
+  window.__escrow = {
+    connect: connectWallet,
+    disconnect: disconnectWalletUI,
+    refresh: function () { renderEscrowSection(currentEscrowOrderId); },
+    createInvoice: createInvoiceAction,
+    pay: payInvoiceAction,
+    confirm: confirmCompletionAction,
+    autoConfirm: autoConfirmAction,
+    withdraw: withdrawFundsAction
+  };
+
+  // ── HOOK INTO EXISTING openOrderDetail() ──
+  const _originalOpenOrderDetail = window.openOrderDetail;
+  if (typeof _originalOpenOrderDetail === 'function') {
+    window.openOrderDetail = function (id) {
+      _originalOpenOrderDetail(id);
+      renderEscrowSection(parseInt(id) || id);
+    };
+  } else {
+    console.warn('openOrderDetail() не найдена — секция эскроу не будет открываться автоматически.');
+  }
+
+  tryAutoConnect();
+})();
+
 </script>
 </body>
 </html>
