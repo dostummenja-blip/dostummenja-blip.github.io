@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreeSun — Биржа фриланса</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -496,6 +497,27 @@
     footer { background:var(--text); color:rgba(255,255,255,.82); padding:34px 48px; text-align:center; font-size:.88rem; }
     footer strong { color:var(--white); }
 
+    /* ── GOOGLE AUTH ── */
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 12px 20px; border-radius: 13px;
+      border: 2px solid #E8EEF4; background: var(--white);
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .97rem;
+      color: var(--text); cursor: pointer; transition: all .2s; margin-bottom: 4px;
+    }
+    .google-btn:hover { border-color: #4285F4; box-shadow: 0 4px 14px rgba(66,133,244,.18); transform: translateY(-1px); }
+    .google-btn svg { flex-shrink: 0; }
+    body.dark .google-btn { background: #1a1f2e; border-color: #3a4558; color: #e8edf5; }
+    body.dark .google-btn:hover { border-color: #4285F4; }
+    .auth-divider {
+      display: flex; align-items: center; gap: 14px;
+      margin: 18px 0; color: var(--text-soft); font-size: .85rem; font-weight: 600;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: #E8EEF4;
+    }
+    body.dark .auth-divider::before, body.dark .auth-divider::after { background: #3a4558; }
+
     /* ── TOAST ── */
     .toast {
       position:fixed; bottom:28px; right:28px; background:var(--text); color:var(--white);
@@ -705,6 +727,13 @@
   <button class="wbb-refresh" onclick="wbbRefresh()">🔄 Обновить</button>
 </div>
 
+<!-- ══════ GOOGLE IDENTITY ══════ -->
+<div id="g_id_onload"
+  data-client_id="689975466319-7rgsk6brqja3lrl1m8f3i87qlssejuj3.apps.googleusercontent.com"
+  data-callback="handleGoogleCredential"
+  data-auto_prompt="false">
+</div>
+
 <!-- ══════ LANDING SELECTOR ══════ -->
 <div class="landing-overlay" id="landingOverlay">
   <div class="landing-sun-deco"></div>
@@ -741,12 +770,22 @@
     </div>
     <!-- LOGIN -->
     <div class="tab-content active" id="tab-login">
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Войти через Google
+      </button>
+      <div class="auth-divider">или</div>
       <div class="form-group"><label>Email</label><input type="text" id="loginEmail" placeholder="your@email.com"/></div>
       <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
       <button class="btn btn-sky btn-full" onclick="doLogin()">Войти в аккаунт</button>
     </div>
     <!-- REGISTER -->
     <div class="tab-content" id="tab-register">
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Зарегистрироваться через Google
+      </button>
+      <div class="auth-divider">или заполните форму</div>
       <div class="form-group"><label>Ваше имя</label><input type="text" id="regName" placeholder="Иван Иванов"/></div>
       <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"/></div>
       <div class="form-group"><label>Пароль</label><input type="password" id="regPass" placeholder="Минимум 8 символов"/></div>
@@ -1406,6 +1445,139 @@ function addMyOrderId(orderId) {
 }
 
 let chats = {}; // local cache: orderId -> chat object (rebuilt from localStorage)
+
+/* ════════════════════════════════════
+         GOOGLE AUTH
+════════════════════════════════════ */
+const GOOGLE_CLIENT_ID = '689975466319-7rgsk6brqja3lrl1m8f3i87qlssejuj3.apps.googleusercontent.com';
+
+function signInWithGoogle() {
+  if (typeof google === 'undefined' || !google.accounts) {
+    showToast('⚠️ Google авторизация недоступна. Проверьте соединение.','#e74c3c');
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+  google.accounts.id.prompt(notification => {
+    // If One Tap is suppressed (e.g. on localhost), fall back to popup flow
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      _googlePopupFallback();
+    }
+  });
+}
+
+function _googlePopupFallback() {
+  // Use the token client (implicit flow) as a fallback popup
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'openid email profile',
+    callback: (tokenResponse) => {
+      if (tokenResponse.error) { showToast('⚠️ Google: ' + tokenResponse.error,'#e74c3c'); return; }
+      // Fetch user info from Google
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+      })
+      .then(r => r.json())
+      .then(profile => {
+        _processGoogleProfile(profile.name, profile.email, profile.sub);
+      })
+      .catch(() => showToast('⚠️ Не удалось получить данные от Google','#e74c3c'));
+    }
+  });
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
+}
+
+function handleGoogleCredential(response) {
+  // Decode JWT payload (no signature verification needed client-side)
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    _processGoogleProfile(payload.name, payload.email, payload.sub);
+  } catch(e) {
+    showToast('⚠️ Ошибка обработки Google токена','#e74c3c');
+  }
+}
+
+function _processGoogleProfile(name, email, googleId) {
+  if (!name || !email) { showToast('⚠️ Не удалось получить данные Google','#e74c3c'); return; }
+
+  const users = lsGet('fs_users', []);
+  let found = users.find(u => u.email === email.toLowerCase());
+
+  if (found) {
+    // Existing user — log in
+    setCurrentUser({ name: found.name, email: found.email, role: found.role || 'freelancer', initials: found.initials });
+    closeAllModals();
+    showToast('🎉 Вы вошли как ' + found.name);
+  } else {
+    // New user via Google — need to pick a role
+    closeAllModals();
+    _showGoogleRoleModal(name, email, googleId);
+  }
+}
+
+function _showGoogleRoleModal(name, email, googleId) {
+  // Reuse the auth modal with a special "pick role" UI
+  document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+  const modal = document.getElementById('authModal');
+
+  // Save original content to restore later
+  const originalContent = modal.innerHTML;
+  modal.innerHTML = `
+    <button class="modal-close" onclick="_restoreAuthModal()">✕</button>
+    <h2>Почти готово! ☀️</h2>
+    <p class="modal-sub">Вы входите как <strong>${name}</strong> (${email})<br>Укажите вашу роль на платформе</p>
+    <div class="form-group" style="margin-top:20px">
+      <label>Я регистрируюсь как</label>
+      <select id="googleRoleSelect" style="width:100%;padding:13px 17px;border:2px solid #E8EEF4;border-radius:13px;font-family:'Nunito',sans-serif;font-size:1rem;color:var(--text);background:var(--sand);outline:none">
+        <option value="">Выберите роль...</option>
+        <option value="entrepreneur">🏢 Предприниматель — размещаю заказы</option>
+        <option value="freelancer">💼 Фрилансер — ищу проекты</option>
+      </select>
+    </div>
+    <button class="btn btn-sun btn-full" style="margin-top:8px" onclick="_finishGoogleRegister('${name.replace(/'/g,"\\'")}','${email}','${googleId}')">
+      ✅ Завершить регистрацию
+    </button>
+  `;
+  // Store original for restore
+  modal._originalContent = originalContent;
+  modal.style.display = 'block';
+  document.getElementById('overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function _finishGoogleRegister(name, email, googleId) {
+  const role = document.getElementById('googleRoleSelect').value;
+  if (!role) { showToast('⚠️ Выберите роль','#F5A623'); return; }
+
+  const users = lsGet('fs_users', []);
+  // Resolve name conflicts
+  let finalName = name;
+  let suffix = 1;
+  while (users.find(u => u.name.toLowerCase() === finalName.toLowerCase())) {
+    finalName = name + suffix++;
+  }
+  const initials = finalName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+  users.push({ name: finalName, email: email.toLowerCase(), pass: null, role, initials, googleId });
+  lsSet('fs_users', users);
+  setCurrentUser({ name: finalName, email: email.toLowerCase(), role, initials });
+  _restoreAuthModal();
+  closeAllModals();
+  showToast('🎉 Добро пожаловать, ' + finalName + '!');
+}
+
+function _restoreAuthModal() {
+  const modal = document.getElementById('authModal');
+  if (modal._originalContent) {
+    modal.innerHTML = modal._originalContent;
+    delete modal._originalContent;
+  }
+  closeAllModals();
+}
 
 /* ════════════════════════════════════
          AUTH
