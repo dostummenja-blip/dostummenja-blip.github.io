@@ -68,27 +68,13 @@
       50%      { filter:drop-shadow(0 0 12px var(--sun)); }
     }
 
-    /* Logo: gentle glow pulse + very slow, very soft color drift across the
-       gradient text. Drift amplitude is low on purpose — a subtle living
-       quality, not a flashy effect. */
-    @keyframes logoColorDrift {
-      0%   { background-position:0% center; }
-      50%  { background-position:100% center; }
-      100% { background-position:0% center; }
-    }
-    .logo {
-      background-size:220% auto;
-      animation: sunGlow 3s ease-in-out infinite, logoColorDrift 14s ease-in-out infinite;
-    }
-    /* Each letter bobs independently, very slightly, on its own slow clock —
-       staggered delays so the word feels alive rather than moving as one rigid block. */
-    @keyframes logoLetterFloat {
-      0%,100% { transform:translateY(0); }
-      50%     { transform:translateY(-2px); }
-    }
-    .logo .lg-letter {
-      display:inline-block;
-      animation: logoLetterFloat 5s ease-in-out infinite;
+    /* Logo: whole word drifts slightly up/down/left/right, very slowly */
+    @keyframes logoFloat {
+      0%   { transform:translate(0, 0); }
+      25%  { transform:translate(2px, -2px); }
+      50%  { transform:translate(0, -3px); }
+      75%  { transform:translate(-2px, -1px); }
+      100% { transform:translate(0, 0); }
     }
 
     /* Spinning sun deco */
@@ -163,7 +149,7 @@
     }
 
     /* Navbar logo hover */
-    .logo:hover { cursor:pointer; animation:logoPop .3s cubic-bezier(.34,1.56,.64,1) forwards, sunGlow 3s ease-in-out infinite, logoColorDrift 14s ease-in-out infinite; }
+    .logo:hover { cursor:pointer; animation:logoPop .3s cubic-bezier(.34,1.56,.64,1) forwards, sunGlow 3s ease-in-out infinite, logoFloat 8s ease-in-out infinite; }
     @keyframes logoPop {
       0%   { transform:scale(1); }
       60%  { transform:scale(1.08); }
@@ -519,9 +505,11 @@
       box-shadow:0 2px 18px rgba(59,175,218,.10); position:static; top:0; z-index:50;
     }
     .logo {
+      display:inline-block;
       font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:800; cursor:pointer;
-      background:linear-gradient(90deg,var(--sun),var(--sun-light),var(--sky),var(--sky-deep),var(--sun));
+      background:linear-gradient(135deg,var(--sun),var(--sky-deep));
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation: sunGlow 3s ease-in-out infinite, logoFloat 8s ease-in-out infinite;
     }
     .logo span { font-style:italic; }
     .nav-links { display:flex; gap:28px; align-items:center; }
@@ -1990,45 +1978,6 @@ function requireAuth(cb) {
          PAGES
 ════════════════════════════════════ */
 
-// Wraps each letter of every .logo element in its own span.lg-letter with a
-// small staggered animation-delay, so the CSS logoLetterFloat animation makes
-// the word feel gently, independently alive rather than bobbing as one block.
-// Preserves the existing inner <span>Sun</span> (used for italic styling) —
-// only the individual characters get re-wrapped, not the structure around them.
-function animateLogoLetters() {
-  document.querySelectorAll('.logo').forEach(function(logoEl) {
-    if (logoEl.dataset.lettersWrapped) return; // don't double-wrap on repeat calls
-    logoEl.dataset.lettersWrapped = 'true';
-
-    var letterIndex = 0;
-    function wrapTextNode(node) {
-      var text = node.textContent;
-      var frag = document.createDocumentFragment();
-      for (var i = 0; i < text.length; i++) {
-        var span = document.createElement('span');
-        span.className = 'lg-letter';
-        span.style.animationDelay = (letterIndex * 0.12) + 's';
-        span.textContent = text[i];
-        frag.appendChild(span);
-        letterIndex++;
-      }
-      node.parentNode.replaceChild(frag, node);
-    }
-    // Snapshot child nodes first — replacing a text node with a fragment
-    // mutates the live NodeList we'd otherwise be iterating over.
-    Array.from(logoEl.childNodes).forEach(function(child) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        wrapTextNode(child);
-      } else if (child.nodeType === Node.ELEMENT_NODE) {
-        // e.g. the existing <span>Sun</span> — keep the element, wrap its text inside
-        Array.from(child.childNodes).forEach(function(grandchild) {
-          if (grandchild.nodeType === Node.TEXT_NODE) wrapTextNode(grandchild);
-        });
-      }
-    });
-  });
-}
-
 function goPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -2825,9 +2774,6 @@ function submitTalent() {
 
   renderOrders(orders);
   renderTalents(talents);
-
-  // Wrap logo letters for the slow float/color-drift effect (all nav variants)
-  animateLogoLetters();
 
   // Initial state: hide both sector sections until user picks from landing
   document.getElementById('ordersSection').style.display  = 'none';
@@ -3871,7 +3817,11 @@ function submitTalent() {
     pay: payInvoiceAction,
     confirm: confirmCompletionAction,
     autoConfirm: autoConfirmAction,
-    withdraw: withdrawFundsAction
+    withdraw: withdrawFundsAction,
+    // Live getter — userAddress lives in this IIFE's closure and is not visible
+    // from other script blocks (e.g. the wallet-balance-pill module), which is
+    // why the pill was never showing even with MetaMask actually connected.
+    getAddress: function () { return userAddress; }
   };
 
   // ── HOOK INTO EXISTING openOrderDetail() ──
@@ -3925,7 +3875,10 @@ function submitTalent() {
     // to appear with a stale balance for logged-out / never-connected
     // visitors.
     var loggedIn = (typeof currentUser !== 'undefined' && currentUser);
-    var explicitlyConnected = (typeof userAddress !== 'undefined' && userAddress);
+    var liveAddress = (window.__escrow && typeof window.__escrow.getAddress === 'function')
+      ? window.__escrow.getAddress()
+      : null;
+    var explicitlyConnected = !!liveAddress;
     if (!loggedIn || !explicitlyConnected) {
       document.getElementById('walletBalanceBar').classList.remove('show');
       return;
