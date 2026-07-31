@@ -148,8 +148,7 @@
       66%    { transform:rotate(8deg) scale(1.05); }
     }
 
-    /* Navbar logo hover */
-    .logo:hover { cursor:pointer; animation:logoPop .3s cubic-bezier(.34,1.56,.64,1) forwards, sunGlow 3s ease-in-out infinite, logoFloat 8s ease-in-out infinite; }
+    /* Navbar logo hover — handled above with .logo:hover rule */
     @keyframes logoPop {
       0%   { transform:scale(1); }
       60%  { transform:scale(1.08); }
@@ -509,7 +508,9 @@
       font-family:'Playfair Display',serif; font-size:1.65rem; font-weight:800; cursor:pointer;
       background:linear-gradient(135deg,var(--sun),var(--sky-deep));
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-      animation: sunGlow 3s ease-in-out infinite, logoFloat 8s ease-in-out infinite;
+    }
+    .logo:hover {
+      animation: logoPop .3s cubic-bezier(.34,1.56,.64,1) forwards, sunGlow 3s ease-in-out infinite, logoFloat 8s ease-in-out infinite !important;
     }
     .logo span { font-style:italic; }
     .nav-links { display:flex; gap:28px; align-items:center; }
@@ -1201,12 +1202,12 @@
        Фрилансеры выставляют резюме,
        предприниматели их просматривают
   ════════════════════════════════════ -->
-  <section class="section section-alt" id="talentsSection" style="display:none">
+  <section class="section section-alt" id="talentsSection" style="display:none;">
 
     <!-- Верхний баннер-кнопка для фрилансеров -->
-    <div class="sector-post-banner" style="background:linear-gradient(135deg,#e8f8ef,#d0f0e0);border-color:#a8e6c8">
+    <div class="sector-post-banner">
       <div class="spb-text">
-        <div class="spb-title" style="color:var(--leaf)">🌟 Вы фрилансер?</div>
+        <div class="spb-title">🌟 Вы фрилансер?</div>
         <div class="spb-sub">Разместите резюме — предприниматели найдут вас</div>
       </div>
       <button class="btn btn-leaf" onclick="requireAuth(()=>openPostTalent())">+ Разместить резюме</button>
@@ -3657,6 +3658,27 @@ function submitTalent() {
     }
   }
 
+  async function cancelInvoiceAction(orderId) {
+    if (!requireWallet()) return;
+    const record = getEscrowRecordForOrder(orderId);
+    if (!record) return;
+    if (!confirm('Вы уверены, что хотите отменить чек №' + record.invoiceId + '? Это действие нельзя отменить.')) return;
+    try {
+      setEscrowStatus('Отменяем чек в MetaMask…', 'pending');
+      const tx = await contract.cancelInvoice(record.invoiceId);
+      setEscrowStatus('Ждём подтверждения отмены…', 'pending');
+      await tx.wait();
+      // Remove the local record so the UI resets to "no invoice" state
+      const map = getEscrowMap();
+      delete map[orderId];
+      localStorage.setItem(LS_ESCROW, JSON.stringify(map));
+      if (typeof showToast === 'function') showToast('🚫 Чек №' + record.invoiceId + ' отменён');
+      renderEscrowSection(orderId);
+    } catch (err) {
+      handleWeb3Error(err);
+    }
+  }
+
   // ── RENDERING ──
   function escrowCardWrapper(innerHtml) {
     return '<div class="escrow-card"><div class="detail-section-title">🔐 Web3-эскроу сделки</div>' + innerHtml + '</div>';
@@ -3733,7 +3755,8 @@ function submitTalent() {
     if (statusNum === 0) {
       actionHtml = isClient
         ? '<button class="btn btn-sun btn-full" onclick="window.__escrow.pay(' + orderId + ')">💸 Оплатить чек №' + record.invoiceId + '</button>'
-        : '<p class="escrow-hint">Ожидаем оплату от заказчика.</p>';
+        : '<p class="escrow-hint">Ожидаем оплату от заказчика.</p>' +
+          (isFreelancer ? '<button class="btn btn-ghost btn-full" style="margin-top:10px;border-color:#e74c3c;color:#e74c3c" onclick="window.__escrow.cancel(' + orderId + ')">🚫 Отменить чек</button>' : '');
 
     } else if (statusNum === 1) { // Paid
       if (isClient) {
@@ -3818,6 +3841,7 @@ function submitTalent() {
     confirm: confirmCompletionAction,
     autoConfirm: autoConfirmAction,
     withdraw: withdrawFundsAction,
+    cancel: cancelInvoiceAction,
     // Live getter — userAddress lives in this IIFE's closure and is not visible
     // from other script blocks (e.g. the wallet-balance-pill module), which is
     // why the pill was never showing even with MetaMask actually connected.
