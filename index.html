@@ -1957,6 +1957,13 @@ function setCurrentUser(u) {
   document.getElementById('profileNameDisplay').textContent = u.name;
   document.getElementById('profileEmailDisplay').textContent = u.email;
   document.getElementById('profileNameInput').value = u.name;
+  // Эскроу-блок на странице заказа рисуется отдельным скриптом и не видит
+  // currentUser напрямую при логине — просим его перерисоваться, если он
+  // сейчас на экране (аналогично тому, как __escrow.refresh уже используется
+  // для wallet balance pill из-за той же особенности изоляции скриптов).
+  if (window.__escrow && typeof window.__escrow.refresh === 'function') {
+    window.__escrow.refresh();
+  }
 }
 function doLogout() {
   lsSet(LS_USER, null);
