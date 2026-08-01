@@ -4,8 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreeSun — Биржа фриланса</title>
+  <script>
+    // ══ ВРЕМЕННАЯ ДИАГНОСТИКА ══
+    // "Uncaught Error: Script error." без файла/строки — типичный признак
+    // того, что превьюер показывает ошибку из sandboxed iframe родительскому
+    // окну, которое считает содержимое cross-origin и обезличивает детали.
+    // Этот перехватчик ловит ошибку изнутри самой страницы (window.onerror
+    // здесь выполняется В ТОМ ЖЕ документе, где произошла ошибка — значит
+    // detail будет полным) и выводит её прямо в DOM, чтобы увидеть текст
+    // даже если внешняя консоль превьюера его прячет.
+    window.addEventListener('error', function (e) {
+      var box = document.createElement('div');
+      box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;'
+        + 'background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;'
+        + 'padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+      box.textContent = '⚠ ' + e.message
+        + '\nФайл: ' + (e.filename || '—')
+        + '\nСтрока: ' + (e.lineno || '—') + ':' + (e.colno || '—')
+        + (e.error && e.error.stack ? '\n\n' + e.error.stack : '');
+      document.addEventListener('DOMContentLoaded', function () {
+        document.body.prepend(box);
+      });
+      if (document.body) document.body.prepend(box);
+    });
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -905,6 +929,12 @@
     body.dark .escrow-msg-error { background:#3a1f22; color:#e88; }
     body.dark .escrow-msg-ok { background:#1a2e22; }
     @media(max-width:768px) { .escrow-card { padding:22px; } }
+
+    /* ══ ROUTING: раньше это были div/button, теперь настоящие <a href> —
+       убираем браузерные дефолты подчёркивания/цвета ссылок ══ */
+    a.logo, a.user-chip, a.chat-nav-btn, a.back-btn {
+      text-decoration:none; color:inherit;
+    }
   </style>
 </head>
 <body>
@@ -1046,12 +1076,12 @@
 
   <!-- NAVBAR -->
   <nav>
-    <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+    <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
     <div class="nav-links">
-      <a onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800">💼 Найти работу</a>
-      <a onclick="switchMainSector('talent')" id="navLinkTalent">🌟 Найти талант</a>
-      <a onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800">О сайте</a>
-      <a id="navPostLink" onclick="requireAuth(()=>openPost())">Разместить заказ</a>
+      <a href="/orders" data-route onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800">💼 Найти работу</a>
+      <a href="/talents" data-route onclick="switchMainSector('talent')" id="navLinkTalent">🌟 Найти талант</a>
+      <a href="/about" data-route onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800">О сайте</a>
+      <a id="navPostLink" href="#" onclick="event.preventDefault();requireAuth(()=>openPost())">Разместить заказ</a>
     </div>
     <div class="nav-actions">
       <div id="navGuest" style="display:flex;gap:10px">
@@ -1059,13 +1089,13 @@
         <button class="btn btn-sun btn-sm" onclick="openAuth('register')">Регистрация</button>
       </div>
       <div class="nav-user" id="navUser">
-        <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">
+        <a class="chat-nav-btn" href="/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">
           💬 Чаты <span class="chat-badge" id="chatBadge" style="display:none">0</span>
-        </button>
-        <div class="user-chip" onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer" title="Мой профиль">
+        </a>
+        <a class="user-chip" href="/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer" title="Мой профиль">
           <div class="user-avatar-sm" id="navAvatar">ИИ</div>
           <span id="navName">Иван И.</span>
-        </div>
+        </a>
         <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
       </div>
     </div>
@@ -1075,19 +1105,19 @@
     </button>
     <!-- Mobile dropdown -->
     <div class="nav-mobile-dropdown" id="navMobileDropdown">
-      <a onclick="switchMainSector('work');closeMobileNav()">💼 Найти работу</a>
-      <a onclick="switchMainSector('talent');closeMobileNav()">🌟 Найти талант</a>
-      <a onclick="goPage('pageAbout');closeMobileNav()">ℹ️ О сайте</a>
-      <a onclick="requireAuth(()=>{openPost();closeMobileNav()})">📋 Разместить заказ</a>
+      <a href="/orders" data-route onclick="switchMainSector('work');closeMobileNav()">💼 Найти работу</a>
+      <a href="/talents" data-route onclick="switchMainSector('talent');closeMobileNav()">🌟 Найти талант</a>
+      <a href="/about" data-route onclick="goPage('pageAbout');closeMobileNav()">ℹ️ О сайте</a>
+      <a href="#" onclick="event.preventDefault();requireAuth(()=>{openPost();closeMobileNav()})">📋 Разместить заказ</a>
       <div class="mob-divider"></div>
       <div id="mobGuestLinks" class="mob-auth">
         <button class="btn btn-outline btn-sm" style="flex:1" onclick="openAuth('login');closeMobileNav()">Войти</button>
         <button class="btn btn-sun btn-sm" style="flex:1" onclick="openAuth('register');closeMobileNav()">Регистрация</button>
       </div>
       <div id="mobUserLinks" style="display:none;flex-direction:column;gap:6px">
-        <a onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})">💬 Чаты</a>
-        <a onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})">👤 Профиль</a>
-        <a onclick="doLogout();closeMobileNav()">🚪 Выйти</a>
+        <a href="/chat" data-route onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})">💬 Чаты</a>
+        <a href="/profile" data-route onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})">👤 Профиль</a>
+        <a href="#" onclick="event.preventDefault();doLogout();closeMobileNav()">🚪 Выйти</a>
       </div>
     </div>
   </nav>
@@ -1249,11 +1279,11 @@
 <div class="page" id="pageTalentDetail">
   <div class="detail-page">
     <nav class="detail-nav">
-      <button class="back-btn" onclick="goPage('pageMain');switchMainSector('talent')">← Назад к специалистам</button>
-      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <a class="back-btn" href="/talents" data-route onclick="switchMainSector('talent')">← Назад к специалистам</a>
+      <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
         <div class="nav-user" id="navUserTalentDetail" style="display:none">
-          <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</button>
+          <a class="chat-nav-btn" href="/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</a>
           <div class="user-chip">
             <div class="user-avatar-sm" id="navAvatarTalentDetail">ИИ</div>
             <span id="navNameTalentDetail">Иван</span>
@@ -1274,11 +1304,11 @@
 <div class="page" id="pageDetail">
   <div class="detail-page">
     <nav class="detail-nav">
-      <button class="back-btn" onclick="goPage('pageMain')">← Назад к заказам</button>
-      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <a class="back-btn" href="/orders" data-route onclick="switchMainSector('work')">← Назад к заказам</a>
+      <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
         <div class="nav-user" id="navUserDetail">
-          <button class="chat-nav-btn" onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</button>
+          <a class="chat-nav-btn" href="/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</a>
           <div class="user-chip">
             <div class="user-avatar-sm" id="navAvatarDetail">ИИ</div>
             <span id="navNameDetail">Иван</span>
@@ -1298,9 +1328,9 @@
 <!-- ══════════════════════════════════ -->
 <div class="page" id="pageChats">
   <nav>
-    <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+    <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
     <div class="nav-links">
-      <a onclick="goPage('pageMain')">← К заказам</a>
+      <a href="/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
     </div>
     <div class="nav-actions">
       <div class="nav-user show" id="navUserChats">
@@ -1335,9 +1365,9 @@
 <div class="page" id="pageProfile">
   <div class="profile-page">
     <nav>
-      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div class="nav-links">
-        <a onclick="goPage('pageMain')">← К заказам</a>
+        <a href="/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
       </div>
       <div class="nav-actions">
         <div class="nav-user show">
@@ -1377,9 +1407,9 @@
 <div class="page" id="pageAbout">
   <div class="about-page">
     <nav>
-      <div class="logo" onclick="goPage('pageMain')">Free<span>Sun</span></div>
+      <a class="logo" href="/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div class="nav-links">
-        <a onclick="goPage('pageMain')">← К заказам</a>
+        <a href="/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
       </div>
       <div class="nav-actions">
         <div id="navGuestAbout" style="display:flex;gap:10px">
@@ -1387,10 +1417,10 @@
           <button class="btn btn-sun btn-sm" onclick="openAuth('register')">Регистрация</button>
         </div>
         <div class="nav-user" id="navUserAbout">
-          <div class="user-chip" onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer">
+          <a class="user-chip" href="/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer">
             <div class="user-avatar-sm" id="navAvatarAbout">ИИ</div>
             <span id="navNameAbout">Пользователь</span>
-          </div>
+          </a>
           <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
         </div>
       </div>
@@ -1453,6 +1483,7 @@
 <div class="toast" id="toast"><span id="toastIcon">✅</span> <span id="toastMsg"></span></div>
 
 <script>
+try {
 /* ════════════════════════════════════
          STORAGE HELPERS  (сервер + localStorage fallback)
 ════════════════════════════════════ */
@@ -2765,6 +2796,7 @@ function submitTalent() {
 
 /* ── INIT ── */
 (function init() {
+try {
   // Restore theme
   const savedTheme = lsGet(LS_THEME, 'light');
   if (savedTheme === 'dark') setTheme('dark');
@@ -2949,10 +2981,27 @@ function submitTalent() {
   };
   syncMobileMenu();
 
+} catch (err) {
+  console.error('ОШИБКА В init():', err);
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box.textContent = '⚠ ОШИБКА В init(): ' + err.message + (err.stack ? '\n\n' + err.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
+  if (document.body) document.body.prepend(box);
+}
 })();
+
+} catch (err2) {
+  console.error('ОШИБКА НА ВЕРХНЕМ УРОВНЕ ОСНОВНОГО СКРИПТА:', err2);
+  var box2 = document.createElement('div');
+  box2.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box2.textContent = '⚠ ОШИБКА НА ВЕРХНЕМ УРОВНЕ СКРИПТА: ' + err2.message + (err2.stack ? '\n\n' + err2.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box2); });
+  if (document.body) document.body.prepend(box2);
+}
 </script>
 <!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" crossorigin="anonymous"></script>
 <script>
 /* ════════════════════════════════════════════════════════════════
    FREESUN — WEB3 ESCROW INTEGRATION (ethers.js v5)
@@ -2968,6 +3017,7 @@ function submitTalent() {
    ════════════════════════════════════════════════════════════════ */
 
 (function () {
+try {
   if (typeof ethers === 'undefined') {
     console.error('ethers.js не загрузился — проверьте интернет-соединение и CDN-ссылку.');
     return;
@@ -3869,6 +3919,14 @@ function submitTalent() {
     if (userAddress) wbbRefresh();
   };
 
+} catch (err) {
+  console.error('ОШИБКА В escrow-блоке:', err);
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box.textContent = '⚠ ОШИБКА В escrow-блоке: ' + err.message + (err.stack ? '\n\n' + err.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
+  if (document.body) document.body.prepend(box);
+}
 })();
 
 /* devtools blocker removed */
@@ -3879,6 +3937,7 @@ function submitTalent() {
    Показывает только сумму USDT (по просьбе — компактно)
 ══════════════════════════════════════════════════ */
 (function() {
+try {
   'use strict';
 
   // Контракты USDT на сетях, где у него есть реальная стоимость
@@ -3983,9 +4042,225 @@ function submitTalent() {
       setTimeout(function() { wbbUpdate().catch(function(){}); }, 1000);
     };
   }
-
+} catch (err) {
+  console.error('ОШИБКА В wbb-блоке:', err);
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box.textContent = '⚠ ОШИБКА В wbb-блоке: ' + err.message + (err.stack ? '\n\n' + err.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
+  if (document.body) document.body.prepend(box);
+}
 })();
+</script>
 
+<!-- ══════════════════════════════════════════════════════════════
+     РОУТЕР (History API) — свой URL для каждого раздела.
+     Ничего не переписывает в логике выше: только слушает клики
+     по ссылкам с data-route, вызывает уже существующие функции
+     (goPage, openOrderDetail, switchMainSector, ...) и синхронно
+     обновляет адресную строку через pushState/replaceState.
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+try {
+
+  // ── 1. Таблица маршрутов ──────────────────────────────────────
+  // path — шаблон URL. render(params) — что показать. Порядок важен:
+  // сначала более специфичные (с параметром), потом общие.
+  const ROUTES = [
+    { path: '/',            render: () => { goPage('pageMain'); } },
+    { path: '/orders',      render: () => { goPage('pageMain'); switchMainSector('work'); } },
+    { path: '/talents',     render: () => { goPage('pageMain'); switchMainSector('talent'); } },
+    { path: '/about',       render: () => { goPage('pageAbout'); } },
+    { path: '/profile',     render: () => { requireRoute(() => goPage('pageProfile')); } },
+    { path: '/chat',        render: () => { requireRoute(() => goPage('pageChats')); } },
+    { path: '/chat/:id',    render: (p) => { requireRoute(() => { goPage('pageChats'); openChatWindow(parseId(p.id)); }); } },
+    { path: '/order/:id',   render: (p) => { openOrderDetailSafe(parseId(p.id)); } },
+    { path: '/user/:id',    render: (p) => { openTalentDetailSafe(parseId(p.id)); } },
+  ];
+
+  // openOrderDetail/openTalentDetail в исходном коде молча ничего не делают
+  // (return), если заказа/специалиста с таким id нет в загруженном списке —
+  // это нормально для клика по уже отрисованной карточке (id всегда валиден),
+  // но при прямом заходе по внешней/устаревшей ссылке экран остался бы пустым.
+  // Здесь просто проверяем результат и мягко откатываемся на список с уже
+  // существующим в проекте showToast — сама функция открытия не меняется.
+  function openOrderDetailSafe(id) {
+    openOrderDetail(id);
+    if (!document.getElementById('pageDetail').classList.contains('active')) {
+      goPage('pageMain'); switchMainSector('work');
+      if (typeof showToast === 'function') showToast('Заказ не найден или был удалён', '#E74C3C');
+    }
+  }
+  function openTalentDetailSafe(id) {
+    openTalentDetail(id);
+    if (!document.getElementById('pageTalentDetail').classList.contains('active')) {
+      goPage('pageMain'); switchMainSector('talent');
+      if (typeof showToast === 'function') showToast('Специалист не найден', '#E74C3C');
+    }
+  }
+
+  // id заказов/специалистов в этом проекте — либо маленькие demo-числа (1,2,3…),
+  // либо Date.now()-таймстемпы. И то и другое — число, поэтому приводим строку из URL к Number.
+  function parseId(raw) {
+    const n = Number(raw);
+    return Number.isNaN(n) ? raw : n;
+  }
+
+  // requireAuth() в исходном коде уже умеет: если юзер не залогинен — открыть
+  // модалку логина и НЕ выполнять callback. Роутер использует ровно эту же
+  // проверку, чтобы прямой заход на /profile или /chat без авторизации вёл
+  // себя так же, как клик по соответствующему пункту меню.
+  function requireRoute(cb) {
+    if (typeof currentUser !== 'undefined' && currentUser) { cb(); return; }
+    goPage('pageMain');
+    if (typeof requireAuth === 'function') requireAuth(cb);
+  }
+
+  // ── 2. Сопоставление текущего pathname с маршрутом ────────────
+  function matchRoute(pathname) {
+    for (const route of ROUTES) {
+      const paramNames = [];
+      const regexStr = route.path.replace(/:[^/]+/g, (m) => {
+        paramNames.push(m.slice(1));
+        return '([^/]+)';
+      });
+      const match = pathname.match(new RegExp('^' + regexStr + '/?$'));
+      if (match) {
+        const params = {};
+        paramNames.forEach((name, i) => { params[name] = decodeURIComponent(match[i + 1]); });
+        return { route, params };
+      }
+    }
+    return null;
+  }
+
+  // ── 3. Рендер текущего URL (при первой загрузке, popstate, и после pushState) ─
+  let renderingFromLocation = false; // защита от рекурсивного pushState во время рендера
+
+  // Единая точка для смены URL. В обычном хостинге pushState/replaceState
+  // работают штатно. Но в песочницах с эфемерным origin (например,
+  // srcdoc-iframe у некоторых превьюеров) браузер по спецификации блокирует
+  // смену URL на другой домен через SecurityError — это ограничение среды,
+  // а не баг роутера. Ловим именно эту ситуацию и тихо продолжаем: сама
+  // навигация (какая .page показана) при этом работает как обычно, просто
+  // адресная строка в такой песочнице остаётся неизменной.
+  function safeUpdateUrl(path, replace) {
+    try {
+      if (replace) history.replaceState({}, '', path);
+      else history.pushState({}, '', path);
+    } catch (e) {
+      if (e.name !== 'SecurityError') throw e; // неожиданную ошибку не прячем
+    }
+  }
+
+  function renderFromLocation() {
+    const found = matchRoute(location.pathname);
+    renderingFromLocation = true;
+    try {
+      if (found) {
+        found.route.render(found.params);
+      } else {
+        // Неизвестный путь — не 404-им молча, а мягко ведём на главную,
+        // чтобы шаренная битая/устаревшая ссылка не показывала пустой экран.
+        goPage('pageMain');
+        safeUpdateUrl('/', true);
+      }
+    } finally {
+      renderingFromLocation = false;
+    }
+  }
+
+  // ── 4. Программная навигация с обновлением URL ─────────────────
+  function navigateTo(path, { replace = false } = {}) {
+    if (location.pathname === path) return;
+    safeUpdateUrl(path, replace);
+    renderFromLocation();
+  }
+  window.navigateTo = navigateTo; // доступна и снаружи, если понадобится
+
+  // ── 5. Обёртки над существующими функциями: они продолжают делать
+  // всё то же самое, что и раньше, но теперь ещё и обновляют URL.
+  // Все места в коде, где эти функции уже вызываются напрямую
+  // (модалки заказа, карточки специалистов, кнопки в чате и т.д.),
+  // работают без изменений — patch делается один раз, здесь.
+  function wrap(name, toPath) {
+    const original = window[name];
+    if (typeof original !== 'function') return;
+    window[name] = function (...args) {
+      const result = original.apply(this, args);
+      if (!renderingFromLocation) {
+        const path = toPath(...args);
+        if (path && location.pathname !== path) safeUpdateUrl(path, false);
+      }
+      return result;
+    };
+  }
+
+  wrap('goPage', (id) => {
+    if (id === 'pageMain')    return currentSectorPath();
+    if (id === 'pageAbout')   return '/about';
+    if (id === 'pageProfile') return '/profile';
+    if (id === 'pageChats')   return '/chat';
+    // pageDetail / pageTalentDetail получают URL из openOrderDetail/openTalentDetail
+    // (там есть id, здесь его нет) — для них ничего не делаем.
+    return null;
+  });
+
+  function currentSectorPath() {
+    return (typeof currentSector !== 'undefined' && currentSector === 'talent') ? '/talents' : '/orders';
+  }
+
+  wrap('switchMainSector', (sector) => sector === 'talent' ? '/talents' : '/orders');
+  wrap('openOrderDetail',  (id) => '/order/' + id);
+  wrap('openTalentDetail', (id) => '/user/' + id);
+  wrap('openChatWindow',   (orderId) => '/chat/' + orderId);
+
+  // ── 6. Перехват кликов по ссылкам <a data-route href="/...">.
+  // Обычный клик — SPA-переход (без перезагрузки страницы браузером).
+  // Сам URL меняют исключительно wrap()-обёртки из шага 5 — они
+  // вызываются из onclick этой же ссылки (goPage/switchMainSector/…)
+  // и срабатывают, только если переход РЕАЛЬНО произошёл. Например,
+  // если пользователь не авторизован и requireAuth() отказал в
+  // переходе на /profile (открыл модалку логина вместо перехода) —
+  // goPage не вызывается, wrap не сработает, и URL корректно
+  // останется прежним, а не "убежит" вперёд состояния экрана.
+  // Здесь мы НЕ трогаем pushState — только гасим переход по href,
+  // чтобы браузер не делал полную перезагрузку страницы.
+  // Ctrl/Cmd/Shift/средняя кнопка мыши — отдаём браузеру как есть,
+  // чтобы "открыть в новой вкладке" продолжало работать нативно.
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('a[data-route]');
+    if (!link) return;
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    e.preventDefault();
+  });
+
+
+  // ── 7. Кнопка "назад/вперёд" браузера ──────────────────────────
+  window.addEventListener('popstate', renderFromLocation);
+
+  // ── 8. Первая отрисовка по текущему URL при загрузке страницы.
+  // init() (существующий IIFE) уже отработал синхронно выше и
+  // показал landingOverlay/pageMain по умолчанию — если в адресной
+  // строке был конкретный путь (например, при обновлении страницы
+  // на /order/456), переигрываем на нужный раздел поверх этого.
+  if (location.pathname !== '/') {
+    document.getElementById('landingOverlay').classList.add('hidden');
+    renderFromLocation();
+  }
+
+} catch (err) {
+  console.error('ОШИБКА В роутере:', err);
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box.textContent = '⚠ ОШИБКА В роутере: ' + err.message + (err.stack ? '\n\n' + err.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
+  if (document.body) document.body.prepend(box);
+}
+})();
 </script>
 </body>
 </html>
