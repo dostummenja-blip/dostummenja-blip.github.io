@@ -5,31 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreeSun — Биржа фриланса</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-  <script src="https://accounts.google.com/gsi/client" async defer
-    onerror="window.__gsiLoadFailed = true;"
-    onload="window.__gsiLoadSucceeded = true;"></script>
-  <script>
-    // ══ ВРЕМЕННАЯ ДИАГНОСТИКА: почему google авторизация недоступна ══
-    // Показывает через 3 секунды после загрузки, что реально произошло
-    // с сетевым запросом за accounts.google.com/gsi/client — это не
-    // зависит от того, успел ли пользователь кликнуть на кнопку раньше.
-    window.addEventListener('load', function () {
-      setTimeout(function () {
-        var msg;
-        if (window.__gsiLoadFailed) {
-          msg = '🔴 ДИАГНОСТИКА: скрипт accounts.google.com/gsi/client НЕ загрузился (сетевая ошибка/блокировка).';
-        } else if (window.__gsiLoadSucceeded && typeof google !== 'undefined' && google.accounts) {
-          msg = '🟢 ДИАГНОСТИКА: скрипт загрузился, google.accounts доступен — авторизация должна работать.';
-        } else if (window.__gsiLoadSucceeded) {
-          msg = '🟡 ДИАГНОСТИКА: скрипт загрузился (onload сработал), но google.accounts всё ещё недоступен.';
-        } else {
-          msg = '🟠 ДИАГНОСТИКА: ни onload, ни onerror не сработали за 3 секунды — скрипт завис или заблокирован до срабатывания событий.';
-        }
-        if (typeof showToast === 'function') showToast(msg, '#8e44ad');
-        else alert(msg);
-      }, 3000);
-    });
-  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1148,8 +1124,8 @@
   </section>
 
   <!-- HERO — TALENT SECTOR -->
-  <section class="hero" id="heroTalent" style="display:none; background:linear-gradient(160deg,#e8f8ef 0%,#FFF8EC 55%,#FFF0CC 100%)">
-    <div class="hero-sun" style="background:radial-gradient(circle,rgba(39,174,96,.3) 0%,transparent 70%)"></div>
+  <section class="hero" id="heroTalent" style="display:none">
+    <div class="hero-sun"></div>
     <div class="hero-badge" style="color:var(--leaf);border-color:#a8e6cf">🌟 Раздел для предпринимателей</div>
     <h1 style="color:#1C2B3A">Найдите <em style="background:linear-gradient(135deg,#F5A623,#E8960D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic">таланты</em><br><span style="color:#1C2B3A">для вашего бизнеса</span></h1>
     <p>Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.</p>
@@ -1232,7 +1208,7 @@
        Фрилансеры выставляют резюме,
        предприниматели их просматривают
   ════════════════════════════════════ -->
-  <section class="section section-alt" id="talentsSection" style="display:none;">
+  <section class="section" id="talentsSection" style="display:none;">
 
     <!-- Верхний баннер-кнопка для фрилансеров -->
     <div class="sector-post-banner">
