@@ -4,32 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreeSun — Биржа фриланса</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer
+    onerror="window.__gsiLoadFailed = true;"
+    onload="window.__gsiLoadSucceeded = true;"></script>
   <script>
-    // ══ ВРЕМЕННАЯ ДИАГНОСТИКА ══
-    // "Uncaught Error: Script error." без файла/строки — типичный признак
-    // того, что превьюер показывает ошибку из sandboxed iframe родительскому
-    // окну, которое считает содержимое cross-origin и обезличивает детали.
-    // Этот перехватчик ловит ошибку изнутри самой страницы (window.onerror
-    // здесь выполняется В ТОМ ЖЕ документе, где произошла ошибка — значит
-    // detail будет полным) и выводит её прямо в DOM, чтобы увидеть текст
-    // даже если внешняя консоль превьюера его прячет.
-    window.addEventListener('error', function (e) {
-      var box = document.createElement('div');
-      box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;'
-        + 'background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;'
-        + 'padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
-      box.textContent = '⚠ ' + e.message
-        + '\nФайл: ' + (e.filename || '—')
-        + '\nСтрока: ' + (e.lineno || '—') + ':' + (e.colno || '—')
-        + (e.error && e.error.stack ? '\n\n' + e.error.stack : '');
-      document.addEventListener('DOMContentLoaded', function () {
-        document.body.prepend(box);
-      });
-      if (document.body) document.body.prepend(box);
+    // ══ ВРЕМЕННАЯ ДИАГНОСТИКА: почему google авторизация недоступна ══
+    // Показывает через 3 секунды после загрузки, что реально произошло
+    // с сетевым запросом за accounts.google.com/gsi/client — это не
+    // зависит от того, успел ли пользователь кликнуть на кнопку раньше.
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var msg;
+        if (window.__gsiLoadFailed) {
+          msg = '🔴 ДИАГНОСТИКА: скрипт accounts.google.com/gsi/client НЕ загрузился (сетевая ошибка/блокировка).';
+        } else if (window.__gsiLoadSucceeded && typeof google !== 'undefined' && google.accounts) {
+          msg = '🟢 ДИАГНОСТИКА: скрипт загрузился, google.accounts доступен — авторизация должна работать.';
+        } else if (window.__gsiLoadSucceeded) {
+          msg = '🟡 ДИАГНОСТИКА: скрипт загрузился (onload сработал), но google.accounts всё ещё недоступен.';
+        } else {
+          msg = '🟠 ДИАГНОСТИКА: ни onload, ни onerror не сработали за 3 секунды — скрипт завис или заблокирован до срабатывания событий.';
+        }
+        if (typeof showToast === 'function') showToast(msg, '#8e44ad');
+        else alert(msg);
+      }, 3000);
     });
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
