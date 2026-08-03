@@ -1593,17 +1593,8 @@ function signInWithGoogle() {
     showToast('⚠️ Google авторизация недоступна. Проверьте соединение.','#e74c3c');
     return;
   }
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    auto_select: false,
-    cancel_on_tap_outside: true,
-  });
-  google.accounts.id.prompt(notification => {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      _googlePopupFallback();
-    }
-  });
+  // Directly use the popup OAuth2 flow — works reliably on all origins
+  _googlePopupFallback();
 }
 
 function _googlePopupFallback() {
@@ -1904,12 +1895,12 @@ function renderOrders(list) {
       </div>
       <div class="order-title">${o.title}</div>
       <div class="order-desc">${o.desc}</div>
+      ${(o.clientReviews && o.clientReviews.length > 0) ? `
+      <button class="btn-take" style="background:none;border:1.5px solid #E8EEF4;color:var(--text-soft);margin-bottom:14px;font-size:.82rem;padding:6px 14px" onclick="event.stopPropagation();openOrderClientReviews(${o.id})">💬 Отзывы (${o.clientReviews.length})</button>
+      ` : ''}
       <div class="order-footer">
         <div class="order-price">$${o.priceMin}–$${o.priceMax} <span>/ проект</span></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-take" style="background:none;border:1.5px solid #E8EEF4;color:var(--text-soft)" onclick="event.stopPropagation();openOrderClientReviews(${o.id})">Отзывы</button>
-          <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">Подробнее →</button>
-        </div>
+        <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">Подробнее →</button>
       </div>
     </div>
   `).join('');
