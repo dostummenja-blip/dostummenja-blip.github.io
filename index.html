@@ -957,6 +957,7 @@
     <div class="nav-links">
       <a href="#/orders" data-route onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800">💼 Найти работу</a>
       <a href="#/talents" data-route onclick="switchMainSector('talent')" id="navLinkTalent">🌟 Найти талант</a>
+      <a href="#/reviews" data-route onclick="switchMainSector('reviews')" id="navLinkReviews">⭐ Отзывы</a>
       <a href="#/about" data-route onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800">О сайте</a>
       <a id="navPostLink" href="#" onclick="event.preventDefault();requireAuth(()=>openPost())">Разместить заказ</a>
     </div>
@@ -984,6 +985,7 @@
     <div class="nav-mobile-dropdown" id="navMobileDropdown">
       <a href="#/orders" data-route onclick="switchMainSector('work');closeMobileNav()">💼 Найти работу</a>
       <a href="#/talents" data-route onclick="switchMainSector('talent');closeMobileNav()">🌟 Найти талант</a>
+      <a href="#/reviews" data-route onclick="switchMainSector('reviews');closeMobileNav()">⭐ Отзывы</a>
       <a href="#/about" data-route onclick="goPage('pageAbout');closeMobileNav()">ℹ️ О сайте</a>
       <a href="#" onclick="event.preventDefault();requireAuth(()=>{openPost();closeMobileNav()})">📋 Разместить заказ</a>
       <div class="mob-divider"></div>
@@ -1145,6 +1147,28 @@
     <h2>Вы фрилансер? ✨</h2>
     <p>Разместите резюме бесплатно — сотни предпринимателей ищут таланты прямо сейчас</p>
     <button class="btn btn-sun" onclick="requireAuth(()=>openPostTalent())">🌟 Разместить резюме бесплатно</button>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       РАЗДЕЛ «ОТЗЫВЫ»
+  ════════════════════════════════════ -->
+  <section class="section" id="reviewsSection" style="display:none;">
+    <div class="section-header" style="margin-top:0">
+      <h2>⭐ Отзывы о заказчиках</h2>
+      <p>Реальные отзывы фрилансеров о работе с предпринимателями на FreeSun</p>
+    </div>
+    <div id="allReviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:24px"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       РАЗДЕЛ «ОТЗЫВЫ»
+  ════════════════════════════════════ -->
+  <section class="section" id="reviewsSection" style="display:none;">
+    <div class="section-header" style="margin-top:0">
+      <h2>⭐ Отзывы о платформе</h2>
+      <p>Реальные истории фрилансеров и предпринимателей, которые нашли друг друга на FreeSun</p>
+    </div>
+    <div id="allReviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:8px"></div>
   </section>
 
   <footer><strong>FreeSun</strong> — летняя биржа фриланса &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Все права защищены</footer>
@@ -1396,42 +1420,71 @@ const DEFAULT_ORDERS = [
     desc:"Нужен современный сайт с меню, онлайн-бронированием столиков и полностью адаптивным дизайном для мобильных устройств. Стек на ваш выбор — важна скорость загрузки, SEO-оптимизация и красота визуала. Желательно наличие портфолио схожих работ. Возможна долгосрочная поддержка проекта.",
     priceMin:800, priceMax:1500, author:"АК", authorName:"Алексей К.", date:"Сегодня", isNew:true,
     tags:["React","Node.js","PostgreSQL","Адаптивный дизайн"],
-    clientReviews:[{author:'Игорь С., веб-разработчик', rating:5, text:'Чёткое ТЗ, быстро отвечал на вопросы, оплату получил день в день после сдачи.', date:'2 месяца назад'}] },
+    clientReviews:[
+      {author:'Игорь С., веб-разработчик', rating:5, text:'Чёткое ТЗ, быстро отвечал на вопросы, оплату получил день в день после сдачи.', date:'2 месяца назад'},
+      {author:'Кирилл М., фронтенд-разработчик', rating:5, text:'Отличный заказчик — знает чего хочет, не меняет требования в процессе. Рекомендую.', date:'3 месяца назад'},
+      {author:'Аня Д., fullstack', rating:4, text:'Работать приятно, оплата вовремя. Небольшие правки в конце, но всё в рамках ТЗ.', date:'4 месяца назад'}
+    ] },
   { id:2, title:"Логотип и фирменный стиль", cat:"Дизайн",
     desc:"Молодой бренд натуральной косметики ищет дизайнера для создания логотипа, цветовой палитры и базовых элементов брендбука (визитки, фирменный бланк, упаковка). Стиль — минимализм с природными мотивами. Предоставим референсы и бриф.",
     priceMin:300, priceMax:700, author:"МС", authorName:"Мария С.", date:"Вчера", isNew:true,
     tags:["Figma","Illustrator","Брендбук"],
-    clientReviews:[{author:'Вера Л., дизайнер', rating:5, text:'Приятно работать — сразу понятно, чего хочет заказчик, минимум правок.', date:'1 месяц назад'}] },
+    clientReviews:[
+      {author:'Вера Л., дизайнер', rating:5, text:'Приятно работать — сразу понятно, чего хочет заказчик, минимум правок.', date:'1 месяц назад'},
+      {author:'Олег П., графический дизайнер', rating:5, text:'Бриф подробный, референсы чёткие. Сделал всё с первого раза практически.', date:'2 месяца назад'},
+      {author:'Лиза К., иллюстратор', rating:5, text:'Мария очень вежливая, платит быстро и даёт полную свободу в рамках стиля.', date:'2,5 месяца назад'}
+    ] },
   { id:3, title:"SMM для Instagram магазина", cat:"SMM",
     desc:"Веду магазин handmade украшений из серебра. Нужен специалист для комплексного ведения Instagram: разработка контент-плана, создание постов и сторис, настройка таргетированной рекламы, работа с аудиторией. Опыт в fashion/украшениях — плюс.",
     priceMin:200, priceMax:400, author:"ДП", authorName:"Дарья П.", date:"2 дня назад", isNew:false,
     tags:["Instagram","Таргет","Контент"],
-    clientReviews:[{author:'Тимур А., SMM-специалист', rating:4, text:'Хороший заказчик, но задержала бриф на пару дней в начале.', date:'3 недели назад'}] },
+    clientReviews:[
+      {author:'Тимур А., SMM-специалист', rating:4, text:'Хороший заказчик, но задержала бриф на пару дней в начале.', date:'3 недели назад'},
+      {author:'Соня Р., контент-менеджер', rating:5, text:'Дарья очень открыта к идеям, легко согласовывает контент. Работать — удовольствие.', date:'1,5 месяца назад'}
+    ] },
   { id:4, title:"Написание SEO-текстов для сайта", cat:"Копирайтинг",
     desc:"Требуется опытный копирайтер для написания 10 SEO-оптимизированных статей на тему строительства загородных домов. Объём каждой — от 2000 слов. Ключевые слова и техзадание предоставим. Нужна грамотность, экспертность, уникальность от 95%.",
     priceMin:150, priceMax:300, author:"ВТ", authorName:"Виктор Т.", date:"3 дня назад", isNew:false,
     tags:["SEO","Копирайтинг","WordPress"],
-    clientReviews:[{author:'Полина Ж., копирайтер', rating:5, text:'Оплатил сразу после сдачи, ТЗ было максимально подробным.', date:'1 месяц назад'}] },
+    clientReviews:[
+      {author:'Полина Ж., копирайтер', rating:5, text:'Оплатил сразу после сдачи, ТЗ было максимально подробным.', date:'1 месяц назад'},
+      {author:'Антон В., SEO-автор', rating:5, text:'Виктор — один из лучших заказчиков с которыми работал. Чёткие ключи, понятная структура.', date:'2 месяца назад'},
+      {author:'Маша Е., контент-райтер', rating:4, text:'Хорошее ТЗ, оплата вовремя. Пару раз просил небольшие доработки — адекватные.', date:'2,5 месяца назад'}
+    ] },
   { id:5, title:"Мобильное приложение (iOS/Android)", cat:"Разработка",
     desc:"Стартап в сфере фитнеса ищет разработчика для создания MVP мобильного приложения с трекером тренировок, дневником питания и интеграцией с Apple Health / Google Fit. Важен опыт с React Native или Flutter. Работа по NDA.",
     priceMin:3000, priceMax:6000, author:"НЛ", authorName:"Никита Л.", date:"3 дня назад", isNew:false,
     tags:["React Native","Flutter","Firebase"],
-    clientReviews:[{author:'Влад К., Flutter-разработчик', rating:5, text:'Серьёзный подход, договор и NDA оформили без проблем.', date:'2 месяца назад'}] },
+    clientReviews:[
+      {author:'Влад К., Flutter-разработчик', rating:5, text:'Серьёзный подход, договор и NDA оформили без проблем.', date:'2 месяца назад'},
+      {author:'Рустам И., мобильный разработчик', rating:5, text:'Никита чётко понимает продукт, не дёргает по мелочам. Оплата по договору — без задержек.', date:'3 месяца назад'}
+    ] },
   { id:6, title:"Монтаж YouTube-роликов", cat:"Видео",
     desc:"Ищу монтажёра для постоянного сотрудничества. Обработка 8–10 роликов в месяц (~10–15 мин каждый). Тематика — бизнес и финансы. Стиль — динамичный, с анимацией текста, саундтреком, цветокоррекцией. Нужны примеры аналогичных работ.",
     priceMin:400, priceMax:800, author:"ЕВ", authorName:"Елена В.", date:"4 дня назад", isNew:false,
     tags:["Premiere Pro","After Effects","Motion"],
-    clientReviews:[{author:'Саша Р., видеомонтажёр', rating:5, text:'Работаем уже полгода на постоянной основе — стабильно и без задержек оплаты.', date:'2 недели назад'}] },
+    clientReviews:[
+      {author:'Саша Р., видеомонтажёр', rating:5, text:'Работаем уже полгода на постоянной основе — стабильно и без задержек оплаты.', date:'2 недели назад'},
+      {author:'Дима Ф., моушн-дизайнер', rating:5, text:'Елена знает чего хочет, присылает материалы организованно. Приятный заказчик.', date:'1 месяц назад'},
+      {author:'Катя Н., видеоредактор', rating:5, text:'Постоянный заказчик — надёжная оплата, интересный контент. Рекомендую всем монтажёрам.', date:'2 месяца назад'}
+    ] },
   { id:7, title:"Настройка Google Ads кампаний", cat:"Маркетинг",
     desc:"Требуется PPC-специалист для настройки и ведения рекламных кампаний интернет-магазина одежды. Бюджет рекламы — от $2000/мес. Нужен аудит текущих кампаний, реструктуризация, A/B-тесты. Желательно наличие сертификата Google.",
     priceMin:500, priceMax:1000, author:"РМ", authorName:"Роман М.", date:"5 дней назад", isNew:false,
     tags:["Google Ads","Analytics","CRO"],
-    clientReviews:[{author:'Настя В., PPC-специалист', rating:4, text:'Адекватный бюджет и реалистичные ожидания по срокам.', date:'1 месяц назад'}] },
+    clientReviews:[
+      {author:'Настя В., PPC-специалист', rating:4, text:'Адекватный бюджет и реалистичные ожидания по срокам.', date:'1 месяц назад'},
+      {author:'Артём С., маркетолог', rating:5, text:'Роман чётко описал KPI, не меняет цели в процессе. Результаты видны уже через 2 недели.', date:'1,5 месяца назад'}
+    ] },
   { id:8, title:"Иллюстрации для детской книги", cat:"Дизайн",
     desc:"Небольшое издательство ищет иллюстратора для создания 20 цветных иллюстраций к детской книге 6+ в тёплом акварельном стиле. Текст и подробное описание сцен предоставим. Права переходят к заказчику. Дедлайн — 6 недель.",
     priceMin:1200, priceMax:2500, author:"ОК", authorName:"Ольга К.", date:"6 дней назад", isNew:false,
     tags:["Акварель","Procreate","Иллюстрация"],
-    clientReviews:[{author:'Женя Т., иллюстратор', rating:5, text:'Понятное ТЗ по сценам, права на работы оформили официально по договору.', date:'3 недели назад'}] },
+    clientReviews:[
+      {author:'Женя Т., иллюстратор', rating:5, text:'Понятное ТЗ по сценам, права на работы оформили официально по договору.', date:'3 недели назад'},
+      {author:'Лера С., художник', rating:5, text:'Ольга даёт свободу в интерпретации сцен — это редкость. Результат все оценили.', date:'1,5 месяца назад'},
+      {author:'Макс Д., иллюстратор', rating:4, text:'Хороший заказчик, референсы подробные. Сроки сжатые, но выполнимые.', date:'2 месяца назад'}
+    ] },
 ];
 
 const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
@@ -2348,25 +2401,29 @@ function chooseSector(sector) {
 
 function switchMainSector(sector) {
   currentSector = sector;
-  const isWork   = sector === 'work';
-  const isTalent = sector === 'talent';
+  const isWork    = sector === 'work';
+  const isTalent  = sector === 'talent';
+  const isReviews = sector === 'reviews';
 
   document.getElementById('heroWork').style.display   = isWork   ? '' : 'none';
   document.getElementById('heroTalent').style.display = isTalent ? '' : 'none';
 
-  document.getElementById('ordersSection').style.display  = isWork   ? '' : 'none';
-  document.getElementById('talentsSection').style.display = isTalent ? '' : 'none';
-  document.getElementById('talentPostCta').style.display  = isTalent ? '' : 'none';
+  document.getElementById('ordersSection').style.display   = isWork    ? '' : 'none';
+  document.getElementById('talentsSection').style.display  = isTalent  ? '' : 'none';
+  document.getElementById('talentPostCta').style.display   = isTalent  ? '' : 'none';
+  document.getElementById('reviewsSection').style.display  = isReviews ? '' : 'none';
 
   const how = document.getElementById('how');
-  if (how) how.style.display = '';
+  if (how) how.style.display = isReviews ? 'none' : '';
 
   const nlw = document.getElementById('navLinkWork');
   const nlt = document.getElementById('navLinkTalent');
-  nlw.style.color      = isWork   ? 'var(--sky-deep)' : '';
-  nlw.style.fontWeight = isWork   ? '800' : '600';
-  nlt.style.color      = isTalent ? 'var(--leaf)'     : '';
-  nlt.style.fontWeight = isTalent ? '800' : '600';
+  const nlr = document.getElementById('navLinkReviews');
+  nlw.style.color      = isWork    ? 'var(--sky-deep)' : '';
+  nlw.style.fontWeight = isWork    ? '800' : '600';
+  nlt.style.color      = isTalent  ? 'var(--leaf)'     : '';
+  nlt.style.fontWeight = isTalent  ? '800' : '600';
+  if (nlr) { nlr.style.color = isReviews ? 'var(--sun)' : ''; nlr.style.fontWeight = isReviews ? '800' : '600'; }
 
   const pl = document.getElementById('navPostLink');
   if (pl) {
@@ -2379,8 +2436,56 @@ function switchMainSector(sector) {
     }
   }
 
+  if (isReviews) renderAllReviews();
+
   goPage('pageMain');
   window.scrollTo(0, 0);
+}
+
+function renderAllReviews() {
+  const grid = document.getElementById('allReviewsGrid');
+  if (!grid) return;
+  const orders = lsGet('fs_orders', DEFAULT_ORDERS);
+  const talents = lsGet('fs_talents', DEFAULT_TALENTS);
+  const cards = [];
+
+  // Collect reviews from orders
+  orders.forEach(o => {
+    (o.clientReviews || []).forEach(r => {
+      cards.push({ author: r.author, rating: r.rating, text: r.text, date: r.date,
+        subject: o.authorName, subjectRole: 'Заказчик', tag: o.cat, onClick: `openOrderDetail(${o.id})`, label: o.title });
+    });
+  });
+
+  // Collect reviews from talents
+  talents.forEach(t => {
+    (t.reviews || []).forEach(r => {
+      cards.push({ author: r.author, rating: r.rating, text: r.text, date: r.date,
+        subject: t.name, subjectRole: t.role, tag: t.cat, onClick: `openTalentDetail(${t.id})`, label: t.name });
+    });
+  });
+
+  if (!cards.length) {
+    grid.innerHTML = '<p style="color:var(--text-soft)">Пока нет отзывов.</p>';
+    return;
+  }
+
+  grid.innerHTML = cards.map(c => `
+    <div class="review-card" style="cursor:pointer" onclick="${c.onClick}" title="Открыть профиль">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-weight:800;font-size:.95rem;color:var(--text)">${c.subject}</div>
+          <div style="font-size:.78rem;color:var(--text-soft)">${c.subjectRole}</div>
+        </div>
+        <span class="order-cat" style="font-size:.7rem;padding:3px 8px">${c.tag}</span>
+      </div>
+      <div class="review-card-top">
+        <span class="review-author">${c.author}</span>
+        <span class="review-date">${c.date}</span>
+      </div>
+      <div class="review-stars">${'⭐'.repeat(Math.round(c.rating))}</div>
+      <p class="review-text">${c.text}</p>
+    </div>`).join('');
 }
 
 function scrollToTalents() {
@@ -3801,6 +3906,7 @@ try {
     { path: '/',            render: () => { goPage('pageMain'); } },
     { path: '/orders',      render: () => { goPage('pageMain'); switchMainSector('work'); } },
     { path: '/talents',     render: () => { goPage('pageMain'); switchMainSector('talent'); } },
+    { path: '/reviews',     render: () => { goPage('pageMain'); switchMainSector('reviews'); } },
     { path: '/about',       render: () => { goPage('pageAbout'); } },
     { path: '/profile',     render: () => { requireRoute(() => goPage('pageProfile')); } },
     { path: '/chat',        render: () => { requireRoute(() => goPage('pageChats')); } },
