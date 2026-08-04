@@ -631,7 +631,11 @@
  .detail-author-info span{font-size:.83rem;color:var(--text-soft)}
  .detail-title{font-family:'Fraunces',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:800;color:var(--text);line-height:1.25;margin-bottom:16px}
  .detail-desc{font-size:1rem;color:var(--text-soft);line-height:1.8;margin-bottom:28px}
- .detail-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:0}
+ .detail-info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:0}
+ .detail-info-item-btn{background:#1e2a4a;border-radius:14px;padding:16px 18px;cursor:pointer;border:none;width:100%;text-align:left;transition:opacity .2s;display:flex;flex-direction:column;justify-content:center;min-height:80px;}
+ .detail-info-item-btn:active{opacity:.75}
+ .detail-info-item-btn .detail-info-label{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75) !important;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+ .detail-info-item-btn .detail-info-value{color:#fff !important;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700}
  .detail-info-item{background:var(--sand);border-radius:14px;padding:16px 18px}
  .detail-info-label{font-size:.75rem;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
  .detail-info-value{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--text)}
@@ -1895,9 +1899,6 @@ function renderOrders(list) {
       </div>
       <div class="order-title">${o.title}</div>
       <div class="order-desc">${o.desc}</div>
-      ${(o.clientReviews && o.clientReviews.length > 0) ? `
-      <button class="btn-take" style="background:none;border:1.5px solid #E8EEF4;color:var(--text-soft);margin-bottom:14px;font-size:.82rem;padding:6px 14px" onclick="event.stopPropagation();openOrderClientReviews(${o.id})">💬 Отзывы (${o.clientReviews.length})</button>
-      ` : ''}
       <div class="order-footer">
         <div class="order-price">$${o.priceMin}–$${o.priceMax} <span>/ проект</span></div>
         <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">Подробнее →</button>
@@ -2013,6 +2014,11 @@ function openOrderDetail(id) {
           <div class="detail-info-label">📅 Опубликован</div>
           <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${o.date}</div>
         </div>
+        ${(o.clientReviews && o.clientReviews.length > 0) ? `
+        <button class="detail-info-item-btn" style="background:#1e2a4a;border-radius:14px;padding:16px 18px;border:none;width:100%;text-align:left;display:flex;flex-direction:column;justify-content:center;min-height:80px;cursor:pointer;" onclick="document.getElementById('clientReviews').scrollIntoView({behavior:'smooth'})">
+          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 Отзывы</div>
+          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${o.clientReviews.length} отзыв${o.clientReviews.length > 1 ? 'а' : ''}</div>
+        </button>` : ''}
       </div>
     </div>
 
@@ -2441,10 +2447,7 @@ function renderTalents(list) {
       <div class="talent-skills">${t.skills.map(s=>`<span class="talent-skill">${s}</span>`).join('')}</div>
       <div class="talent-footer">
         <div class="talent-rate">$${t.rateMin}–$${t.rateMax} <span>/ час</span></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-contact" style="background:none;border:1.5px solid #E8EEF4;color:var(--text-soft)" onclick="event.stopPropagation();openTalentReviews(${t.id})">Отзывы</button>
-          <button class="btn-contact" onclick="event.stopPropagation();openTalentDetail(${t.id})">Подробнее →</button>
-        </div>
+        <button class="btn-contact" onclick="event.stopPropagation();openTalentDetail(${t.id})">Подробнее →</button>
       </div>
     </div>
   `).join('');
@@ -2523,6 +2526,11 @@ function openTalentDetail(talentId) {
           <div class="detail-info-label">⭐ Рейтинг</div>
           <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${t.rating} / 5.0</div>
         </div>
+        ${(t.reviews && t.reviews.length > 0) ? `
+        <button class="detail-info-item-btn" style="background:#1e2a4a;border-radius:14px;padding:16px 18px;border:none;width:100%;text-align:left;display:flex;flex-direction:column;justify-content:center;min-height:80px;cursor:pointer;" onclick="document.getElementById('talentReviews').scrollIntoView({behavior:'smooth',block:'start'})">
+          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 Отзывы</div>
+          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${t.reviews.length} отзыв${t.reviews.length > 1 ? 'а' : ''}</div>
+        </button>` : ''}
       </div>
     </div>
 
