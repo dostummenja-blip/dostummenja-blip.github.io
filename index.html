@@ -1502,18 +1502,44 @@ function lsSet(key, val) {
 }
 async function ssRefresh(key) { return false; }
 
+// Демо-заказы/специалисты (id 1-8 и 101-10x) всегда обновляются свежим
+// содержимым из кода (включая отзывы), даже если в localStorage/на сервере
+// осталась старая версия. Реальные объявления пользователей (id = Date.now())
+// никогда не трогаются.
+function refreshSeedData(list, defaults) {
+  if (!Array.isArray(list)) list = [];
+  const byId = {};
+  defaults.forEach(d => { byId[d.id] = d; });
+  let changed = false;
+  const seenIds = new Set();
+  const merged = list.map(item => {
+    seenIds.add(item.id);
+    const fresh = byId[item.id];
+    if (fresh && JSON.stringify(fresh) !== JSON.stringify(item)) { changed = true; return fresh; }
+    return item;
+  });
+  defaults.forEach(d => {
+    if (!seenIds.has(d.id)) { merged.unshift(d); changed = true; }
+  });
+  return { merged, changed };
+}
+
 async function loadSharedDataFromServer() {
   const srvOrders = await serverGet(LS_ORDERS);
   if (srvOrders && Array.isArray(srvOrders) && srvOrders.length > 0) {
-    try { localStorage.setItem(LS_ORDERS, JSON.stringify(srvOrders)); } catch(e) {}
-    orders = srvOrders;
+    const r = refreshSeedData(srvOrders, DEFAULT_ORDERS);
+    try { localStorage.setItem(LS_ORDERS, JSON.stringify(r.merged)); } catch(e) {}
+    if (r.changed) serverSet(LS_ORDERS, r.merged);
+    orders = r.merged;
     orders = pruneExpiredOrders(orders);
     filterOrders ? filterOrders() : renderOrders(orders);
   }
   const srvTalents = await serverGet(LS_TALENTS);
   if (srvTalents && Array.isArray(srvTalents) && srvTalents.length > 0) {
-    try { localStorage.setItem(LS_TALENTS, JSON.stringify(srvTalents)); } catch(e) {}
-    talents = srvTalents;
+    const rt = refreshSeedData(srvTalents, DEFAULT_TALENTS);
+    try { localStorage.setItem(LS_TALENTS, JSON.stringify(rt.merged)); } catch(e) {}
+    if (rt.changed) serverSet(LS_TALENTS, rt.merged);
+    talents = rt.merged;
     filterTalents ? filterTalents() : renderTalents(talents);
   }
   const srvUsers = await serverGet('fs_users');
@@ -1529,10 +1555,12 @@ async function loadSharedDataFromServer() {
 async function pollServerOrders() {
   const srvOrders = await serverGet(LS_ORDERS);
   if (srvOrders && Array.isArray(srvOrders)) {
+    const r = refreshSeedData(srvOrders, DEFAULT_ORDERS);
     const local = lsGet(LS_ORDERS, []);
-    if (JSON.stringify(srvOrders) !== JSON.stringify(local)) {
-      try { localStorage.setItem(LS_ORDERS, JSON.stringify(srvOrders)); } catch(e) {}
-      orders = srvOrders;
+    if (JSON.stringify(r.merged) !== JSON.stringify(local)) {
+      try { localStorage.setItem(LS_ORDERS, JSON.stringify(r.merged)); } catch(e) {}
+      if (r.changed) serverSet(LS_ORDERS, r.merged);
+      orders = r.merged;
       orders = pruneExpiredOrders(orders);
       if (typeof filterOrders === 'function') filterOrders(); else renderOrders(orders);
     }
@@ -1541,10 +1569,12 @@ async function pollServerOrders() {
 async function pollServerTalents() {
   const srvTalents = await serverGet(LS_TALENTS);
   if (srvTalents && Array.isArray(srvTalents)) {
+    const rt = refreshSeedData(srvTalents, DEFAULT_TALENTS);
     const local = lsGet(LS_TALENTS, []);
-    if (JSON.stringify(srvTalents) !== JSON.stringify(local)) {
-      try { localStorage.setItem(LS_TALENTS, JSON.stringify(srvTalents)); } catch(e) {}
-      talents = srvTalents;
+    if (JSON.stringify(rt.merged) !== JSON.stringify(local)) {
+      try { localStorage.setItem(LS_TALENTS, JSON.stringify(rt.merged)); } catch(e) {}
+      if (rt.changed) serverSet(LS_TALENTS, rt.merged);
+      talents = rt.merged;
       if (typeof filterTalents === 'function') filterTalents(); else renderTalents(talents);
     }
   }
@@ -1583,6 +1613,11 @@ let activeChatId = null;
 let orders = lsGet(LS_ORDERS, null);
 if (!orders) { orders = DEFAULT_ORDERS; }
 orders = pruneExpiredOrders(orders);
+{
+  const r = refreshSeedData(orders, DEFAULT_ORDERS);
+  orders = r.merged;
+  if (r.changed) lsSet(LS_ORDERS, orders);
+}
 
 function chatKey(orderId) { return LS_CHATS + '_' + orderId; }
 function loadChat(orderId) { return lsGet(chatKey(orderId), null); }
@@ -2528,6 +2563,11 @@ const DEFAULT_TALENTS = [
 
 let talents = lsGet(LS_TALENTS, null);
 if (!talents) { talents = DEFAULT_TALENTS; }
+{
+  const rt = refreshSeedData(talents, DEFAULT_TALENTS);
+  talents = rt.merged;
+  if (rt.changed) lsSet(LS_TALENTS, talents);
+}
 
 let activeTalentCat = '';
 
