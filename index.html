@@ -163,6 +163,7 @@
  body.dark .profile-body .profile-section-title{color:#8a9bb5}
  body.dark .nav-mobile-dropdown a{color:#e8edf5}
  body.dark nav{background:#1e2535}
+body.dark .notif-btn{background:#2d3650;color:#e8edf5}
  body.dark .modal{background:#242b3d}
  body.dark .form-group input,body.dark .form-group textarea,body.dark .form-group select{background:#1a1f2e;border-color:#3a4558;color:#e8edf5}
  body.dark .order-card{background:#242b3d;border-color:#3a4558}
@@ -761,6 +762,9 @@
  body.dark .nav-mobile-dropdown a{color:#e8edf5}
  body.dark .nav-mobile-dropdown a:hover{background:#242b3d}
  @media(max-width:980px){
+ .profile-tabs{overflow-x:auto;gap:4px}
+ .profile-tab{white-space:nowrap;flex:none;padding:9px 12px;font-size:.78rem}
+ .notif-panel{right:8px;width:calc(100vw - 16px);max-width:360px}
  nav{padding:14px 18px;position:relative}
  .nav-links{display:none}
  .nav-actions{display:none !important}
@@ -812,7 +816,156 @@
  @media(max-width:980px){.escrow-card{padding:22px}}
  a.logo,a.user-chip,a.chat-nav-btn,a.back-btn{
  text-decoration:none;color:inherit;
-}</style>
+}
+/* ═══ NOTIFICATIONS ═══ */
+.notif-btn{position:relative;padding:8px 14px;border-radius:50px;background:var(--sand-mid);border:none;cursor:pointer;font-size:1.1rem;transition:all .2s}
+.notif-btn:hover{background:var(--sky);color:var(--white)}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:#E74C3C;border-radius:50%;font-size:.62rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center}
+.notif-panel{position:fixed;top:62px;right:18px;width:340px;background:var(--white);border-radius:18px;box-shadow:0 16px 48px rgba(18,33,59,.2);border:1.5px solid #EEF4FA;z-index:900;display:none;overflow:hidden;animation:slideDown .2s ease}
+.notif-panel.open{display:block}
+.notif-header{padding:16px 20px 12px;border-bottom:1px solid #EEF4FA;display:flex;align-items:center;justify-content:space-between}
+.notif-header h4{font-weight:800;font-size:.95rem;color:var(--text)}
+.notif-clear{font-size:.78rem;color:var(--sky);font-weight:700;cursor:pointer;border:none;background:none;padding:0}
+.notif-list{max-height:340px;overflow-y:auto}
+.notif-item{padding:14px 20px;border-bottom:1px solid #F5F7FA;cursor:pointer;transition:background .15s;display:flex;gap:12px;align-items:flex-start}
+.notif-item:hover{background:var(--sand)}
+.notif-item.unread{background:#F0F8FF}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--sky);flex-shrink:0;margin-top:5px}
+.notif-dot.read{background:transparent}
+.notif-content p{font-size:.88rem;color:var(--text);line-height:1.4;font-weight:600}
+.notif-content span{font-size:.75rem;color:var(--text-soft);margin-top:2px;display:block}
+.notif-empty{padding:32px 20px;text-align:center;color:var(--text-soft);font-size:.9rem}
+body.dark .notif-panel{background:#242b3d;border-color:#3a4558}
+body.dark .notif-item{border-bottom-color:#3a4558}
+body.dark .notif-item:hover{background:#1a1f2e}
+body.dark .notif-item.unread{background:#1e2a3a}
+body.dark .notif-content p{color:#e8edf5}
+
+/* ═══ SKELETON LOADERS ═══ */
+.skeleton{background:linear-gradient(90deg,var(--sand-mid) 25%,var(--white) 50%,var(--sand-mid) 75%);background-size:200% 100%;animation:skeletonShimmer 1.5s infinite;border-radius:8px}
+@keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-card{background:var(--white);border-radius:var(--radius);padding:26px;box-shadow:var(--card-shadow);border:1.5px solid #EEF4FA}
+.sk-line{height:14px;margin-bottom:10px}
+.sk-line.short{width:40%}.sk-line.med{width:70%}.sk-line.full{width:100%}
+.sk-avatar{width:48px;height:48px;border-radius:50%}
+body.dark .skeleton{background:linear-gradient(90deg,#2d3650 25%,#3a4558 50%,#2d3650 75%);background-size:200% 100%}
+
+/* ═══ BOOKMARK BUTTON ═══ */
+.bookmark-btn{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;box-shadow:0 2px 8px rgba(18,33,59,.12);transition:all .2s;z-index:2}
+.bookmark-btn:hover{transform:scale(1.12);box-shadow:0 4px 14px rgba(18,33,59,.18)}
+.bookmark-btn.active{background:var(--sun);color:var(--white)}
+body.dark .bookmark-btn{background:#2d3650}
+
+/* ═══ BOOKMARKS PAGE ═══ */
+.bookmarks-empty{text-align:center;padding:60px 20px;color:var(--text-soft)}
+.bookmarks-empty .be-icon{font-size:3rem;margin-bottom:14px}
+
+/* ═══ FILTER SIDEBAR ═══ */
+.filter-sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:450;display:none}
+.filter-sidebar-overlay.open{display:block}
+.filter-sidebar{position:fixed;left:0;top:0;bottom:0;width:300px;background:var(--white);z-index:460;padding:28px 24px;overflow-y:auto;transform:translateX(-100%);transition:transform .3s cubic-bezier(.16,1,.3,1);box-shadow:4px 0 24px rgba(18,33,59,.12)}
+.filter-sidebar.open{transform:translateX(0)}
+.filter-sidebar h3{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:22px}
+.filter-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-soft);margin-top:-4px}
+.filter-group{margin-bottom:22px}
+.filter-label{font-size:.78rem;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.filter-range{display:flex;gap:10px;align-items:center}
+.filter-range input{flex:1;padding:10px 14px;border-radius:10px;border:2px solid #E8EEF4;font-family:'Inter',sans-serif;font-size:.9rem;color:var(--text);background:var(--white);outline:none}
+.filter-range input:focus{border-color:var(--sky)}
+.filter-range span{color:var(--text-soft);font-weight:700;font-size:.85rem}
+.filter-tags{display:flex;flex-wrap:wrap;gap:7px}
+.filter-tag{padding:6px 14px;border-radius:50px;border:2px solid #E8EEF4;font-size:.82rem;font-weight:700;color:var(--text-soft);cursor:pointer;transition:all .18s}
+.filter-tag.active,.filter-tag:hover{background:var(--sky);color:var(--white);border-color:var(--sky)}
+.filter-apply{width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--sky),var(--sky-deep));color:#fff;font-weight:800;font-size:.95rem;border:none;cursor:pointer;margin-top:8px;transition:all .2s}
+.filter-apply:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(59,175,218,.35)}
+.filter-reset{width:100%;padding:11px;border-radius:12px;background:transparent;color:var(--text-soft);font-weight:700;font-size:.88rem;border:2px solid #E8EEF4;cursor:pointer;margin-top:8px;transition:all .2s}
+.filter-reset:hover{border-color:var(--sky);color:var(--sky-deep)}
+.filter-btn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:2px solid #E8EEF4;background:var(--white);font-weight:700;font-size:.9rem;color:var(--text);cursor:pointer;transition:all .2s;margin-bottom:16px}
+.filter-btn:hover{border-color:var(--sky);color:var(--sky-deep)}
+.filter-btn .filter-count{background:var(--sky);color:#fff;border-radius:50px;font-size:.72rem;font-weight:900;padding:1px 7px}
+body.dark .filter-sidebar{background:#242b3d}
+body.dark .filter-range input{background:#1a1f2e;border-color:#3a4558;color:#e8edf5}
+body.dark .filter-tag{border-color:#3a4558;color:#8a9bb5}
+body.dark .filter-reset{border-color:#3a4558;color:#8a9bb5}
+body.dark .filter-btn{background:#242b3d;border-color:#3a4558;color:#e8edf5}
+
+/* ═══ BREADCRUMB ═══ */
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text-soft);margin-bottom:20px;flex-wrap:wrap}
+.breadcrumb a{color:var(--sky);font-weight:700;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb .bc-sep{color:var(--text-soft)}
+
+/* ═══ DASHBOARD ═══ */
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.dash-card{background:var(--white);border-radius:16px;padding:22px 20px;box-shadow:var(--card-shadow);border:1.5px solid #EEF4FA;text-align:center}
+.dash-icon{font-size:1.8rem;margin-bottom:10px}
+.dash-num{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:800;color:var(--text);line-height:1}
+.dash-label{font-size:.8rem;color:var(--text-soft);font-weight:600;margin-top:4px}
+.dash-chart{background:var(--white);border-radius:16px;padding:22px;box-shadow:var(--card-shadow);border:1.5px solid #EEF4FA;margin-bottom:24px}
+.dash-chart h4{font-weight:800;font-size:.95rem;color:var(--text);margin-bottom:16px}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:80px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(135deg,var(--sky),var(--sky-deep));min-height:4px;transition:all .4s ease}
+.chart-bar-label{font-size:.68rem;color:var(--text-soft);font-weight:600}
+body.dark .dash-card{background:#242b3d;border-color:#3a4558}
+body.dark .dash-chart{background:#242b3d;border-color:#3a4558}
+body.dark .dash-num{color:#e8edf5}
+
+/* ═══ PORTFOLIO / PROJECT PHOTOS ═══ */
+.portfolio-section{margin-top:22px}
+.portfolio-title{font-weight:800;font-size:.95rem;color:var(--text);margin-bottom:14px}
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.portfolio-item{border-radius:12px;overflow:hidden;aspect-ratio:1;background:var(--sand-mid);cursor:pointer;position:relative;border:2px solid transparent;transition:border-color .2s}
+.portfolio-item:hover{border-color:var(--sky)}
+.portfolio-item img{width:100%;height:100%;object-fit:cover}
+.portfolio-item-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-soft)}
+.portfolio-add{border:2px dashed #D0DDE8;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--text-soft);font-size:.8rem;font-weight:700;transition:all .2s}
+.portfolio-add:hover{border-color:var(--sky);color:var(--sky)}
+.portfolio-add-icon{font-size:1.6rem}
+
+/* ═══ PHOTO UPLOAD AVATAR ═══ */
+.avatar-upload-wrap{position:relative;width:80px;height:80px;margin:0 auto 16px;cursor:pointer}
+.avatar-upload-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(18,33,59,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:1.3rem}
+.avatar-upload-wrap:hover .avatar-upload-overlay{opacity:1}
+.avatar-upload-input{display:none}
+
+/* ═══ AVAILABILITY CALENDAR ═══ */
+.avail-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.avail-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .18s;color:var(--text-soft)}
+.avail-day.available{background:#EAFAF1;color:var(--leaf);border-color:#A8E6CF}
+.avail-day.busy{background:#FDEDEC;color:#E74C3C;border-color:#F1948A}
+.avail-day:hover{transform:scale(1.1)}
+.avail-day-label{font-size:.7rem;text-align:center;color:var(--text-soft);font-weight:700;padding-bottom:2px}
+.avail-legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.avail-legend-item{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--text-soft)}
+.avail-dot{width:10px;height:10px;border-radius:3px}
+
+/* ═══ SEARCH HISTORY ═══ */
+.search-history{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.search-history-item{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:50px;background:var(--sand-mid);font-size:.8rem;font-weight:700;color:var(--text-soft);cursor:pointer;transition:all .18s}
+.search-history-item:hover{background:var(--sky);color:#fff}
+.search-history-item .sh-remove{font-size:.7rem;opacity:.6;margin-left:2px}
+
+/* ═══ RATING MODAL ═══ */
+.star-row{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.star-btn{font-size:2rem;cursor:pointer;transition:transform .15s;opacity:.4}
+.star-btn.active,.star-btn:hover{opacity:1;transform:scale(1.15)}
+
+/* ═══ NAV TABS PROFILE ═══ */
+.profile-tabs{display:flex;gap:0;background:var(--sand-mid);border-radius:12px;padding:4px;margin-bottom:20px}
+.profile-tab{flex:1;padding:10px 8px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;font-size:.85rem;color:var(--text-soft);background:transparent;transition:all .2s;text-align:center}
+.profile-tab.active{background:var(--white);color:var(--text);box-shadow:0 2px 10px rgba(18,33,59,.1)}
+body.dark .profile-tab.active{background:#1a1f2e}
+
+/* ═══ EXPORT CV ═══ */
+.cv-preview{background:var(--sand);border-radius:14px;padding:18px;font-size:.88rem;line-height:1.8;color:var(--text);margin-top:12px;white-space:pre-line}
+
+/* ═══ DARK MODE EXTRAS ═══ */
+body.dark .filter-sidebar-overlay{background:rgba(0,0,0,.6)}
+body.dark .portfolio-item{background:#2d3650}
+body.dark .avail-day{color:#8a9bb5}
+body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
+</style>
 </head>
 <body>
 
@@ -941,6 +1094,15 @@
       <div class="form-group"><label>Ставка от ($/ч)</label><input type="number" id="talentRateMin" placeholder="15" min="0"/></div>
       <div class="form-group"><label>Ставка до ($/ч)</label><input type="number" id="talentRateMax" placeholder="40" min="0"/></div>
     </div>
+    <div class="form-group">
+      <label>📸 Фото проектов (необязательно)</label>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('talentModalPhotoInput').click()">+ Загрузить фото</button>
+        <span style="font-size:.8rem;color:var(--text-soft)" id="talentModalPhotoCount">0 фото выбрано</span>
+      </div>
+      <input type="file" id="talentModalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleTalentModalPhotos(event)"/>
+      <div id="talentModalPhotoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+    </div>
     <button class="btn btn-leaf btn-full" onclick="submitTalent()">✨ Опубликовать портфолио</button>
   </div>
 
@@ -970,6 +1132,9 @@
         <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">
           💬 Чаты <span class="chat-badge" id="chatBadge" style="display:none">0</span>
         </a>
+        <button class="notif-btn" onclick="toggleNotifPanel()" title="Уведомления" id="notifBtn">
+          🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </button>
         <a class="user-chip" href="#/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer" title="Мой профиль">
           <div class="user-avatar-sm" id="navAvatar">ИИ</div>
           <span id="navName">Иван И.</span>
@@ -996,6 +1161,7 @@
       <div id="mobUserLinks" style="display:none;flex-direction:column;gap:6px">
         <a href="#/chat" data-route onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})">💬 Чаты</a>
         <a href="#/profile" data-route onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})">👤 Профиль</a>
+        <a href="#" onclick="event.preventDefault();requireAuth(()=>{goPage('pageProfile');setTimeout(()=>switchProfileTab('bookmarks',document.querySelectorAll('.profile-tab')[3]),150)});closeMobileNav()">🔖 Избранное</a>
         <a href="#" onclick="event.preventDefault();doLogout();closeMobileNav()">🚪 Выйти</a>
       </div>
     </div>
@@ -1083,10 +1249,14 @@
       <h2>Открытые заказы</h2>
       <p>Фрилансеры: выберите проект, нажмите «Подробнее» и напишите предпринимателю</p>
     </div>
+    <div style="display:flex;gap:10px;align-items:center;max-width:600px;margin:0 auto 8px">
+      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0">🎛 Фильтры <span class="filter-count" id="filterCount" style="display:none">0</span></button>
+    </div>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." oninput="filterOrders()"/>
+      <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." oninput="filterOrders();saveSearchHistory(this.value)"/>
       <button onclick="filterOrders()">Найти</button>
     </div>
+    <div id="searchHistoryOrders" class="search-history" style="justify-content:center;max-width:540px;margin:0 auto"></div>
     <div class="chips" id="categoryChips">
       <div class="chip active" onclick="filterCat('',this)">Все</div>
       <div class="chip" onclick="filterCat('Дизайн',this)">🎨 Дизайн</div>
@@ -1126,10 +1296,14 @@
       <h2>Каталог фрилансеров</h2>
       <p>Предприниматели: найдите специалиста, нажмите «Написать» и начните сотрудничество</p>
     </div>
+    <div style="display:flex;gap:10px;align-items:center;max-width:600px;margin:0 auto 8px">
+      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0">🎛 Фильтры</button>
+    </div>
     <div class="search-bar">
-      <input type="text" id="searchTalents" placeholder="🔍  Поиск по специалистам..." oninput="filterTalents()"/>
+      <input type="text" id="searchTalents" placeholder="🔍  Поиск по специалистам..." oninput="filterTalents();saveSearchHistory(this.value,'talent')"/>
       <button onclick="filterTalents()">Найти</button>
     </div>
+    <div id="searchHistoryTalents" class="search-history" style="justify-content:center;max-width:540px;margin:0 auto"></div>
     <div class="chips" id="talentChips">
       <div class="chip active" onclick="filterTalentCat('',this)">Все</div>
       <div class="chip" onclick="filterTalentCat('Дизайн',this)">🎨 Дизайн</div>
@@ -1281,21 +1455,79 @@
       </div>
     </nav>
     <div class="profile-body">
+      <!-- AVATAR + NAME CARD -->
       <div class="profile-card">
-        <div class="profile-avatar-big" id="profileAvatarBig">ИИ</div>
+        <label class="avatar-upload-wrap" title="Сменить фото профиля">
+          <div class="profile-avatar-big" id="profileAvatarBig" style="margin:0;cursor:pointer">ИИ</div>
+          <div class="avatar-upload-overlay">📷</div>
+          <input type="file" class="avatar-upload-input" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)"/>
+        </label>
         <div class="profile-name-display" id="profileNameDisplay">Имя</div>
         <div class="profile-email-display" id="profileEmailDisplay">email@example.com</div>
 
-        <div class="profile-section-title">✏️ Сменить имя</div>
-        <div class="form-group" style="margin-bottom:10px">
-          <input type="text" id="profileNameInput" placeholder="Введите новое имя"/>
+        <!-- PROFILE TABS -->
+        <div class="profile-tabs" id="profileTabs">
+          <button class="profile-tab active" onclick="switchProfileTab('main',this)">👤 Профиль</button>
+          <button class="profile-tab" onclick="switchProfileTab('dashboard',this)">📊 Аналитика</button>
+          <button class="profile-tab" onclick="switchProfileTab('portfolio',this)">🖼 Портфолио</button>
+          <button class="profile-tab" onclick="switchProfileTab('bookmarks',this)">🔖 Избранное</button>
         </div>
-        <button class="btn btn-sky" style="width:100%;justify-content:center" onclick="saveProfileName()">Сохранить имя</button>
 
-        <div class="profile-section-title">🎨 Тема оформления</div>
-        <div class="theme-selector">
-          <div class="theme-option active" id="themeLight" onclick="setTheme('light')">☀️ Белая</div>
-          <div class="theme-option" id="themeDark" onclick="setTheme('dark')">🌙 Чёрная</div>
+        <!-- TAB: MAIN -->
+        <div id="profileTabMain">
+          <div class="profile-section-title">✏️ Сменить имя</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <input type="text" id="profileNameInput" placeholder="Введите новое имя"/>
+          </div>
+          <button class="btn btn-sky" style="width:100%;justify-content:center" onclick="saveProfileName()">Сохранить имя</button>
+
+          <div class="profile-section-title">🎨 Тема оформления</div>
+          <div class="theme-selector">
+            <div class="theme-option active" id="themeLight" onclick="setTheme('light')">☀️ Белая</div>
+            <div class="theme-option" id="themeDark" onclick="setTheme('dark')">🌙 Чёрная</div>
+          </div>
+
+          <div class="profile-section-title">📅 Моя доступность</div>
+          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:10px">Отметьте дни, когда вы свободны для работы</p>
+          <div id="availCalendarWrap"></div>
+          <div class="avail-legend">
+            <div class="avail-legend-item"><div class="avail-dot" style="background:#A8E6CF"></div>Свободен</div>
+            <div class="avail-legend-item"><div class="avail-dot" style="background:#F1948A"></div>Занят</div>
+          </div>
+
+          <div class="profile-section-title">📄 Экспорт резюме</div>
+          <button class="btn btn-outline" style="width:100%;justify-content:center;margin-bottom:10px" onclick="generateCV()">📥 Скачать CV (текст)</button>
+        </div>
+
+        <!-- TAB: DASHBOARD -->
+        <div id="profileTabDashboard" style="display:none">
+          <div class="profile-section-title" style="margin-top:0">📊 Статистика</div>
+          <div class="dashboard-grid" id="dashGrid"></div>
+          <div class="dash-chart">
+            <h4>Активность за 7 дней</h4>
+            <div class="chart-bars" id="activityChart"></div>
+          </div>
+          <div class="profile-section-title">⭐ Мои отзывы</div>
+          <div id="myReviewsList" style="font-size:.88rem;color:var(--text-soft)">Нет отзывов</div>
+        </div>
+
+        <!-- TAB: PORTFOLIO -->
+        <div id="profileTabPortfolio" style="display:none">
+          <div class="profile-section-title" style="margin-top:0">🖼 Мои работы</div>
+          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:14px">Загружайте скриншоты и фото готовых проектов</p>
+          <div class="portfolio-grid" id="portfolioGrid">
+            <div class="portfolio-item portfolio-add" onclick="document.getElementById('portfolioFileInput').click()">
+              <div class="portfolio-add-icon">+</div>
+              <span>Добавить</span>
+            </div>
+          </div>
+          <input type="file" id="portfolioFileInput" accept="image/*" multiple style="display:none" onchange="handlePortfolioUpload(event)"/>
+        </div>
+
+        <!-- TAB: BOOKMARKS -->
+        <div id="profileTabBookmarks" style="display:none">
+          <div class="profile-section-title" style="margin-top:0">🔖 Сохранённые</div>
+          <div id="bookmarksContent"></div>
         </div>
       </div>
     </div>
@@ -1388,6 +1620,84 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"><span id="toastIcon">✅</span> <span id="toastMsg"></span></div>
+
+<!-- ══════ NOTIFICATIONS PANEL ══════ -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <h4>🔔 Уведомления</h4>
+    <button class="notif-clear" onclick="clearNotifs()">Очистить все</button>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty">Нет уведомлений</div>
+  </div>
+</div>
+
+<!-- ══════ FILTER SIDEBAR ══════ -->
+<div class="filter-sidebar-overlay" id="filterOverlay" onclick="closeFilterSidebar()"></div>
+<div class="filter-sidebar" id="filterSidebar">
+  <h3>🎛 Фильтры <button class="filter-close" onclick="closeFilterSidebar()">✕</button></h3>
+  <div class="filter-group">
+    <div class="filter-label">💰 Бюджет / Ставка ($)</div>
+    <div class="filter-range">
+      <input type="number" id="filterPriceMin" placeholder="От" min="0"/>
+      <span>—</span>
+      <input type="number" id="filterPriceMax" placeholder="До" min="0"/>
+    </div>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">🏷 Навыки / Теги</div>
+    <div class="filter-tags" id="filterTagsContainer">
+      <span class="filter-tag" onclick="toggleFilterTag(this,'React')">React</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Figma')">Figma</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'SEO')">SEO</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Python')">Python</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'WordPress')">WordPress</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Instagram')">Instagram</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Видео')">Видео</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Node.js')">Node.js</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'TypeScript')">TypeScript</span>
+      <span class="filter-tag" onclick="toggleFilterTag(this,'Flutter')">Flutter</span>
+    </div>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">⭐ Минимальный рейтинг</div>
+    <div class="filter-tags">
+      <span class="filter-tag" onclick="setFilterRating(0,this)">Любой</span>
+      <span class="filter-tag" onclick="setFilterRating(4,this)">4.0+</span>
+      <span class="filter-tag" onclick="setFilterRating(4.5,this)">4.5+</span>
+      <span class="filter-tag" onclick="setFilterRating(4.8,this)">4.8+</span>
+    </div>
+  </div>
+  <button class="filter-apply" onclick="applyFilters()">✅ Применить фильтры</button>
+  <button class="filter-reset" onclick="resetFilters()">↺ Сбросить всё</button>
+</div>
+
+<!-- ══════ RATE REVIEW MODAL ══════ -->
+<div class="overlay" id="reviewOverlay" onclick="closeReviewModal()" style="display:none">
+  <div class="modal" id="reviewModal" onclick="event.stopPropagation()" style="display:block">
+    <button class="modal-close" onclick="closeReviewModal()">✕</button>
+    <h2>⭐ Оставить отзыв</h2>
+    <p class="modal-sub" id="reviewModalSub">Оцените сотрудничество</p>
+    <div class="star-row" id="starRow">
+      <span class="star-btn" onclick="setReviewStar(1)">⭐</span>
+      <span class="star-btn" onclick="setReviewStar(2)">⭐</span>
+      <span class="star-btn" onclick="setReviewStar(3)">⭐</span>
+      <span class="star-btn" onclick="setReviewStar(4)">⭐</span>
+      <span class="star-btn" onclick="setReviewStar(5)">⭐</span>
+    </div>
+    <div class="form-group">
+      <label>Ваш отзыв</label>
+      <textarea id="reviewText" placeholder="Расскажите о своём опыте сотрудничества..." rows="4"></textarea>
+    </div>
+    <button class="btn btn-sun btn-full" onclick="submitReview()">Опубликовать отзыв</button>
+  </div>
+</div>
+
+<!-- ══════ PORTFOLIO IMAGE LIGHTBOX ══════ -->
+<div id="portfolioLightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center">
+  <img id="portfolioLightboxImg" style="max-width:92vw;max-height:88vh;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.6)" src="" alt=""/>
+  <button onclick="closeLightbox()" style="position:fixed;top:20px;right:24px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.5rem;cursor:pointer;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center">✕</button>
+</div>
 
 <script>
 const LS_ORDERS  = 'fs_orders';
@@ -1863,7 +2173,7 @@ function setCurrentUser(u) {
   const first = u.name.split(' ')[0];
   document.getElementById('navGuest').style.display = 'none';
   const nu = document.getElementById('navUser'); nu.classList.add('show');
-  document.getElementById('navAvatar').textContent = u.initials;
+  if (!_storedAvatar) document.getElementById('navAvatar').textContent = u.initials;
   document.getElementById('navName').textContent = first;
   document.getElementById('navGuestDetail').style.display = 'none';
   const nd = document.getElementById('navUserDetail'); nd.style.display='flex';
@@ -1882,7 +2192,17 @@ function setCurrentUser(u) {
   const na = document.getElementById('navUserAbout'); na.classList.add('show');
   document.getElementById('navAvatarAbout').textContent = u.initials;
   document.getElementById('navNameAbout').textContent = first;
-  document.getElementById('profileAvatarBig').textContent = u.initials;
+  // Avatar: show image if stored, else initials
+  const _avBig = document.getElementById('profileAvatarBig');
+  const _avSm = document.getElementById('navAvatar');
+  const _storedAvatar = lsGet('fs_avatar_' + u.email, null);
+  if (_storedAvatar) {
+    _avBig.innerHTML = `<img src="${_storedAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Аватар"/>`;
+    _avSm.innerHTML = `<img src="${_storedAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt=""/>`;
+  } else {
+    _avBig.textContent = u.initials;
+    _avSm.textContent = u.initials;
+  }
   document.getElementById('profileNameDisplay').textContent = u.name;
   document.getElementById('profileEmailDisplay').textContent = u.email;
   document.getElementById('profileNameInput').value = u.name;
@@ -1978,6 +2298,7 @@ function renderOrders(list) {
   }
   grid.innerHTML = list.map(o => `
     <div class="order-card" onclick="openOrderDetail(${o.id})">
+      <button class="bookmark-btn ${isBookmarked('order',o.id)?'active':''}" onclick="event.stopPropagation();toggleBookmark('order',${o.id},'${o.title.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
       <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
 
       <div class="order-meta">
@@ -2050,8 +2371,16 @@ function submitOrder() {
 function openOrderDetail(id) {
   id = parseInt(id)||id;
   currentDetailOrderId = id;
-  const o = orders.find(x=>x.id===id);
+  let o = orders.find(x=>x.id===id);
   if (!o) return;
+
+  // Всегда берём отзывы из DEFAULT_ORDERS для демо-заказов (id 1–99)
+  if (id < 1000) {
+    const seed = DEFAULT_ORDERS.find(x=>x.id===id);
+    if (seed && seed.clientReviews && seed.clientReviews.length > 0) {
+      o = Object.assign({}, o, { clientReviews: seed.clientReviews });
+    }
+  }
 
   serverGet(chatKey(id)).then(srvChat => {
     if (!srvChat) return;
@@ -2072,6 +2401,14 @@ function openOrderDetail(id) {
     : '';
 
   document.getElementById('detailBody').innerHTML = `
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+      <a onclick="goPage('pageMain');switchMainSector('work')">Главная</a>
+      <span class="bc-sep">›</span>
+      <a onclick="goPage('pageMain');switchMainSector('work')">Заказы</a>
+      <span class="bc-sep">›</span>
+      <span>${o.title.length > 40 ? o.title.substring(0,40)+'...' : o.title}</span>
+    </div>
     <!-- ORDER INFO CARD -->
     <div class="detail-header-card">
       <div class="detail-author-row">
@@ -2579,6 +2916,7 @@ function renderTalents(list) {
   }
   grid.innerHTML = list.map(t => `
     <div class="talent-card" onclick="openTalentDetail(${t.id})">
+      <button class="bookmark-btn ${isBookmarked('talent',t.id)?'active':''}" onclick="event.stopPropagation();toggleBookmark('talent',${t.id},'${t.name.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
       <div class="talent-top">
         <div class="talent-avatar">${t.initials}</div>
         <div>
@@ -2633,13 +2971,38 @@ function saveTalentChat(chat) { lsSet(talentChatKey(chat.talentId), chat); }
 
 function openTalentDetail(talentId) {
   talentId = parseInt(talentId) || talentId;
-  const t = talents.find(x => x.id === talentId);
+  let t = talents.find(x => x.id === talentId);
   if (!t) return;
+
+  // Всегда берём отзывы из DEFAULT_TALENTS для демо-специалистов (id 101–199)
+  if (talentId >= 101 && talentId < 200) {
+    const seed = DEFAULT_TALENTS.find(x=>x.id===talentId);
+    if (seed && seed.reviews && seed.reviews.length > 0) {
+      t = Object.assign({}, t, { reviews: seed.reviews });
+    }
+  }
 
   const chat = lsGet(talentChatKey(talentId), null);
   const msgs = chat ? chat.messages : [];
 
+  const tPortfolio = lsGet('fs_portfolio_' + talentId, []);
+  // Store portfolio for lightbox access
+  window._currentDetailPortfolio = tPortfolio;
+  const portfolioHtml = tPortfolio.length > 0 ? `
+    <div class="profile-card" style="margin-bottom:24px">
+      <div class="portfolio-title">🖼 Портфолио (${tPortfolio.length} работ)</div>
+      <div class="portfolio-grid">${tPortfolio.map((img,i)=>`<div class="portfolio-item" onclick="openLightbox(window._currentDetailPortfolio[${i}])"><img src="${img}" alt="Работа ${i+1}"/></div>`).join('')}</div>
+    </div>` : '';
+
   document.getElementById('talentDetailBody').innerHTML = `
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+      <a onclick="goPage('pageMain');switchMainSector('talent')">Главная</a>
+      <span class="bc-sep">›</span>
+      <a onclick="goPage('pageMain');switchMainSector('talent')">Специалисты</a>
+      <span class="bc-sep">›</span>
+      <span>${t.name}</span>
+    </div>
     <!-- TALENT PROFILE CARD -->
     <div class="detail-header-card">
       <div class="detail-author-row">
@@ -2679,6 +3042,7 @@ function openTalentDetail(talentId) {
       </div>
     </div>
 
+    ${portfolioHtml}
     ${renderReviewsHtml(t.reviews, 'talentReviews')}
 
     <!-- CHAT WITH TALENT -->
@@ -2712,8 +3076,9 @@ function openTalentDetail(talentId) {
       </div>
     </div>
 
-    <div style="text-align:center;padding:10px 0 20px">
+    <div style="text-align:center;padding:10px 0 20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-ghost" onclick="goPage('pageMain');switchMainSector('talent')" style="font-size:.88rem">← Вернуться к каталогу</button>
+      ${currentUser ? `<button class="btn btn-sun" onclick="openReviewModal(${t.id},'talent','${t.name.replace(/'/g,\"\\'\")}')">⭐ Оставить отзыв</button>` : ''}
     </div>
   `;
 
@@ -2851,6 +3216,7 @@ try {
           markChatRead(orderId);
         } else {
           updateChatBadge();
+          addNotif('💬', 'Новое сообщение по заказу', null);
         }
       }
     }
@@ -2903,6 +3269,671 @@ try {
   (function spawnParticles() {
     return; // no-op
   })();
+
+
+// ══════════════════════════════════════════════════
+//   NOTIFICATIONS SYSTEM
+// ══════════════════════════════════════════════════
+let notifications = [];
+const LS_NOTIFS = 'fs_notifs';
+
+function loadNotifs() { return lsGet(LS_NOTIFS, []); }
+function saveNotifs(n) { try { localStorage.setItem(LS_NOTIFS, JSON.stringify(n)); } catch(e){} }
+
+function addNotif(icon, text, onClick) {
+  const n = { id: Date.now(), icon, text, time: new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}), read: false, onClick };
+  notifications.unshift(n);
+  if (notifications.length > 30) notifications.pop();
+  saveNotifs(notifications);
+  renderNotifPanel();
+  updateNotifBadge();
+  // Push notification (browser)
+  if (Notification && Notification.permission === 'granted') {
+    new Notification('FreeSun: ' + text, { icon: '☀️' });
+  }
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  const unread = notifications.filter(n => !n.read).length;
+  badge.textContent = unread > 99 ? '99+' : String(unread);
+  badge.style.display = unread > 0 ? 'flex' : 'none';
+}
+
+function renderNotifPanel() {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (!notifications.length) { list.innerHTML = '<div class="notif-empty">Нет уведомлений</div>'; return; }
+  list.innerHTML = notifications.map(n => `
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead(${n.id})">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div class="notif-content">
+        <p>${n.icon} ${n.text}</p>
+        <span>${n.time}</span>
+      </div>
+    </div>`).join('');
+}
+
+function markNotifRead(id) {
+  notifications = notifications.map(n => n.id === id ? {...n, read:true} : n);
+  saveNotifs(notifications);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function clearNotifs() {
+  notifications = [];
+  saveNotifs(notifications);
+  renderNotifPanel();
+  updateNotifBadge();
+  document.getElementById('notifPanel').classList.remove('open');
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  if (!panel) return;
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    renderNotifPanel();
+    notifications = notifications.map(n => ({...n, read:true}));
+    saveNotifs(notifications);
+    setTimeout(updateNotifBadge, 300);
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('notifPanel');
+  const btn = document.getElementById('notifBtn');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+// Request push notification permission
+if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+  setTimeout(() => { Notification.requestPermission(); }, 4000);
+}
+
+notifications = loadNotifs();
+updateNotifBadge();
+
+// ══════════════════════════════════════════════════
+//   BOOKMARKS SYSTEM
+// ══════════════════════════════════════════════════
+const LS_BOOKMARKS = 'fs_bookmarks';
+function loadBookmarks() { return lsGet(LS_BOOKMARKS, []); }
+function saveBookmarks(b) { try { localStorage.setItem(LS_BOOKMARKS, JSON.stringify(b)); } catch(e){} }
+
+function isBookmarked(type, id) {
+  const bm = loadBookmarks();
+  return bm.some(b => b.type === type && b.id == id);
+}
+
+function toggleBookmark(type, id, title) {
+  const bm = loadBookmarks();
+  const idx = bm.findIndex(b => b.type === type && b.id == id);
+  if (idx !== -1) {
+    bm.splice(idx, 1);
+    saveBookmarks(bm);
+    filterOrders ? filterOrders() : null;
+    filterTalents ? filterTalents() : null;
+    showToast('🔖 Удалено из избранного');
+  } else {
+    bm.unshift({ type, id, title, savedAt: Date.now() });
+    saveBookmarks(bm);
+    filterOrders ? filterOrders() : null;
+    filterTalents ? filterTalents() : null;
+    showToast('🔖 Добавлено в избранное!');
+    addNotif('🔖', `Сохранено: «${title.substring(0,40)}»`, null);
+  }
+}
+
+function renderBookmarksTab() {
+  const bm = loadBookmarks();
+  const el = document.getElementById('bookmarksContent');
+  if (!el) return;
+  if (!bm.length) {
+    el.innerHTML = `<div class="bookmarks-empty"><div class="be-icon">🔖</div><p>Пока ничего не сохранено.<br><small>Нажмите 🔖 на карточке заказа или специалиста</small></p></div>`;
+    return;
+  }
+  el.innerHTML = bm.map(b => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #EEF4FA;gap:12px">
+      <div>
+        <div style="font-weight:700;font-size:.9rem;color:var(--text)">${b.type === 'order' ? '📋' : '👤'} ${b.title}</div>
+        <div style="font-size:.75rem;color:var(--text-soft);margin-top:2px">${b.type === 'order' ? 'Заказ' : 'Специалист'}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn-take" style="font-size:.8rem;padding:7px 14px" onclick="${b.type==='order'?`openOrderDetail(${b.id})`:`openTalentDetail(${b.id})`}">Открыть</button>
+        <button class="bookmark-btn active" style="position:static;width:30px;height:30px" onclick="toggleBookmark('${b.type}',${b.id},'${b.title.replace(/'/g,"\\'")}');renderBookmarksTab()">🔖</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//   FILTER SIDEBAR SYSTEM
+// ══════════════════════════════════════════════════
+let filterState = { priceMin: 0, priceMax: 0, tags: [], rating: 0 };
+
+function openFilterSidebar() {
+  document.getElementById('filterSidebar').classList.add('open');
+  document.getElementById('filterOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFilterSidebar() {
+  document.getElementById('filterSidebar').classList.remove('open');
+  document.getElementById('filterOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleFilterTag(el, tag) {
+  el.classList.toggle('active');
+  if (el.classList.contains('active')) {
+    if (!filterState.tags.includes(tag)) filterState.tags.push(tag);
+  } else {
+    filterState.tags = filterState.tags.filter(t => t !== tag);
+  }
+}
+
+function setFilterRating(val, el) {
+  document.querySelectorAll('#filterSidebar .filter-group:nth-child(3) .filter-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  filterState.rating = val;
+}
+
+function applyFilters() {
+  filterState.priceMin = parseInt(document.getElementById('filterPriceMin').value) || 0;
+  filterState.priceMax = parseInt(document.getElementById('filterPriceMax').value) || 0;
+  closeFilterSidebar();
+  const activeCount = (filterState.priceMin > 0 || filterState.priceMax > 0 ? 1 : 0) + filterState.tags.length + (filterState.rating > 0 ? 1 : 0);
+  const cnt = document.getElementById('filterCount');
+  if (cnt) { cnt.textContent = activeCount; cnt.style.display = activeCount > 0 ? 'inline-flex' : 'none'; }
+  filterOrders();
+  filterTalents();
+}
+
+function resetFilters() {
+  filterState = { priceMin: 0, priceMax: 0, tags: [], rating: 0 };
+  document.getElementById('filterPriceMin').value = '';
+  document.getElementById('filterPriceMax').value = '';
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  const cnt = document.getElementById('filterCount');
+  if (cnt) cnt.style.display = 'none';
+  closeFilterSidebar();
+  filterOrders();
+  filterTalents();
+}
+
+// Patch filterOrders and filterTalents to use filterState
+const _origFilterOrders = filterOrders;
+filterOrders = function() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = orders.filter(o => {
+    const mc = !activeCategory || o.cat.includes(activeCategory);
+    const mq = !q || o.title.toLowerCase().includes(q) || o.desc.toLowerCase().includes(q);
+    const mp = !filterState.priceMin || (o.priceMax >= filterState.priceMin);
+    const mpx = !filterState.priceMax || (o.priceMin <= filterState.priceMax);
+    const mt = !filterState.tags.length || filterState.tags.some(tag => (o.tags||[]).some(t=>t.includes(tag)) || o.cat.includes(tag) || o.desc.toLowerCase().includes(tag.toLowerCase()));
+    return mc && mq && mp && mpx && mt;
+  });
+  renderOrders(list);
+};
+
+const _origFilterTalents = filterTalents;
+filterTalents = function() {
+  const q = (document.getElementById('searchTalents')?.value || '').toLowerCase();
+  let list = talents.filter(t => {
+    const mc = !activeTalentCat || t.cat.includes(activeTalentCat);
+    const mq = !q || t.name.toLowerCase().includes(q) || t.role.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+    const mp = !filterState.priceMin || (t.rateMax >= filterState.priceMin);
+    const mpx = !filterState.priceMax || (t.rateMin <= filterState.priceMax);
+    const mt = !filterState.tags.length || filterState.tags.some(tag => (t.skills||[]).some(s=>s.includes(tag)));
+    const mr = !filterState.rating || (t.rating >= filterState.rating);
+    return mc && mq && mp && mpx && mt && mr;
+  });
+  renderTalents(list);
+};
+
+// ══════════════════════════════════════════════════
+//   SEARCH HISTORY
+// ══════════════════════════════════════════════════
+const LS_SEARCH_HIST = 'fs_search_hist';
+const LS_SEARCH_HIST_T = 'fs_search_hist_t';
+let _searchTimer = null;
+
+function saveSearchHistory(q, type) {
+  clearTimeout(_searchTimer);
+  if (!q || q.length < 2) return;
+  _searchTimer = setTimeout(() => {
+    const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
+    let hist = lsGet(key, []);
+    hist = [q, ...hist.filter(h => h !== q)].slice(0, 6);
+    lsSet(key, hist);
+    renderSearchHistory(type);
+  }, 800);
+}
+
+function renderSearchHistory(type) {
+  const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
+  const id = type === 'talent' ? 'searchHistoryTalents' : 'searchHistoryOrders';
+  const hist = lsGet(key, []);
+  const el = document.getElementById(id);
+  if (!el || !hist.length) { if(el) el.innerHTML=''; return; }
+  el.innerHTML = '<span style="font-size:.75rem;color:var(--text-soft);font-weight:700">История:</span>' + hist.map(h => `
+    <span class="search-history-item" onclick="applySearchFromHistory('${h.replace(/'/g,"\\'")}','${type}')">
+      🕐 ${h} <span class="sh-remove" onclick="event.stopPropagation();removeFromHistory('${h.replace(/'/g,"\\'")}','${type}')">✕</span>
+    </span>`).join('');
+}
+
+function applySearchFromHistory(q, type) {
+  if (type === 'talent') {
+    const el = document.getElementById('searchTalents');
+    if (el) { el.value = q; filterTalents(); }
+  } else {
+    const el = document.getElementById('searchInput');
+    if (el) { el.value = q; filterOrders(); }
+  }
+}
+
+function removeFromHistory(q, type) {
+  const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
+  let hist = lsGet(key, []);
+  hist = hist.filter(h => h !== q);
+  lsSet(key, hist);
+  renderSearchHistory(type);
+}
+
+renderSearchHistory('order');
+renderSearchHistory('talent');
+
+// ══════════════════════════════════════════════════
+//   AVATAR UPLOAD
+// ══════════════════════════════════════════════════
+window.handleAvatarUpload = function(event) {
+  const file = event.target.files[0];
+  if (!file || !currentUser) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Файл слишком большой (максимум 2 МБ)', '#e74c3c'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    lsSet('fs_avatar_' + currentUser.email, dataUrl);
+    // Update all avatar elements
+    const bigAv = document.getElementById('profileAvatarBig');
+    const smAv = document.getElementById('navAvatar');
+    if (bigAv) bigAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Аватар"/>`;
+    if (smAv) smAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt=""/>`;
+    showToast('✅ Фото профиля обновлено!');
+    addNotif('📸', 'Фото профиля успешно обновлено', null);
+  };
+  reader.readAsDataURL(file);
+};
+
+// ══════════════════════════════════════════════════
+//   PORTFOLIO UPLOAD (Profile page)
+// ══════════════════════════════════════════════════
+window.handlePortfolioUpload = function(event) {
+  if (!currentUser) return;
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+  const key = 'fs_portfolio_' + currentUser.email;
+  let portfolio = lsGet(key, []);
+  let loaded = 0;
+  files.forEach(file => {
+    if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл ' + file.name + ' слишком большой (>3МБ)', '#F5A623'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      portfolio.push(e.target.result);
+      lsSet(key, portfolio);
+      loaded++;
+      if (loaded === files.length) {
+        renderPortfolioGrid();
+        showToast(`✅ Загружено ${loaded} фото!`);
+        addNotif('🖼', `Добавлено ${loaded} новых работ в портфолио`, null);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+};
+
+function renderPortfolioGrid() {
+  if (!currentUser) return;
+  const key = 'fs_portfolio_' + currentUser.email;
+  const portfolio = lsGet(key, []);
+  const grid = document.getElementById('portfolioGrid');
+  if (!grid) return;
+  const addBtn = `<div class="portfolio-item portfolio-add" onclick="document.getElementById('portfolioFileInput').click()">
+    <div class="portfolio-add-icon">+</div>
+    <span>Добавить</span>
+  </div>`;
+  grid.innerHTML = portfolio.map((img, i) => `
+    <div class="portfolio-item" onclick="openLightbox('${img}')">
+      <img src="${img}" alt="Работа ${i+1}"/>
+      <button onclick="event.stopPropagation();removePortfolioItem(${i})" style="position:absolute;top:4px;right:4px;background:rgba(231,76,60,.85);border:none;border-radius:50%;color:#fff;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>`).join('') + addBtn;
+}
+
+function removePortfolioItem(idx) {
+  if (!currentUser) return;
+  const key = 'fs_portfolio_' + currentUser.email;
+  let portfolio = lsGet(key, []);
+  portfolio.splice(idx, 1);
+  lsSet(key, portfolio);
+  renderPortfolioGrid();
+}
+
+// ══════════════════════════════════════════════════
+//   TALENT MODAL PHOTO UPLOAD
+// ══════════════════════════════════════════════════
+let _talentModalPhotos = [];
+window.handleTalentModalPhotos = function(event) {
+  const files = Array.from(event.target.files);
+  _talentModalPhotos = [];
+  const preview = document.getElementById('talentModalPhotoPreview');
+  const count = document.getElementById('talentModalPhotoCount');
+  let loaded = 0;
+  files.slice(0, 6).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      _talentModalPhotos.push(e.target.result);
+      loaded++;
+      if (loaded === Math.min(files.length, 6)) {
+        if (count) count.textContent = _talentModalPhotos.length + ' фото выбрано';
+        if (preview) preview.innerHTML = _talentModalPhotos.map((d,i) => `<img src="${d}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid var(--sky)" alt="preview ${i}"/>`).join('');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+// Patch submitTalent to save photos
+const _origSubmitTalent = submitTalent;
+submitTalent = function() {
+  _origSubmitTalent();
+  // Save photos for the new talent (id = most recent)
+  if (_talentModalPhotos.length > 0 && talents.length > 0) {
+    const newTalent = talents[0]; // just added at the front
+    if (newTalent && newTalent.id) {
+      lsSet('fs_portfolio_' + newTalent.id, _talentModalPhotos);
+      _talentModalPhotos = [];
+      const preview = document.getElementById('talentModalPhotoPreview');
+      const count = document.getElementById('talentModalPhotoCount');
+      if (preview) preview.innerHTML = '';
+      if (count) count.textContent = '0 фото выбрано';
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════
+//   LIGHTBOX
+// ══════════════════════════════════════════════════
+window.openLightbox = function(src) {
+  const lb = document.getElementById('portfolioLightbox');
+  const img = document.getElementById('portfolioLightboxImg');
+  if (!lb || !img) return;
+  img.src = src;
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+window.closeLightbox = function() {
+  const lb = document.getElementById('portfolioLightbox');
+  if (lb) { lb.style.display = 'none'; document.body.style.overflow = ''; }
+};
+
+// ══════════════════════════════════════════════════
+//   PROFILE TABS
+// ══════════════════════════════════════════════════
+window.switchProfileTab = function(tab, btn) {
+  document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const tabs = ['main','dashboard','portfolio','bookmarks'];
+  tabs.forEach(t => {
+    const el = document.getElementById('profileTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'portfolio') renderPortfolioGrid();
+  if (tab === 'bookmarks') renderBookmarksTab();
+};
+
+// ══════════════════════════════════════════════════
+//   DASHBOARD
+// ══════════════════════════════════════════════════
+function renderDashboard() {
+  const grid = document.getElementById('dashGrid');
+  const chart = document.getElementById('activityChart');
+  const reviewsEl = document.getElementById('myReviewsList');
+  if (!grid || !currentUser) return;
+
+  const myOrders = orders.filter(o => o.authorName === currentUser.name.split(' ')[0]);
+  const myTalent = talents.filter(t => t.initials === currentUser.initials);
+  const bm = loadBookmarks();
+  const myChats = loadMyOrderIds();
+
+  grid.innerHTML = `
+    <div class="dash-card"><div class="dash-icon">📋</div><div class="dash-num">${myOrders.length}</div><div class="dash-label">Мои заказы</div></div>
+    <div class="dash-card"><div class="dash-icon">👥</div><div class="dash-num">${myTalent.length}</div><div class="dash-label">Резюме опубликовано</div></div>
+    <div class="dash-card"><div class="dash-icon">💬</div><div class="dash-num">${myChats.length}</div><div class="dash-label">Активных чатов</div></div>
+    <div class="dash-card"><div class="dash-icon">🔖</div><div class="dash-num">${bm.length}</div><div class="dash-label">В избранном</div></div>
+  `;
+
+  // Activity bars (mock 7-day data)
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const vals = [3, 7, 5, 9, 4, 2, 6];
+  const max = Math.max(...vals);
+  if (chart) {
+    chart.innerHTML = days.map((d, i) => `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height:${Math.round((vals[i]/max)*76)}px"></div>
+        <div class="chart-bar-label">${d}</div>
+      </div>`).join('');
+  }
+
+  // My reviews
+  if (reviewsEl) {
+    const myRevs = [];
+    orders.forEach(o => (o.clientReviews||[]).forEach(r => { if(r.author && r.author.includes(currentUser.name.split(' ')[0])) myRevs.push({...r, about: o.title}); }));
+    if (!myRevs.length) {
+      reviewsEl.innerHTML = '<p style="color:var(--text-soft);font-size:.88rem">Вы ещё не оставляли отзывов.</p>';
+    } else {
+      reviewsEl.innerHTML = myRevs.map(r => `
+        <div style="padding:12px 0;border-bottom:1px solid #EEF4FA">
+          <div style="font-size:.8rem;color:var(--text-soft)">${r.about}</div>
+          <div style="font-size:.85rem;font-weight:700;color:var(--text);margin-top:4px">${'⭐'.repeat(r.rating)} — ${r.text}</div>
+        </div>`).join('');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════
+//   AVAILABILITY CALENDAR
+// ══════════════════════════════════════════════════
+function renderAvailCalendar() {
+  const wrap = document.getElementById('availCalendarWrap');
+  if (!wrap || !currentUser) return;
+  const key = 'fs_avail_' + currentUser.email;
+  let avail = lsGet(key, {});
+  const today = new Date();
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  let html = '<div class="avail-calendar">';
+  // Header row
+  days.forEach(d => { html += `<div class="avail-day-label">${d}</div>`; });
+  // Day cells for next 28 days
+  // Align start to Monday
+  const dayOfWeek = (today.getDay() + 6) % 7; // 0=Mon
+  for (let i = 0; i < dayOfWeek; i++) html += '<div></div>';
+  for (let i = 0; i < 28; i++) {
+    const d = new Date(today); d.setDate(today.getDate() + i);
+    const key2 = d.toISOString().split('T')[0];
+    const state = avail[key2]; // 'available' | 'busy' | undefined
+    const label = d.getDate();
+    html += `<div class="avail-day ${state||''}" onclick="toggleAvailDay('${key2}',this)" title="${key2}">${label}</div>`;
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+window.toggleAvailDay = function(dateKey, el) {
+  if (!currentUser) return;
+  const key = 'fs_avail_' + currentUser.email;
+  let avail = lsGet(key, {});
+  const cur = avail[dateKey];
+  if (!cur) { avail[dateKey] = 'available'; el.className = 'avail-day available'; }
+  else if (cur === 'available') { avail[dateKey] = 'busy'; el.className = 'avail-day busy'; }
+  else { delete avail[dateKey]; el.className = 'avail-day'; }
+  lsSet(key, avail);
+};
+
+// ══════════════════════════════════════════════════
+//   CV EXPORT
+// ══════════════════════════════════════════════════
+window.generateCV = function() {
+  if (!currentUser) return;
+  const myTalent = talents.find(t => t.initials === currentUser.initials);
+  const bm = loadBookmarks();
+  const avail = lsGet('fs_avail_' + currentUser.email, {});
+  const freeDays = Object.entries(avail).filter(([,v]) => v === 'available').length;
+
+  let cv = `=== РЕЗЮМЕ FreeSun ===
+`;
+  cv += `Имя: ${currentUser.name}
+`;
+  cv += `Email: ${currentUser.email}
+`;
+  cv += `Роль: ${currentUser.role === 'freelancer' ? 'Фрилансер' : 'Предприниматель'}
+
+`;
+
+  if (myTalent) {
+    cv += `--- ПРОФЕССИОНАЛЬНАЯ ИНФОРМАЦИЯ ---
+`;
+    cv += `Специализация: ${myTalent.role}
+`;
+    cv += `Категория: ${myTalent.cat}
+`;
+    cv += `О себе: ${myTalent.desc}
+`;
+    cv += `Навыки: ${myTalent.skills.join(', ')}
+`;
+    cv += `Ставка: $${myTalent.rateMin}–$${myTalent.rateMax}/ч
+`;
+    cv += `Рейтинг: ${myTalent.rating}/5.0
+
+`;
+  }
+
+  cv += `--- АКТИВНОСТЬ ---
+`;
+  cv += `Свободных дней (ближайшие 4 нед.): ${freeDays}
+`;
+  cv += `Сохранённых объектов: ${bm.length}
+
+`;
+  cv += `Сгенерировано: ${new Date().toLocaleString('ru')}
+`;
+  cv += `Платформа: FreeSun — freesun.io`;
+
+  const blob = new Blob([cv], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'FreeSun_CV_' + currentUser.name.replace(/\s+/g,'_') + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 CV скачан!');
+};
+
+// ══════════════════════════════════════════════════
+//   REVIEW MODAL
+// ══════════════════════════════════════════════════
+let _reviewTarget = null;
+let _reviewStars = 0;
+
+window.openReviewModal = function(id, type, name) {
+  _reviewTarget = { id, type, name };
+  _reviewStars = 0;
+  document.getElementById('reviewModalSub').textContent = 'Оцените: ' + name;
+  document.getElementById('reviewText').value = '';
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+  const ro = document.getElementById('reviewOverlay');
+  ro.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeReviewModal = function() {
+  document.getElementById('reviewOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+window.setReviewStar = function(n) {
+  _reviewStars = n;
+  const btns = document.querySelectorAll('.star-btn');
+  btns.forEach((b, i) => b.classList.toggle('active', i < n));
+};
+
+window.submitReview = function() {
+  if (!currentUser || !_reviewTarget) return;
+  if (!_reviewStars) { showToast('⚠️ Выберите оценку', '#F5A623'); return; }
+  const text = document.getElementById('reviewText').value.trim();
+  if (!text) { showToast('⚠️ Напишите отзыв', '#F5A623'); return; }
+  const now = new Date();
+  const review = {
+    author: currentUser.name + ', ' + (currentUser.role === 'freelancer' ? 'фрилансер' : 'предприниматель'),
+    rating: _reviewStars,
+    text,
+    date: 'Только что'
+  };
+  if (_reviewTarget.type === 'talent') {
+    const idx = talents.findIndex(t => t.id == _reviewTarget.id);
+    if (idx !== -1) {
+      if (!talents[idx].reviews) talents[idx].reviews = [];
+      talents[idx].reviews.unshift(review);
+      // Update rating
+      const allRatings = talents[idx].reviews.map(r => r.rating);
+      talents[idx].rating = Math.round((allRatings.reduce((a,b)=>a+b,0)/allRatings.length)*10)/10;
+      const starCount = Math.round(talents[idx].rating);
+      talents[idx].stars = '⭐'.repeat(starCount);
+      lsSet(LS_TALENTS, talents);
+      filterTalents();
+    }
+  }
+  closeReviewModal();
+  showToast('✅ Отзыв опубликован!');
+  addNotif('⭐', `Вы оставили отзыв на «${_reviewTarget.name.substring(0,30)}»`, null);
+};
+
+// ══════════════════════════════════════════════════
+//   PATCH goPage for profile init
+// ══════════════════════════════════════════════════
+const _origGoPage = goPage;
+goPage = function(id) {
+  _origGoPage(id);
+  if (id === 'pageProfile' && currentUser) {
+    renderAvailCalendar();
+    renderPortfolioGrid();
+    // Reset to main tab
+    const mainTab = document.querySelector('.profile-tab');
+    if (mainTab) {
+      document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+      mainTab.classList.add('active');
+      const tabs = ['main','dashboard','portfolio','bookmarks'];
+      tabs.forEach(t => {
+        const el = document.getElementById('profileTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.style.display = t === 'main' ? '' : 'none';
+      });
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════
+//   NOTIFY on new order/talent posted
+// ══════════════════════════════════════════════════
+const _origSubmitOrder = submitOrder;
+submitOrder = function() {
+  _origSubmitOrder();
+  if (currentUser) addNotif('📋', 'Ваш заказ опубликован — ждите откликов!', null);
+};
 
   if (typeof window.ethereum !== 'undefined') {
     window.ethereum.on('accountsChanged', function(accounts) {
