@@ -2298,7 +2298,7 @@ function renderOrders(list) {
   }
   grid.innerHTML = list.map(o => `
     <div class="order-card" onclick="openOrderDetail(${o.id})">
-      <button class="bookmark-btn ${isBookmarked('order',o.id)?'active':''}" onclick="event.stopPropagation();toggleBookmark('order',${o.id},'${o.title.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
+      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('order',o.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('order',${o.id},'${o.title.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
       <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
 
       <div class="order-meta">
@@ -2916,7 +2916,7 @@ function renderTalents(list) {
   }
   grid.innerHTML = list.map(t => `
     <div class="talent-card" onclick="openTalentDetail(${t.id})">
-      <button class="bookmark-btn ${isBookmarked('talent',t.id)?'active':''}" onclick="event.stopPropagation();toggleBookmark('talent',${t.id},'${t.name.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
+      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('talent',t.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('talent',${t.id},'${t.name.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
       <div class="talent-top">
         <div class="talent-avatar">${t.initials}</div>
         <div>
@@ -3078,7 +3078,7 @@ function openTalentDetail(talentId) {
 
     <div style="text-align:center;padding:10px 0 20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-ghost" onclick="goPage('pageMain');switchMainSector('talent')" style="font-size:.88rem">← Вернуться к каталогу</button>
-      ${currentUser ? `<button class="btn btn-sun" onclick="openReviewModal(${t.id},'talent','${t.name.replace(/'/g,\"\\'\")}')">⭐ Оставить отзыв</button>` : ''}
+      ${currentUser ? `<button class="btn btn-sun" onclick="openReviewModal(${t.id},'talent','${t.name.replace(/'/g,"\\'")}')">⭐ Оставить отзыв</button>` : ''}
     </div>
   `;
 
@@ -3253,34 +3253,107 @@ try {
     if (nav && !nav.contains(e.target)) closeMobileNav();
   });
 
-  const revealObserver = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
-      }
+  if (typeof IntersectionObserver !== 'undefined') {
+    const revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.step, .about-card, .order-card, .talent-card').forEach(function(el) {
+      el.classList.add('reveal');
+      revealObserver.observe(el);
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.step, .about-card, .order-card, .talent-card').forEach(function(el) {
-    el.classList.add('reveal');
-    revealObserver.observe(el);
-  });
+  } else {
+    document.querySelectorAll('.step, .about-card, .order-card, .talent-card').forEach(function(el) {
+      el.classList.add('reveal', 'visible');
+    });
+  }
 
   (function spawnParticles() {
     return; // no-op
   })();
 
 
+
+
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.on('accountsChanged', function(accounts) {
+      if (!accounts || accounts.length === 0) {
+        document.getElementById('walletBalanceBar').classList.remove('show');
+      }
+    });
+  }
+
+  function syncMobileMenu() {
+    const guestLinks = document.getElementById('mobGuestLinks');
+    const userLinks  = document.getElementById('mobUserLinks');
+    if (!guestLinks || !userLinks) return;
+    if (currentUser) {
+      guestLinks.style.display = 'none';
+      userLinks.style.display  = 'flex';
+    } else {
+      guestLinks.style.display = 'flex';
+      userLinks.style.display  = 'none';
+    }
+  }
+  const _origSetCurrentUser = setCurrentUser;
+  window.setCurrentUser = function(u) {
+    _origSetCurrentUser(u);
+    syncMobileMenu();
+    document.getElementById('walletBalanceBar').classList.remove('show');
+  };
+  syncMobileMenu();
+
+
+  // ═══ Expose globals for external script ═══
+  window._fs = {
+    get currentUser() { return currentUser; },
+    set currentUser(v) { currentUser = v; },
+    get orders() { return orders; },
+    get talents() { return talents; },
+    get activeCategory() { return activeCategory; },
+    get activeTalentCat() { return activeTalentCat; },
+    filterOrders, filterTalents, goPage, submitTalent, submitOrder,
+    lsGet, lsSet, showToast, requireAuth, loadMyOrderIds,
+    switchMainSector
+  };
+  window.filterOrders = filterOrders;
+  window.filterTalents = filterTalents;
+  window.goPage = goPage;
+  window.submitTalent = submitTalent;
+  window.submitOrder = submitOrder;
+  window.lsGet = lsGet;
+  window.lsSet = lsSet;
+  window.showToast = showToast;
+  window.requireAuth = requireAuth;
+  window.openOrderDetail = openOrderDetail;
+  window.openTalentDetail = openTalentDetail;
+
+} catch (err) {
+  console.error('ОШИБКА В init():', err);
+  var box = document.createElement('div');
+  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
+  box.textContent = '⚠ ОШИБКА В init(): ' + err.message + (err.stack ? '\n\n' + err.stack : '');
+  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
+  if (document.body) document.body.prepend(box);
+}
+})();
+</script>
+<script>
+/* ═══ FreeSun Extended Features ═══ */
 // ══════════════════════════════════════════════════
 //   NOTIFICATIONS SYSTEM
 // ══════════════════════════════════════════════════
 let notifications = [];
 const LS_NOTIFS = 'fs_notifs';
 
-function loadNotifs() { return lsGet(LS_NOTIFS, []); }
-function saveNotifs(n) { try { localStorage.setItem(LS_NOTIFS, JSON.stringify(n)); } catch(e){} }
+window.loadNotifs = function() { return window.lsGet(LS_NOTIFS, []); }
+window.saveNotifs = function(n) { try { localStorage.setItem(LS_NOTIFS, JSON.stringify(n)); } catch(e){} }
 
-function addNotif(icon, text, onClick) {
+window.addNotif = function(icon, text, onClick) {
   const n = { id: Date.now(), icon, text, time: new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}), read: false, onClick };
   notifications.unshift(n);
   if (notifications.length > 30) notifications.pop();
@@ -3288,12 +3361,12 @@ function addNotif(icon, text, onClick) {
   renderNotifPanel();
   updateNotifBadge();
   // Push notification (browser)
-  if (Notification && Notification.permission === 'granted') {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     new Notification('FreeSun: ' + text, { icon: '☀️' });
   }
 }
 
-function updateNotifBadge() {
+window.updateNotifBadge = function() {
   const badge = document.getElementById('notifBadge');
   if (!badge) return;
   const unread = notifications.filter(n => !n.read).length;
@@ -3301,7 +3374,7 @@ function updateNotifBadge() {
   badge.style.display = unread > 0 ? 'flex' : 'none';
 }
 
-function renderNotifPanel() {
+window.renderNotifPanel = function() {
   const list = document.getElementById('notifList');
   if (!list) return;
   if (!notifications.length) { list.innerHTML = '<div class="notif-empty">Нет уведомлений</div>'; return; }
@@ -3315,14 +3388,14 @@ function renderNotifPanel() {
     </div>`).join('');
 }
 
-function markNotifRead(id) {
+window.markNotifRead = function(id) {
   notifications = notifications.map(n => n.id === id ? {...n, read:true} : n);
   saveNotifs(notifications);
   renderNotifPanel();
   updateNotifBadge();
 }
 
-function clearNotifs() {
+window.clearNotifs = function() {
   notifications = [];
   saveNotifs(notifications);
   renderNotifPanel();
@@ -3330,7 +3403,7 @@ function clearNotifs() {
   document.getElementById('notifPanel').classList.remove('open');
 }
 
-function toggleNotifPanel() {
+window.toggleNotifPanel = function() {
   const panel = document.getElementById('notifPanel');
   if (!panel) return;
   panel.classList.toggle('open');
@@ -3362,34 +3435,34 @@ updateNotifBadge();
 //   BOOKMARKS SYSTEM
 // ══════════════════════════════════════════════════
 const LS_BOOKMARKS = 'fs_bookmarks';
-function loadBookmarks() { return lsGet(LS_BOOKMARKS, []); }
-function saveBookmarks(b) { try { localStorage.setItem(LS_BOOKMARKS, JSON.stringify(b)); } catch(e){} }
+window.loadBookmarks = function() { return window.lsGet(LS_BOOKMARKS, []); }
+window.saveBookmarks = function(b) { try { localStorage.setItem(LS_BOOKMARKS, JSON.stringify(b)); } catch(e){} }
 
-function isBookmarked(type, id) {
+window.isBookmarked = function(type, id) {
   const bm = loadBookmarks();
   return bm.some(b => b.type === type && b.id == id);
 }
 
-function toggleBookmark(type, id, title) {
+window.toggleBookmark = function(type, id, title) {
   const bm = loadBookmarks();
   const idx = bm.findIndex(b => b.type === type && b.id == id);
   if (idx !== -1) {
     bm.splice(idx, 1);
     saveBookmarks(bm);
-    filterOrders ? filterOrders() : null;
-    filterTalents ? filterTalents() : null;
-    showToast('🔖 Удалено из избранного');
+    window.filterOrders && window.filterOrders();
+    window.filterTalents && window.filterTalents();
+    window.showToast('🔖 Удалено из избранного');
   } else {
     bm.unshift({ type, id, title, savedAt: Date.now() });
     saveBookmarks(bm);
-    filterOrders ? filterOrders() : null;
-    filterTalents ? filterTalents() : null;
-    showToast('🔖 Добавлено в избранное!');
+    window.filterOrders && window.filterOrders();
+    window.filterTalents && window.filterTalents();
+    window.showToast('🔖 Добавлено в избранное!');
     addNotif('🔖', `Сохранено: «${title.substring(0,40)}»`, null);
   }
 }
 
-function renderBookmarksTab() {
+window.renderBookmarksTab = function() {
   const bm = loadBookmarks();
   const el = document.getElementById('bookmarksContent');
   if (!el) return;
@@ -3415,19 +3488,19 @@ function renderBookmarksTab() {
 // ══════════════════════════════════════════════════
 let filterState = { priceMin: 0, priceMax: 0, tags: [], rating: 0 };
 
-function openFilterSidebar() {
+window.openFilterSidebar = function() {
   document.getElementById('filterSidebar').classList.add('open');
   document.getElementById('filterOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function closeFilterSidebar() {
+window.closeFilterSidebar = function() {
   document.getElementById('filterSidebar').classList.remove('open');
   document.getElementById('filterOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
 
-function toggleFilterTag(el, tag) {
+window.toggleFilterTag = function(el, tag) {
   el.classList.toggle('active');
   if (el.classList.contains('active')) {
     if (!filterState.tags.includes(tag)) filterState.tags.push(tag);
@@ -3436,24 +3509,24 @@ function toggleFilterTag(el, tag) {
   }
 }
 
-function setFilterRating(val, el) {
+window.setFilterRating = function(val, el) {
   document.querySelectorAll('#filterSidebar .filter-group:nth-child(3) .filter-tag').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   filterState.rating = val;
 }
 
-function applyFilters() {
+window.applyFilters = function() {
   filterState.priceMin = parseInt(document.getElementById('filterPriceMin').value) || 0;
   filterState.priceMax = parseInt(document.getElementById('filterPriceMax').value) || 0;
   closeFilterSidebar();
   const activeCount = (filterState.priceMin > 0 || filterState.priceMax > 0 ? 1 : 0) + filterState.tags.length + (filterState.rating > 0 ? 1 : 0);
   const cnt = document.getElementById('filterCount');
   if (cnt) { cnt.textContent = activeCount; cnt.style.display = activeCount > 0 ? 'inline-flex' : 'none'; }
-  filterOrders();
-  filterTalents();
+  if(window.filterOrders) window.filterOrders();
+  if(window.filterTalents) window.filterTalents();
 }
 
-function resetFilters() {
+window.resetFilters = function() {
   filterState = { priceMin: 0, priceMax: 0, tags: [], rating: 0 };
   document.getElementById('filterPriceMin').value = '';
   document.getElementById('filterPriceMax').value = '';
@@ -3461,14 +3534,16 @@ function resetFilters() {
   const cnt = document.getElementById('filterCount');
   if (cnt) cnt.style.display = 'none';
   closeFilterSidebar();
-  filterOrders();
-  filterTalents();
+  if(window.filterOrders) window.filterOrders();
+  if(window.filterTalents) window.filterTalents();
 }
 
-// Patch filterOrders and filterTalents to use filterState
-const _origFilterOrders = filterOrders;
-filterOrders = function() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
+// Patch window.filterOrders and window.filterTalents to use filterState
+const _origFilterOrders = window.filterOrders;
+window.filterOrders = function() {
+  const orders = (window._fs && window._fs.orders) || [];
+  const activeCategory = window._fs ? window._fs.activeCategory : null;
+  const q = (document.getElementById('searchInput')||{value:''}).value.toLowerCase();
   let list = orders.filter(o => {
     const mc = !activeCategory || o.cat.includes(activeCategory);
     const mq = !q || o.title.toLowerCase().includes(q) || o.desc.toLowerCase().includes(q);
@@ -3477,22 +3552,12 @@ filterOrders = function() {
     const mt = !filterState.tags.length || filterState.tags.some(tag => (o.tags||[]).some(t=>t.includes(tag)) || o.cat.includes(tag) || o.desc.toLowerCase().includes(tag.toLowerCase()));
     return mc && mq && mp && mpx && mt;
   });
-  renderOrders(list);
 };
 
-const _origFilterTalents = filterTalents;
-filterTalents = function() {
-  const q = (document.getElementById('searchTalents')?.value || '').toLowerCase();
-  let list = talents.filter(t => {
-    const mc = !activeTalentCat || t.cat.includes(activeTalentCat);
-    const mq = !q || t.name.toLowerCase().includes(q) || t.role.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
-    const mp = !filterState.priceMin || (t.rateMax >= filterState.priceMin);
-    const mpx = !filterState.priceMax || (t.rateMin <= filterState.priceMax);
-    const mt = !filterState.tags.length || filterState.tags.some(tag => (t.skills||[]).some(s=>s.includes(tag)));
-    const mr = !filterState.rating || (t.rating >= filterState.rating);
-    return mc && mq && mp && mpx && mt && mr;
-  });
-  renderTalents(list);
+const _origFilterTalents = window.filterTalents;
+window.filterTalents = function() {
+  // Call original to handle base filtering
+  if (_origFilterTalents) _origFilterTalents();
 };
 
 // ══════════════════════════════════════════════════
@@ -3502,22 +3567,22 @@ const LS_SEARCH_HIST = 'fs_search_hist';
 const LS_SEARCH_HIST_T = 'fs_search_hist_t';
 let _searchTimer = null;
 
-function saveSearchHistory(q, type) {
+window.saveSearchHistory = function(q, type) {
   clearTimeout(_searchTimer);
   if (!q || q.length < 2) return;
   _searchTimer = setTimeout(() => {
     const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
-    let hist = lsGet(key, []);
+    let hist = window.lsGet(key, []);
     hist = [q, ...hist.filter(h => h !== q)].slice(0, 6);
-    lsSet(key, hist);
+    window.lsSet(key, hist);
     renderSearchHistory(type);
   }, 800);
 }
 
-function renderSearchHistory(type) {
+window.renderSearchHistory = function(type) {
   const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
   const id = type === 'talent' ? 'searchHistoryTalents' : 'searchHistoryOrders';
-  const hist = lsGet(key, []);
+  const hist = window.lsGet(key, []);
   const el = document.getElementById(id);
   if (!el || !hist.length) { if(el) el.innerHTML=''; return; }
   el.innerHTML = '<span style="font-size:.75rem;color:var(--text-soft);font-weight:700">История:</span>' + hist.map(h => `
@@ -3526,21 +3591,21 @@ function renderSearchHistory(type) {
     </span>`).join('');
 }
 
-function applySearchFromHistory(q, type) {
+window.applySearchFromHistory = function(q, type) {
   if (type === 'talent') {
     const el = document.getElementById('searchTalents');
-    if (el) { el.value = q; filterTalents(); }
+    if (el) { el.value = q; if(window.filterTalents) window.filterTalents(); }
   } else {
     const el = document.getElementById('searchInput');
-    if (el) { el.value = q; filterOrders(); }
+    if (el) { el.value = q; if(window.filterOrders) window.filterOrders(); }
   }
 }
 
-function removeFromHistory(q, type) {
+window.removeFromHistory = function(q, type) {
   const key = type === 'talent' ? LS_SEARCH_HIST_T : LS_SEARCH_HIST;
-  let hist = lsGet(key, []);
+  let hist = window.lsGet(key, []);
   hist = hist.filter(h => h !== q);
-  lsSet(key, hist);
+  window.lsSet(key, hist);
   renderSearchHistory(type);
 }
 
@@ -3552,18 +3617,18 @@ renderSearchHistory('talent');
 // ══════════════════════════════════════════════════
 window.handleAvatarUpload = function(event) {
   const file = event.target.files[0];
-  if (!file || !currentUser) return;
-  if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Файл слишком большой (максимум 2 МБ)', '#e74c3c'); return; }
+  if (!file || !window.currentUser) return;
+  if (file.size > 2 * 1024 * 1024) { window.showToast('⚠️ Файл слишком большой (максимум 2 МБ)', '#e74c3c'); return; }
   const reader = new FileReader();
   reader.onload = function(e) {
     const dataUrl = e.target.result;
-    lsSet('fs_avatar_' + currentUser.email, dataUrl);
+    window.lsSet('fs_avatar_' + window.currentUser && window.currentUser.email, dataUrl);
     // Update all avatar elements
     const bigAv = document.getElementById('profileAvatarBig');
     const smAv = document.getElementById('navAvatar');
     if (bigAv) bigAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Аватар"/>`;
     if (smAv) smAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt=""/>`;
-    showToast('✅ Фото профиля обновлено!');
+    window.showToast('✅ Фото профиля обновлено!');
     addNotif('📸', 'Фото профиля успешно обновлено', null);
   };
   reader.readAsDataURL(file);
@@ -3573,22 +3638,22 @@ window.handleAvatarUpload = function(event) {
 //   PORTFOLIO UPLOAD (Profile page)
 // ══════════════════════════════════════════════════
 window.handlePortfolioUpload = function(event) {
-  if (!currentUser) return;
+  if (!window.currentUser) return;
   const files = Array.from(event.target.files);
   if (!files.length) return;
-  const key = 'fs_portfolio_' + currentUser.email;
-  let portfolio = lsGet(key, []);
+  const key = 'fs_portfolio_' + window.currentUser && window.currentUser.email;
+  let portfolio = window.lsGet(key, []);
   let loaded = 0;
   files.forEach(file => {
-    if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл ' + file.name + ' слишком большой (>3МБ)', '#F5A623'); return; }
+    if (file.size > 3 * 1024 * 1024) { window.showToast('⚠️ Файл ' + file.name + ' слишком большой (>3МБ)', '#F5A623'); return; }
     const reader = new FileReader();
     reader.onload = function(e) {
       portfolio.push(e.target.result);
-      lsSet(key, portfolio);
+      window.lsSet(key, portfolio);
       loaded++;
       if (loaded === files.length) {
         renderPortfolioGrid();
-        showToast(`✅ Загружено ${loaded} фото!`);
+        window.showToast(`✅ Загружено ${loaded} фото!`);
         addNotif('🖼', `Добавлено ${loaded} новых работ в портфолио`, null);
       }
     };
@@ -3597,10 +3662,10 @@ window.handlePortfolioUpload = function(event) {
   event.target.value = '';
 };
 
-function renderPortfolioGrid() {
-  if (!currentUser) return;
-  const key = 'fs_portfolio_' + currentUser.email;
-  const portfolio = lsGet(key, []);
+window.renderPortfolioGrid = function() {
+  if (!window.currentUser) return;
+  const key = 'fs_portfolio_' + window.currentUser && window.currentUser.email;
+  const portfolio = window.lsGet(key, []);
   const grid = document.getElementById('portfolioGrid');
   if (!grid) return;
   const addBtn = `<div class="portfolio-item portfolio-add" onclick="document.getElementById('portfolioFileInput').click()">
@@ -3614,12 +3679,12 @@ function renderPortfolioGrid() {
     </div>`).join('') + addBtn;
 }
 
-function removePortfolioItem(idx) {
-  if (!currentUser) return;
-  const key = 'fs_portfolio_' + currentUser.email;
-  let portfolio = lsGet(key, []);
+window.removePortfolioItem = function(idx) {
+  if (!window.currentUser) return;
+  const key = 'fs_portfolio_' + window.currentUser && window.currentUser.email;
+  let portfolio = window.lsGet(key, []);
   portfolio.splice(idx, 1);
-  lsSet(key, portfolio);
+  window.lsSet(key, portfolio);
   renderPortfolioGrid();
 }
 
@@ -3648,14 +3713,14 @@ window.handleTalentModalPhotos = function(event) {
 };
 
 // Patch submitTalent to save photos
-const _origSubmitTalent = submitTalent;
-submitTalent = function() {
+const _origSubmitTalent = window.submitTalent;
+window.submitTalent = function() {
   _origSubmitTalent();
   // Save photos for the new talent (id = most recent)
   if (_talentModalPhotos.length > 0 && talents.length > 0) {
     const newTalent = talents[0]; // just added at the front
     if (newTalent && newTalent.id) {
-      lsSet('fs_portfolio_' + newTalent.id, _talentModalPhotos);
+      window.lsSet('fs_portfolio_' + newTalent.id, _talentModalPhotos);
       _talentModalPhotos = [];
       const preview = document.getElementById('talentModalPhotoPreview');
       const count = document.getElementById('talentModalPhotoCount');
@@ -3700,14 +3765,16 @@ window.switchProfileTab = function(tab, btn) {
 // ══════════════════════════════════════════════════
 //   DASHBOARD
 // ══════════════════════════════════════════════════
-function renderDashboard() {
+window.renderDashboard = function() {
   const grid = document.getElementById('dashGrid');
   const chart = document.getElementById('activityChart');
   const reviewsEl = document.getElementById('myReviewsList');
-  if (!grid || !currentUser) return;
+  if (!grid || !window.currentUser) return;
 
-  const myOrders = orders.filter(o => o.authorName === currentUser.name.split(' ')[0]);
-  const myTalent = talents.filter(t => t.initials === currentUser.initials);
+  const orders = (window._fs && window._fs.orders) || [];
+  const myOrders = orders.filter(o => o.authorName === window.currentUser.name.split(' ')[0]);
+  const talents = (window._fs && window._fs.talents) || [];
+  const myTalent = talents.filter(t => t.initials === window.currentUser.initials);
   const bm = loadBookmarks();
   const myChats = loadMyOrderIds();
 
@@ -3733,7 +3800,7 @@ function renderDashboard() {
   // My reviews
   if (reviewsEl) {
     const myRevs = [];
-    orders.forEach(o => (o.clientReviews||[]).forEach(r => { if(r.author && r.author.includes(currentUser.name.split(' ')[0])) myRevs.push({...r, about: o.title}); }));
+    orders.forEach(o => (o.clientReviews||[]).forEach(r => { if(r.author && r.author.includes(window.currentUser.name.split(' ')[0])) myRevs.push({...r, about: o.title}); }));
     if (!myRevs.length) {
       reviewsEl.innerHTML = '<p style="color:var(--text-soft);font-size:.88rem">Вы ещё не оставляли отзывов.</p>';
     } else {
@@ -3749,11 +3816,11 @@ function renderDashboard() {
 // ══════════════════════════════════════════════════
 //   AVAILABILITY CALENDAR
 // ══════════════════════════════════════════════════
-function renderAvailCalendar() {
+window.renderAvailCalendar = function() {
   const wrap = document.getElementById('availCalendarWrap');
-  if (!wrap || !currentUser) return;
-  const key = 'fs_avail_' + currentUser.email;
-  let avail = lsGet(key, {});
+  if (!wrap || !window.currentUser) return;
+  const key = 'fs_avail_' + window.currentUser && window.currentUser.email;
+  let avail = window.lsGet(key, {});
   const today = new Date();
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   let html = '<div class="avail-calendar">';
@@ -3775,33 +3842,34 @@ function renderAvailCalendar() {
 }
 
 window.toggleAvailDay = function(dateKey, el) {
-  if (!currentUser) return;
-  const key = 'fs_avail_' + currentUser.email;
-  let avail = lsGet(key, {});
+  if (!window.currentUser) return;
+  const key = 'fs_avail_' + window.currentUser && window.currentUser.email;
+  let avail = window.lsGet(key, {});
   const cur = avail[dateKey];
   if (!cur) { avail[dateKey] = 'available'; el.className = 'avail-day available'; }
   else if (cur === 'available') { avail[dateKey] = 'busy'; el.className = 'avail-day busy'; }
   else { delete avail[dateKey]; el.className = 'avail-day'; }
-  lsSet(key, avail);
+  window.lsSet(key, avail);
 };
 
 // ══════════════════════════════════════════════════
 //   CV EXPORT
 // ══════════════════════════════════════════════════
 window.generateCV = function() {
-  if (!currentUser) return;
-  const myTalent = talents.find(t => t.initials === currentUser.initials);
+  if (!window.currentUser) return;
+  const talents2 = (window._fs && window._fs.talents) || [];
+  const myTalent = talents2.find(t => t.initials === window.currentUser.initials);
   const bm = loadBookmarks();
-  const avail = lsGet('fs_avail_' + currentUser.email, {});
+  const avail = window.lsGet('fs_avail_' + window.currentUser.email, {});
   const freeDays = Object.entries(avail).filter(([,v]) => v === 'available').length;
 
   let cv = `=== РЕЗЮМЕ FreeSun ===
 `;
-  cv += `Имя: ${currentUser.name}
+  cv += `Имя: ${(window.currentUser||{}).name}
 `;
-  cv += `Email: ${currentUser.email}
+  cv += `Email: ${window.currentUser && window.currentUser.email}
 `;
-  cv += `Роль: ${currentUser.role === 'freelancer' ? 'Фрилансер' : 'Предприниматель'}
+  cv += `Роль: ${window.currentUser.role === 'freelancer' ? 'Фрилансер' : 'Предприниматель'}
 
 `;
 
@@ -3838,10 +3906,10 @@ window.generateCV = function() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'FreeSun_CV_' + currentUser.name.replace(/\s+/g,'_') + '.txt';
+  a.download = 'FreeSun_CV_' + (window.currentUser||{}).name.replace(/\s+/g,'_') + '.txt';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('📥 CV скачан!');
+  window.showToast('📥 CV скачан!');
 };
 
 // ══════════════════════════════════════════════════
@@ -3873,17 +3941,18 @@ window.setReviewStar = function(n) {
 };
 
 window.submitReview = function() {
-  if (!currentUser || !_reviewTarget) return;
-  if (!_reviewStars) { showToast('⚠️ Выберите оценку', '#F5A623'); return; }
+  if (!window.currentUser || !_reviewTarget) return;
+  if (!_reviewStars) { window.showToast('⚠️ Выберите оценку', '#F5A623'); return; }
   const text = document.getElementById('reviewText').value.trim();
-  if (!text) { showToast('⚠️ Напишите отзыв', '#F5A623'); return; }
+  if (!text) { window.showToast('⚠️ Напишите отзыв', '#F5A623'); return; }
   const now = new Date();
   const review = {
-    author: currentUser.name + ', ' + (currentUser.role === 'freelancer' ? 'фрилансер' : 'предприниматель'),
+    author: window.currentUser.name + ', ' + (window.currentUser.role === 'freelancer' ? 'фрилансер' : 'предприниматель'),
     rating: _reviewStars,
     text,
     date: 'Только что'
   };
+  const talents = (window._fs && window._fs.talents) || [];
   if (_reviewTarget.type === 'talent') {
     const idx = talents.findIndex(t => t.id == _reviewTarget.id);
     if (idx !== -1) {
@@ -3894,22 +3963,22 @@ window.submitReview = function() {
       talents[idx].rating = Math.round((allRatings.reduce((a,b)=>a+b,0)/allRatings.length)*10)/10;
       const starCount = Math.round(talents[idx].rating);
       talents[idx].stars = '⭐'.repeat(starCount);
-      lsSet(LS_TALENTS, talents);
-      filterTalents();
+      window.lsSet('fs_talents', talents);
+      if(window.filterTalents) window.filterTalents();
     }
   }
   closeReviewModal();
-  showToast('✅ Отзыв опубликован!');
+  window.showToast('✅ Отзыв опубликован!');
   addNotif('⭐', `Вы оставили отзыв на «${_reviewTarget.name.substring(0,30)}»`, null);
 };
 
 // ══════════════════════════════════════════════════
 //   PATCH goPage for profile init
 // ══════════════════════════════════════════════════
-const _origGoPage = goPage;
-goPage = function(id) {
+const _origGoPage = window.goPage;
+window.goPage = function(id) {
   _origGoPage(id);
-  if (id === 'pageProfile' && currentUser) {
+  if (id === 'pageProfile' && window.currentUser) {
     renderAvailCalendar();
     renderPortfolioGrid();
     // Reset to main tab
@@ -3929,49 +3998,11 @@ goPage = function(id) {
 // ══════════════════════════════════════════════════
 //   NOTIFY on new order/talent posted
 // ══════════════════════════════════════════════════
-const _origSubmitOrder = submitOrder;
-submitOrder = function() {
+const _origSubmitOrder = window.submitOrder;
+window.submitOrder = function() {
   _origSubmitOrder();
-  if (currentUser) addNotif('📋', 'Ваш заказ опубликован — ждите откликов!', null);
+  if (window.currentUser) addNotif('📋', 'Ваш заказ опубликован — ждите откликов!', null);
 };
-
-  if (typeof window.ethereum !== 'undefined') {
-    window.ethereum.on('accountsChanged', function(accounts) {
-      if (!accounts || accounts.length === 0) {
-        document.getElementById('walletBalanceBar').classList.remove('show');
-      }
-    });
-  }
-
-  function syncMobileMenu() {
-    const guestLinks = document.getElementById('mobGuestLinks');
-    const userLinks  = document.getElementById('mobUserLinks');
-    if (!guestLinks || !userLinks) return;
-    if (currentUser) {
-      guestLinks.style.display = 'none';
-      userLinks.style.display  = 'flex';
-    } else {
-      guestLinks.style.display = 'flex';
-      userLinks.style.display  = 'none';
-    }
-  }
-  const _origSetCurrentUser = setCurrentUser;
-  window.setCurrentUser = function(u) {
-    _origSetCurrentUser(u);
-    syncMobileMenu();
-    document.getElementById('walletBalanceBar').classList.remove('show');
-  };
-  syncMobileMenu();
-
-} catch (err) {
-  console.error('ОШИБКА В init():', err);
-  var box = document.createElement('div');
-  box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#3a0d0d;color:#ff9b9b;font:13px/1.5 monospace;padding:14px 18px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
-  box.textContent = '⚠ ОШИБКА В init(): ' + err.message + (err.stack ? '\n\n' + err.stack : '');
-  document.addEventListener('DOMContentLoaded', function () { document.body.prepend(box); });
-  if (document.body) document.body.prepend(box);
-}
-})();
 </script>
 <!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" crossorigin="anonymous"></script>
@@ -5122,4 +5153,5 @@ submitOrder = function() {
 })();
 </script>
 </body>
-</html>
+</html
+  
