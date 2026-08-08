@@ -2173,7 +2173,6 @@ function setCurrentUser(u) {
   const first = u.name.split(' ')[0];
   document.getElementById('navGuest').style.display = 'none';
   const nu = document.getElementById('navUser'); nu.classList.add('show');
-  if (!_storedAvatar) document.getElementById('navAvatar').textContent = u.initials;
   document.getElementById('navName').textContent = first;
   document.getElementById('navGuestDetail').style.display = 'none';
   const nd = document.getElementById('navUserDetail'); nd.style.display='flex';
@@ -5154,4 +5153,3 @@ window.submitOrder = function() {
 </script>
 </body>
 </html
-  
