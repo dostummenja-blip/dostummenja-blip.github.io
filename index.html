@@ -820,6 +820,12 @@ body.dark .notif-btn{background:#2d3650;color:#e8edf5}
 /* ═══ NOTIFICATIONS ═══ */
 .notif-btn{position:relative;padding:8px 14px;border-radius:50px;background:var(--sand-mid);border:none;cursor:pointer;font-size:1.1rem;transition:all .2s}
 .notif-btn:hover{background:var(--sky);color:var(--white)}
+.lang-nav-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:50px;background:var(--sand-mid);border:none;cursor:pointer;font-size:.85rem;font-weight:800;color:var(--text);transition:all .2s;white-space:nowrap}
+.lang-nav-btn:hover{background:var(--sky);color:var(--white)}
+body.dark .lang-nav-btn{background:#2d3650;color:#e8edf5}
+.nav-mobile-dropdown .lang-nav-btn-mobile{width:100%;justify-content:center;padding:13px 14px;margin-bottom:10px;background:linear-gradient(135deg,var(--sky),var(--sky-deep));color:var(--white);font-size:.95rem;box-shadow:0 3px 10px rgba(59,175,218,.3)}
+.nav-mobile-dropdown .lang-nav-btn-mobile:hover,.nav-mobile-dropdown .lang-nav-btn-mobile:active{background:var(--sky-deep)}
+body.dark .nav-mobile-dropdown .lang-nav-btn-mobile{background:linear-gradient(135deg,var(--sky),var(--sky-deep));color:var(--white)}
 .notif-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:#E74C3C;border-radius:50%;font-size:.62rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center}
 .notif-panel{position:fixed;top:62px;right:18px;width:340px;background:var(--white);border-radius:18px;box-shadow:0 16px 48px rgba(18,33,59,.2);border:1.5px solid #EEF4FA;z-index:900;display:none;overflow:hidden;animation:slideDown .2s ease}
 .notif-panel.open{display:block}
@@ -972,9 +978,9 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 <!-- devtools blocker removed -->
 
 <!-- ══════ WALLET BALANCE PILL (USDT only, corner) ══════ -->
-<div id="walletBalanceBar" onclick="wbbRefresh()" title="Обновить баланс USDT">
+<div id="walletBalanceBar" onclick="wbbRefresh()" title="Обновить баланс USDT" data-i18n-title="wallet_refresh_title">
   <div class="wbb-dot"></div>
-  <div class="wbb-total" id="wbbTotal"><span class="wbb-loading">Загрузка…</span></div>
+  <div class="wbb-total" id="wbbTotal"><span class="wbb-loading" data-i18n="t_loading">Загрузка…</span></div>
 </div>
 
 <!-- ══════ GOOGLE IDENTITY ══════ -->
@@ -987,22 +993,22 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 <div class="landing-overlay" id="landingOverlay">
   <div class="landing-sun-deco"></div>
   <div class="landing-logo">Free<span>Sun</span></div>
-  <p class="landing-tagline">Лучшая биржа фриланса — моментальные выплаты, честные условия, без лишних барьеров</p>
+  <p class="landing-tagline" data-i18n="landing_tagline">Лучшая биржа фриланса — моментальные выплаты, честные условия, без лишних барьеров</p>
   <div class="landing-cards">
     <div class="landing-card lc-work" onclick="chooseSector('work')">
       <div class="landing-card-icon">💼</div>
-      <h2>Найти работу</h2>
-      <p>Для фрилансеров. Просматривайте заказы от предпринимателей, откликайтесь и зарабатывайте.</p>
-      <div class="landing-card-btn">Я фрилансер →</div>
+      <h2 data-i18n="landing_work_title">Найти работу</h2>
+      <p data-i18n="landing_work_desc">Для фрилансеров. Просматривайте заказы от предпринимателей, откликайтесь и зарабатывайте.</p>
+      <div class="landing-card-btn" data-i18n="landing_work_btn">Я фрилансер →</div>
     </div>
     <div class="landing-card lc-talent" onclick="chooseSector('talent')">
       <div class="landing-card-icon">🌟</div>
-      <h2>Найти талант</h2>
-      <p>Для бизнеса. Найдите лучших специалистов — просматривайте профили фрилансеров и нанимайте.</p>
-      <div class="landing-card-btn">Я предприниматель →</div>
+      <h2 data-i18n="landing_talent_title">Найти талант</h2>
+      <p data-i18n="landing_talent_desc">Для бизнеса. Найдите лучших специалистов — просматривайте профили фрилансеров и нанимайте.</p>
+      <div class="landing-card-btn" data-i18n="landing_talent_btn">Я предприниматель →</div>
     </div>
   </div>
-  <div class="landing-footer">FreeSun · Биржа фриланса · 2026</div>
+  <div class="landing-footer" data-i18n="landing_footer">FreeSun · Биржа фриланса · 2026</div>
 </div>
 
 <!-- ══════ OVERLAY ══════ -->
@@ -1011,99 +1017,99 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <!-- AUTH MODAL -->
   <div class="modal" id="authModal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <h2>Добро пожаловать ☀️</h2>
-    <p class="modal-sub">Войдите или создайте аккаунт, чтобы начать</p>
+    <h2 data-i18n="auth_welcome">Добро пожаловать ☀️</h2>
+    <p class="modal-sub" data-i18n="auth_subtitle">Войдите или создайте аккаунт, чтобы начать</p>
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchAuthTab('login',this)">Вход</button>
-      <button class="tab-btn" onclick="switchAuthTab('register',this)">Регистрация</button>
+      <button class="tab-btn active" onclick="switchAuthTab('login',this)" data-i18n="auth_tab_login">Вход</button>
+      <button class="tab-btn" onclick="switchAuthTab('register',this)" data-i18n="auth_tab_register">Регистрация</button>
     </div>
     <!-- LOGIN -->
     <div class="tab-content active" id="tab-login">
       <button class="google-btn" onclick="signInWithGoogle()">
         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Войти через Google
+        <span data-i18n="auth_google_login">Войти через Google</span>
       </button>
-      <div class="auth-divider">или</div>
-      <div class="form-group"><label>Email</label><input type="text" id="loginEmail" placeholder="your@email.com"/></div>
-      <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
-      <button class="btn btn-sky btn-full" onclick="doLogin()">Войти в аккаунт</button>
+      <div class="auth-divider" data-i18n="auth_or">или</div>
+      <div class="form-group"><label data-i18n="auth_email">Email</label><input type="text" id="loginEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label data-i18n="auth_password">Пароль</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+      <button class="btn btn-sky btn-full" onclick="doLogin()" data-i18n="auth_login_btn">Войти в аккаунт</button>
     </div>
     <!-- REGISTER -->
     <div class="tab-content" id="tab-register">
       <button class="google-btn" onclick="signInWithGoogle()">
         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Зарегистрироваться через Google
+        <span data-i18n="auth_google_register">Зарегистрироваться через Google</span>
       </button>
-      <div class="auth-divider">или заполните форму</div>
-      <div class="form-group"><label>Ваше имя</label><input type="text" id="regName" placeholder="Иван Иванов"/></div>
-      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"/></div>
-      <div class="form-group"><label>Пароль</label><input type="password" id="regPass" placeholder="Минимум 8 символов"/></div>
+      <div class="auth-divider" data-i18n="auth_or_form">или заполните форму</div>
+      <div class="form-group"><label data-i18n="auth_your_name">Ваше имя</label><input type="text" id="regName" placeholder="Иван Иванов"/></div>
+      <div class="form-group"><label data-i18n="auth_email">Email</label><input type="email" id="regEmail" placeholder="your@email.com"/></div>
+      <div class="form-group"><label data-i18n="auth_password">Пароль</label><input type="password" id="regPass" placeholder="Минимум 8 символов" data-i18n-placeholder="auth_password_min"/></div>
       <div class="form-group">
-        <label>Я регистрируюсь как</label>
+        <label data-i18n="auth_role_label">Я регистрируюсь как</label>
         <select id="regRole">
-          <option value="">Выберите роль...</option>
-          <option value="entrepreneur">🏢 Предприниматель — размещаю заказы</option>
-          <option value="freelancer">💼 Фрилансер — ищу проекты</option>
+          <option value="" data-i18n="auth_role_placeholder">Выберите роль...</option>
+          <option value="entrepreneur" data-i18n="auth_role_entrepreneur">🏢 Предприниматель — размещаю заказы</option>
+          <option value="freelancer" data-i18n="auth_role_freelancer">💼 Фрилансер — ищу проекты</option>
         </select>
       </div>
-      <button class="btn btn-sun btn-full" onclick="doRegister()">Создать аккаунт</button>
+      <button class="btn btn-sun btn-full" onclick="doRegister()" data-i18n="auth_register_btn">Создать аккаунт</button>
     </div>
   </div>
 
   <!-- POST ORDER MODAL -->
   <div class="modal" id="postModal" onclick="event.stopPropagation()" style="display:none">
     <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <h2>Новый заказ 📋</h2>
-    <p class="modal-sub">Опишите задачу — фрилансеры увидят её сразу</p>
-    <div class="form-group"><label>Заголовок заказа</label><input type="text" id="orderTitle" placeholder="Например: Разработка лендинга"/></div>
+    <h2 data-i18n="post_order_title">Новый заказ 📋</h2>
+    <p class="modal-sub" data-i18n="post_order_subtitle">Опишите задачу — фрилансеры увидят её сразу</p>
+    <div class="form-group"><label data-i18n="post_order_heading">Заголовок заказа</label><input type="text" id="orderTitle" placeholder="Например: Разработка лендинга" data-i18n-placeholder="post_order_heading_ph"/></div>
     <div class="form-group">
-      <label>Категория</label>
+      <label data-i18n="post_category">Категория</label>
       <select id="orderCat">
-        <option value="">Выберите категорию...</option>
-        <option>🎨 Дизайн</option><option>💻 Разработка</option>
-        <option>✍️ Копирайтинг</option><option>📱 SMM</option>
-        <option>🎬 Видео</option><option>📊 Маркетинг</option>
+        <option value="" data-i18n="post_category_ph">Выберите категорию...</option>
+        <option data-i18n="cat_design_ic">🎨 Дизайн</option><option data-i18n="cat_dev_ic">💻 Разработка</option>
+        <option data-i18n="cat_copy_ic">✍️ Копирайтинг</option><option data-i18n="cat_smm_ic">📱 SMM</option>
+        <option data-i18n="cat_video_ic">🎬 Видео</option><option data-i18n="cat_marketing_ic">📊 Маркетинг</option>
       </select>
     </div>
-    <div class="form-group"><label>Описание задачи</label><textarea id="orderDesc" placeholder="Подробно опишите, что нужно сделать, требования, сроки..."></textarea></div>
+    <div class="form-group"><label data-i18n="post_order_desc">Описание задачи</label><textarea id="orderDesc" placeholder="Подробно опишите, что нужно сделать, требования, сроки..." data-i18n-placeholder="post_order_desc_ph"></textarea></div>
     <div class="price-row">
-      <div class="form-group"><label>Бюджет от ($)</label><input type="number" id="orderPriceMin" placeholder="500" min="0"/></div>
-      <div class="form-group"><label>Бюджет до ($)</label><input type="number" id="orderPriceMax" placeholder="1500" min="0"/></div>
+      <div class="form-group"><label data-i18n="post_budget_from">Бюджет от ($)</label><input type="number" id="orderPriceMin" placeholder="500" min="0"/></div>
+      <div class="form-group"><label data-i18n="post_budget_to">Бюджет до ($)</label><input type="number" id="orderPriceMax" placeholder="1500" min="0"/></div>
     </div>
-    <button class="btn btn-sun btn-full" onclick="submitOrder()">✨ Опубликовать заказ</button>
+    <button class="btn btn-sun btn-full" onclick="submitOrder()" data-i18n="post_order_submit">✨ Опубликовать заказ</button>
   </div>
 
   <!-- POST TALENT MODAL -->
   <div class="modal" id="postTalentModal" onclick="event.stopPropagation()" style="display:none">
     <button class="modal-close" onclick="closeAllModals()">✕</button>
-    <h2>Моё портфолио 🌟</h2>
-    <p class="modal-sub">Расскажите о себе — предприниматели найдут вас</p>
-    <div class="form-group"><label>Ваше имя / псевдоним</label><input type="text" id="talentName" placeholder="Иван Иванов"/></div>
+    <h2 data-i18n="post_talent_title">Моё портфолио 🌟</h2>
+    <p class="modal-sub" data-i18n="post_talent_subtitle">Расскажите о себе — предприниматели найдут вас</p>
+    <div class="form-group"><label data-i18n="post_talent_name">Ваше имя / псевдоним</label><input type="text" id="talentName" placeholder="Иван Иванов"/></div>
     <div class="form-group">
-      <label>Специализация</label>
+      <label data-i18n="post_talent_spec">Специализация</label>
       <select id="talentCat">
-        <option value="">Выберите категорию...</option>
-        <option>🎨 Дизайн</option><option>💻 Разработка</option>
-        <option>✍️ Копирайтинг</option><option>📱 SMM</option>
-        <option>🎬 Видео</option><option>📊 Маркетинг</option>
+        <option value="" data-i18n="post_category_ph">Выберите категорию...</option>
+        <option data-i18n="cat_design_ic">🎨 Дизайн</option><option data-i18n="cat_dev_ic">💻 Разработка</option>
+        <option data-i18n="cat_copy_ic">✍️ Копирайтинг</option><option data-i18n="cat_smm_ic">📱 SMM</option>
+        <option data-i18n="cat_video_ic">🎬 Видео</option><option data-i18n="cat_marketing_ic">📊 Маркетинг</option>
       </select>
     </div>
-    <div class="form-group"><label>О себе</label><textarea id="talentDesc" placeholder="Опишите опыт, подход к работе, достижения..."></textarea></div>
-    <div class="form-group"><label>Навыки (через запятую)</label><input type="text" id="talentSkills" placeholder="Figma, Photoshop, Illustrator"/></div>
+    <div class="form-group"><label data-i18n="post_talent_about">О себе</label><textarea id="talentDesc" placeholder="Опишите опыт, подход к работе, достижения..." data-i18n-placeholder="post_talent_about_ph"></textarea></div>
+    <div class="form-group"><label data-i18n="post_talent_skills">Навыки (через запятую)</label><input type="text" id="talentSkills" placeholder="Figma, Photoshop, Illustrator"/></div>
     <div class="price-row">
-      <div class="form-group"><label>Ставка от ($/ч)</label><input type="number" id="talentRateMin" placeholder="15" min="0"/></div>
-      <div class="form-group"><label>Ставка до ($/ч)</label><input type="number" id="talentRateMax" placeholder="40" min="0"/></div>
+      <div class="form-group"><label data-i18n="post_rate_from">Ставка от ($/ч)</label><input type="number" id="talentRateMin" placeholder="15" min="0"/></div>
+      <div class="form-group"><label data-i18n="post_rate_to">Ставка до ($/ч)</label><input type="number" id="talentRateMax" placeholder="40" min="0"/></div>
     </div>
     <div class="form-group">
-      <label>📸 Фото проектов (необязательно)</label>
+      <label data-i18n="post_photos_label">📸 Фото проектов (необязательно)</label>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('talentModalPhotoInput').click()">+ Загрузить фото</button>
-        <span style="font-size:.8rem;color:var(--text-soft)" id="talentModalPhotoCount">0 фото выбрано</span>
+        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('talentModalPhotoInput').click()" data-i18n="post_photos_upload">+ Загрузить фото</button>
+        <span style="font-size:.8rem;color:var(--text-soft)" id="talentModalPhotoCount" data-i18n="post_photos_count">0 фото выбрано</span>
       </div>
       <input type="file" id="talentModalPhotoInput" accept="image/*" multiple style="display:none" onchange="handleTalentModalPhotos(event)"/>
       <div id="talentModalPhotoPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
     </div>
-    <button class="btn btn-leaf btn-full" onclick="submitTalent()">✨ Опубликовать портфолио</button>
+    <button class="btn btn-leaf btn-full" onclick="submitTalent()" data-i18n="post_talent_submit">✨ Опубликовать портфолио</button>
   </div>
 
 </div><!-- /overlay -->
@@ -1117,52 +1123,54 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <nav>
     <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
     <div class="nav-links">
-      <a href="#/orders" data-route onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800">💼 Найти работу</a>
-      <a href="#/talents" data-route onclick="switchMainSector('talent')" id="navLinkTalent">🌟 Найти талант</a>
-      <a href="#/reviews" data-route onclick="switchMainSector('reviews')" id="navLinkReviews">⭐ Отзывы</a>
-      <a href="#/about" data-route onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800">О сайте</a>
-      <a id="navPostLink" href="#" onclick="event.preventDefault();requireAuth(()=>openPost())">Разместить заказ</a>
+      <a href="#/orders" data-route onclick="switchMainSector('work')" id="navLinkWork" style="color:var(--sky-deep);font-weight:800" data-i18n="nav_find_work">💼 Найти работу</a>
+      <a href="#/talents" data-route onclick="switchMainSector('talent')" id="navLinkTalent" data-i18n="nav_find_talent">🌟 Найти талант</a>
+      <a href="#/reviews" data-route onclick="switchMainSector('reviews')" id="navLinkReviews" data-i18n="nav_reviews">⭐ Отзывы</a>
+      <a href="#/about" data-route onclick="goPage('pageAbout')" style="color:var(--sun);font-weight:800" data-i18n="nav_about">О сайте</a>
+      <a id="navPostLink" href="#" onclick="event.preventDefault();requireAuth(()=>openPost())" data-i18n="nav_post_order">Разместить заказ</a>
     </div>
     <div class="nav-actions">
+      <button class="lang-nav-btn" onclick="toggleNavLang()" id="navLangBtn" title="Change language / Изменить язык">🌐 <span id="navLangLabel">EN</span></button>
       <div id="navGuest" style="display:flex;gap:10px">
-        <button class="btn btn-outline btn-sm" onclick="openAuth('login')">Войти</button>
-        <button class="btn btn-sun btn-sm" onclick="openAuth('register')">Регистрация</button>
+        <button class="btn btn-outline btn-sm" onclick="openAuth('login')" data-i18n="nav_login">Войти</button>
+        <button class="btn btn-sun btn-sm" onclick="openAuth('register')" data-i18n="nav_register">Регистрация</button>
       </div>
       <div class="nav-user" id="navUser">
         <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">
-          💬 Чаты <span class="chat-badge" id="chatBadge" style="display:none">0</span>
+          <span data-i18n="nav_chats">💬 Чаты</span> <span class="chat-badge" id="chatBadge" style="display:none">0</span>
         </a>
-        <button class="notif-btn" onclick="toggleNotifPanel()" title="Уведомления" id="notifBtn">
+        <button class="notif-btn" onclick="toggleNotifPanel()" title="Уведомления" id="notifBtn" data-i18n-title="nav_notifications">
           🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
         </button>
-        <a class="user-chip" href="#/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer" title="Мой профиль">
+        <a class="user-chip" href="#/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer" title="Мой профиль" data-i18n-title="nav_profile">
           <div class="user-avatar-sm" id="navAvatar">ИИ</div>
           <span id="navName">Иван И.</span>
         </a>
-        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()" data-i18n="nav_logout">Выйти</button>
       </div>
     </div>
     <!-- Hamburger for mobile -->
-    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Меню">
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Меню" data-i18n-title="nav_menu">
       <span></span><span></span><span></span>
     </button>
     <!-- Mobile dropdown -->
     <div class="nav-mobile-dropdown" id="navMobileDropdown">
-      <a href="#/orders" data-route onclick="switchMainSector('work');closeMobileNav()">💼 Найти работу</a>
-      <a href="#/talents" data-route onclick="switchMainSector('talent');closeMobileNav()">🌟 Найти талант</a>
-      <a href="#/reviews" data-route onclick="switchMainSector('reviews');closeMobileNav()">⭐ Отзывы</a>
-      <a href="#/about" data-route onclick="goPage('pageAbout');closeMobileNav()">ℹ️ О сайте</a>
-      <a href="#" onclick="event.preventDefault();requireAuth(()=>{openPost();closeMobileNav()})">📋 Разместить заказ</a>
+      <button class="lang-nav-btn lang-nav-btn-mobile" onclick="toggleNavLang()" id="navLangBtnMobile">🌐 <span id="navLangLabelMobile">EN</span></button>
+      <a href="#/orders" data-route onclick="switchMainSector('work');closeMobileNav()" data-i18n="nav_find_work">💼 Найти работу</a>
+      <a href="#/talents" data-route onclick="switchMainSector('talent');closeMobileNav()" data-i18n="nav_find_talent">🌟 Найти талант</a>
+      <a href="#/reviews" data-route onclick="switchMainSector('reviews');closeMobileNav()" data-i18n="nav_reviews">⭐ Отзывы</a>
+      <a href="#/about" data-route onclick="goPage('pageAbout');closeMobileNav()" data-i18n="nav_mob_about">ℹ️ О сайте</a>
+      <a href="#" onclick="event.preventDefault();requireAuth(()=>{openPost();closeMobileNav()})" data-i18n="nav_mob_post">📋 Разместить заказ</a>
       <div class="mob-divider"></div>
       <div id="mobGuestLinks" class="mob-auth">
-        <button class="btn btn-outline btn-sm" style="flex:1" onclick="openAuth('login');closeMobileNav()">Войти</button>
-        <button class="btn btn-sun btn-sm" style="flex:1" onclick="openAuth('register');closeMobileNav()">Регистрация</button>
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="openAuth('login');closeMobileNav()" data-i18n="nav_login">Войти</button>
+        <button class="btn btn-sun btn-sm" style="flex:1" onclick="openAuth('register');closeMobileNav()" data-i18n="nav_register">Регистрация</button>
       </div>
       <div id="mobUserLinks" style="display:none;flex-direction:column;gap:6px">
-        <a href="#/chat" data-route onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})">💬 Чаты</a>
-        <a href="#/profile" data-route onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})">👤 Профиль</a>
-        <a href="#" onclick="event.preventDefault();requireAuth(()=>{goPage('pageProfile');setTimeout(()=>switchProfileTab('bookmarks',document.querySelectorAll('.profile-tab')[3]),150)});closeMobileNav()">🔖 Избранное</a>
-        <a href="#" onclick="event.preventDefault();doLogout();closeMobileNav()">🚪 Выйти</a>
+        <a href="#/chat" data-route onclick="requireAuth(()=>{goPage('pageChats');closeMobileNav()})" data-i18n="nav_chats">💬 Чаты</a>
+        <a href="#/profile" data-route onclick="requireAuth(()=>{goPage('pageProfile');closeMobileNav()})" data-i18n="nav_profile">👤 Профиль</a>
+        <a href="#" onclick="event.preventDefault();requireAuth(()=>{goPage('pageProfile');setTimeout(()=>switchProfileTab('bookmarks',document.querySelectorAll('.profile-tab')[3]),150)});closeMobileNav()" data-i18n="nav_mob_bookmarks">🔖 Избранное</a>
+        <a href="#" onclick="event.preventDefault();doLogout();closeMobileNav()" data-i18n="nav_logout">🚪 Выйти</a>
       </div>
     </div>
   </nav>
@@ -1171,23 +1179,23 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <section class="hero" id="heroWork">
     <div class="hero-sun"></div>
     <div class="hero-particles" id="heroParticles"></div>
-    <div class="hero-badge">💼 Раздел для фрилансеров</div>
-    <h1>Найдите <em>заказы</em><br>и зарабатывайте<br>на своих навыках</h1>
-    <p>Сотни открытых проектов от предпринимателей — выберите подходящий заказ, напишите в чат и начните работу уже сегодня.</p>
+    <div class="hero-badge" data-i18n="hero_work_badge">💼 Раздел для фрилансеров</div>
+    <h1><span data-i18n="hero_work_h1_pre">Найдите </span><em data-i18n="hero_work_h1_em">заказы</em><br><span data-i18n="hero_work_h1_post">и зарабатывайте на своих навыках</span></h1>
+    <p data-i18n="hero_work_p">Сотни открытых проектов от предпринимателей — выберите подходящий заказ, напишите в чат и начните работу уже сегодня.</p>
     <div class="hero-ctas">
-      <button class="btn btn-sky" onclick="scrollToOrders()">🔍 Смотреть заказы</button>
-      <button class="btn btn-outline" onclick="switchMainSector('talent')">🌟 Я предприниматель</button>
+      <button class="btn btn-sky" onclick="scrollToOrders()" data-i18n="hero_work_btn1">🔍 Смотреть заказы</button>
+      <button class="btn btn-outline" onclick="switchMainSector('talent')" data-i18n="hero_work_btn2">🌟 Я предприниматель</button>
     </div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">830+</div><div class="stat-label">Открытых заказов</div></div>
-      <div class="stat"><div class="stat-num">$1.2М</div><div class="stat-label">Выплачено фрилансерам</div></div>
-      <div class="stat"><div class="stat-num">4.9⭐</div><div class="stat-label">Средняя оценка</div></div>
-      <div class="stat"><div class="stat-num">0 KYC</div><div class="stat-label">Вывод без верификации</div></div>
+      <div class="stat"><div class="stat-num">830+</div><div class="stat-label" data-i18n="hero_work_stat1">Открытых заказов</div></div>
+      <div class="stat"><div class="stat-num">$1.2М</div><div class="stat-label" data-i18n="hero_work_stat2">Выплачено фрилансерам</div></div>
+      <div class="stat"><div class="stat-num">4.9⭐</div><div class="stat-label" data-i18n="hero_work_stat3">Средняя оценка</div></div>
+      <div class="stat"><div class="stat-num">0 KYC</div><div class="stat-label" data-i18n="hero_work_stat4">Вывод без верификации</div></div>
     </div>
     <!-- Entrepreneur CTA — visible on first screen of "Find work" -->
     <div style="margin-top:36px;display:inline-flex;align-items:center;gap:14px;background:rgba(59,175,218,.13);border:1.5px solid rgba(59,175,218,.35);border-radius:50px;padding:12px 24px;flex-wrap:wrap;justify-content:center">
-      <span style="font-size:.95rem;font-weight:700;color:var(--text)">📋 <strong>Вы предприниматель?</strong> Разместите заказ — фрилансеры увидят его мгновенно</span>
-      <button class="btn btn-sun btn-sm" onclick="requireAuth(()=>openPost())" style="white-space:nowrap">+ Разместить заказ</button>
+      <span style="font-size:.95rem;font-weight:700;color:var(--text)" data-i18n="hero_work_cta_text" data-i18n-html>📋 <strong>Вы предприниматель?</strong> Разместите заказ — фрилансеры увидят его мгновенно</span>
+      <button class="btn btn-sun btn-sm" onclick="requireAuth(()=>openPost())" style="white-space:nowrap" data-i18n="hero_work_cta_btn">+ Разместить заказ</button>
     </div>
     <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
   </section>
@@ -1195,23 +1203,23 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <!-- HERO — TALENT SECTOR -->
   <section class="hero" id="heroTalent" style="display:none">
     <div class="hero-sun"></div>
-    <div class="hero-badge" style="color:var(--leaf);border-color:#a8e6cf">🌟 Раздел для предпринимателей</div>
-    <h1 style="color:#1C2B3A">Найдите <em style="background:linear-gradient(135deg,#F5A623,#E8960D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic">таланты</em><br><span style="color:#1C2B3A">для вашего бизнеса</span></h1>
-    <p>Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.</p>
+    <div class="hero-badge" style="color:var(--leaf);border-color:#a8e6cf" data-i18n="hero_talent_badge">🌟 Раздел для предпринимателей</div>
+    <h1 style="color:#1C2B3A"><span data-i18n="hero_talent_h1_pre">Найдите </span><em style="background:linear-gradient(135deg,#F5A623,#E8960D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic" data-i18n="hero_talent_h1_em">таланты</em><br><span style="color:#1C2B3A" data-i18n="hero_talent_h1_post">для вашего бизнеса</span></h1>
+    <p data-i18n="hero_talent_p">Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.</p>
     <div class="hero-ctas">
-      <button class="btn btn-sky" onclick="setTimeout(()=>document.getElementById('talentsSection').scrollIntoView({behavior:'smooth'}),80)">🌟 Смотреть резюме</button>
-      <button class="btn btn-leaf" onclick="requireAuth(()=>openPost())">📋 Разместить заказ</button>
+      <button class="btn btn-sky" onclick="setTimeout(()=>document.getElementById('talentsSection').scrollIntoView({behavior:'smooth'}),80)" data-i18n="hero_talent_btn1">🌟 Смотреть резюме</button>
+      <button class="btn btn-leaf" onclick="requireAuth(()=>openPost())" data-i18n="hero_talent_btn2">📋 Разместить заказ</button>
     </div>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label">Фрилансеров в базе</div></div>
-      <div class="stat"><div class="stat-num">⚡ 1ч</div><div class="stat-label">Первый отклик</div></div>
-      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Гарантия результата</div></div>
-      <div class="stat"><div class="stat-num">0₽</div><div class="stat-label">Размещение бесплатно</div></div>
+      <div class="stat"><div class="stat-num">2 400+</div><div class="stat-label" data-i18n="hero_talent_stat1">Фрилансеров в базе</div></div>
+      <div class="stat"><div class="stat-num">⚡ 1ч</div><div class="stat-label" data-i18n="hero_talent_stat2">Первый отклик</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label" data-i18n="hero_talent_stat3">Гарантия результата</div></div>
+      <div class="stat"><div class="stat-num">0₽</div><div class="stat-label" data-i18n="hero_talent_stat4">Размещение бесплатно</div></div>
     </div>
     <!-- Freelancer CTA strip — visible on first screen inside talent hero -->
     <div style="margin-top:36px;display:inline-flex;align-items:center;gap:14px;background:rgba(39,174,96,.13);border:1.5px solid rgba(39,174,96,.35);border-radius:50px;padding:12px 24px;flex-wrap:wrap;justify-content:center">
-      <span style="font-size:.95rem;font-weight:700;color:var(--text)">☀️ <strong>Вы фрилансер?</strong> Разместите резюме — предприниматели найдут вас</span>
-      <button class="btn btn-leaf btn-sm" onclick="requireAuth(()=>openPostTalent())" style="white-space:nowrap">+ Разместить резюме</button>
+      <span style="font-size:.95rem;font-weight:700;color:var(--text)" data-i18n="hero_talent_cta_text" data-i18n-html>☀️ <strong>Вы фрилансер?</strong> Разместите резюме — предприниматели найдут вас</span>
+      <button class="btn btn-leaf btn-sm" onclick="requireAuth(()=>openPostTalent())" style="white-space:nowrap" data-i18n="hero_talent_cta_btn">+ Разместить резюме</button>
     </div>
     <svg class="hero-wave" viewBox="0 0 1440 56" fill="none"><path d="M0 56L1440 56L1440 28C1200 56 720 0 0 28L0 56Z" fill="#FFFFFF"/></svg>
   </section>
@@ -1219,13 +1227,13 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <!-- HOW IT WORKS -->
   <section class="section section-alt" id="how">
     <div class="section-header">
-      <h2>Как это работает</h2>
-      <p>Три простых шага от идеи до готового проекта</p>
+      <h2 data-i18n="how_title">Как это работает</h2>
+      <p data-i18n="how_subtitle">Три простых шага от идеи до готового проекта</p>
     </div>
     <div class="steps">
-      <div class="step reveal reveal-delay-1"><div class="step-icon sun-bg">📋</div><h3>Разместите заказ</h3><p>Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.</p></div>
-      <div class="step reveal reveal-delay-2"><div class="step-icon sky-bg">💼</div><h3>Получите отклики</h3><p>Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.</p></div>
-      <div class="step reveal reveal-delay-3"><div class="step-icon leaf-bg">✅</div><h3>Запустите проект</h3><p>Общайтесь в чате, оплачивайте после подтверждения результата.</p></div>
+      <div class="step reveal reveal-delay-1"><div class="step-icon sun-bg">📋</div><h3 data-i18n="how_step1_title">Разместите заказ</h3><p data-i18n="how_step1_desc">Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.</p></div>
+      <div class="step reveal reveal-delay-2"><div class="step-icon sky-bg">💼</div><h3 data-i18n="how_step2_title">Получите отклики</h3><p data-i18n="how_step2_desc">Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.</p></div>
+      <div class="step reveal reveal-delay-3"><div class="step-icon leaf-bg">✅</div><h3 data-i18n="how_step3_title">Запустите проект</h3><p data-i18n="how_step3_desc">Общайтесь в чате, оплачивайте после подтверждения результата.</p></div>
     </div>
   </section>
 
@@ -1239,41 +1247,41 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
     <!-- Верхний баннер-кнопка для предпринимателей -->
     <div class="sector-post-banner" id="workPostBanner">
       <div class="spb-text">
-        <div class="spb-title">📋 Вы предприниматель?</div>
-        <div class="spb-sub">Разместите заказ — фрилансеры увидят его мгновенно</div>
+        <div class="spb-title" data-i18n="orders_banner_title">📋 Вы предприниматель?</div>
+        <div class="spb-sub" data-i18n="orders_banner_sub">Разместите заказ — фрилансеры увидят его мгновенно</div>
       </div>
-      <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">+ Разместить заказ</button>
+      <button class="btn btn-sun" onclick="requireAuth(()=>openPost())" data-i18n="orders_banner_btn">+ Разместить заказ</button>
     </div>
 
     <div class="section-header" style="margin-top:0">
-      <h2>Открытые заказы</h2>
-      <p>Фрилансеры: выберите проект, нажмите «Подробнее» и напишите предпринимателю</p>
+      <h2 data-i18n="orders_title">Открытые заказы</h2>
+      <p data-i18n="orders_subtitle">Фрилансеры: выберите проект, нажмите «Подробнее» и напишите предпринимателю</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;max-width:600px;margin:0 auto 8px">
-      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0">🎛 Фильтры <span class="filter-count" id="filterCount" style="display:none">0</span></button>
+      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0"><span data-i18n="orders_filters">🎛 Фильтры</span> <span class="filter-count" id="filterCount" style="display:none">0</span></button>
     </div>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." oninput="filterOrders();saveSearchHistory(this.value)"/>
-      <button onclick="filterOrders()">Найти</button>
+      <input type="text" id="searchInput" placeholder="🔍  Поиск заказов..." data-i18n-placeholder="orders_search_ph" oninput="filterOrders();saveSearchHistory(this.value)"/>
+      <button onclick="filterOrders()" data-i18n="orders_search_btn">Найти</button>
     </div>
     <div id="searchHistoryOrders" class="search-history" style="justify-content:center;max-width:540px;margin:0 auto"></div>
     <div class="chips" id="categoryChips">
-      <div class="chip active" onclick="filterCat('',this)">Все</div>
-      <div class="chip" onclick="filterCat('Дизайн',this)">🎨 Дизайн</div>
-      <div class="chip" onclick="filterCat('Разработка',this)">💻 Разработка</div>
-      <div class="chip" onclick="filterCat('Копирайтинг',this)">✍️ Копирайтинг</div>
-      <div class="chip" onclick="filterCat('SMM',this)">📱 SMM</div>
-      <div class="chip" onclick="filterCat('Видео',this)">🎬 Видео</div>
-      <div class="chip" onclick="filterCat('Маркетинг',this)">📊 Маркетинг</div>
+      <div class="chip active" onclick="filterCat('',this)" data-i18n="cat_all">Все</div>
+      <div class="chip" onclick="filterCat('Дизайн',this)" data-i18n="cat_design_ic">🎨 Дизайн</div>
+      <div class="chip" onclick="filterCat('Разработка',this)" data-i18n="cat_dev_ic">💻 Разработка</div>
+      <div class="chip" onclick="filterCat('Копирайтинг',this)" data-i18n="cat_copy_ic">✍️ Копирайтинг</div>
+      <div class="chip" onclick="filterCat('SMM',this)" data-i18n="cat_smm_ic">📱 SMM</div>
+      <div class="chip" onclick="filterCat('Видео',this)" data-i18n="cat_video_ic">🎬 Видео</div>
+      <div class="chip" onclick="filterCat('Маркетинг',this)" data-i18n="cat_marketing_ic">📊 Маркетинг</div>
     </div>
     <div class="orders-grid" id="ordersGrid"></div>
   </section>
 
   <!-- CTA под заказами -->
   <section class="post-section">
-    <h2>Вы предприниматель? 🚀</h2>
-    <p>Разместите заказ бесплатно и получите первые отклики уже через час</p>
-    <button class="btn btn-sun" onclick="requireAuth(()=>openPost())">📋 Разместить заказ бесплатно</button>
+    <h2 data-i18n="orders_cta_title">Вы предприниматель? 🚀</h2>
+    <p data-i18n="orders_cta_sub">Разместите заказ бесплатно и получите первые отклики уже через час</p>
+    <button class="btn btn-sun" onclick="requireAuth(()=>openPost())" data-i18n="orders_cta_btn">📋 Разместить заказ бесплатно</button>
   </section>
 
   <!-- ═══════════════════════════════════
@@ -1286,41 +1294,41 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
     <!-- Верхний баннер-кнопка для фрилансеров -->
     <div class="sector-post-banner">
       <div class="spb-text">
-        <div class="spb-title">🌟 Вы фрилансер?</div>
-        <div class="spb-sub">Разместите резюме — предприниматели найдут вас</div>
+        <div class="spb-title" data-i18n="talents_banner_title">🌟 Вы фрилансер?</div>
+        <div class="spb-sub" data-i18n="talents_banner_sub">Разместите резюме — предприниматели найдут вас</div>
       </div>
-      <button class="btn btn-leaf" onclick="requireAuth(()=>openPostTalent())">+ Разместить резюме</button>
+      <button class="btn btn-leaf" onclick="requireAuth(()=>openPostTalent())" data-i18n="talents_banner_btn">+ Разместить резюме</button>
     </div>
 
     <div class="section-header" style="margin-top:0">
-      <h2>Каталог фрилансеров</h2>
-      <p>Предприниматели: найдите специалиста, нажмите «Написать» и начните сотрудничество</p>
+      <h2 data-i18n="talents_title">Каталог фрилансеров</h2>
+      <p data-i18n="talents_subtitle">Предприниматели: найдите специалиста, нажмите «Написать» и начните сотрудничество</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;max-width:600px;margin:0 auto 8px">
-      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0">🎛 Фильтры</button>
+      <button class="filter-btn" onclick="openFilterSidebar()" style="white-space:nowrap;flex-shrink:0" data-i18n="talents_filters">🎛 Фильтры</button>
     </div>
     <div class="search-bar">
-      <input type="text" id="searchTalents" placeholder="🔍  Поиск по специалистам..." oninput="filterTalents();saveSearchHistory(this.value,'talent')"/>
-      <button onclick="filterTalents()">Найти</button>
+      <input type="text" id="searchTalents" placeholder="🔍  Поиск по специалистам..." data-i18n-placeholder="talents_search_ph" oninput="filterTalents();saveSearchHistory(this.value,'talent')"/>
+      <button onclick="filterTalents()" data-i18n="talents_search_btn">Найти</button>
     </div>
     <div id="searchHistoryTalents" class="search-history" style="justify-content:center;max-width:540px;margin:0 auto"></div>
     <div class="chips" id="talentChips">
-      <div class="chip active" onclick="filterTalentCat('',this)">Все</div>
-      <div class="chip" onclick="filterTalentCat('Дизайн',this)">🎨 Дизайн</div>
-      <div class="chip" onclick="filterTalentCat('Разработка',this)">💻 Разработка</div>
-      <div class="chip" onclick="filterTalentCat('Копирайтинг',this)">✍️ Копирайтинг</div>
-      <div class="chip" onclick="filterTalentCat('SMM',this)">📱 SMM</div>
-      <div class="chip" onclick="filterTalentCat('Видео',this)">🎬 Видео</div>
-      <div class="chip" onclick="filterTalentCat('Маркетинг',this)">📊 Маркетинг</div>
+      <div class="chip active" onclick="filterTalentCat('',this)" data-i18n="cat_all">Все</div>
+      <div class="chip" onclick="filterTalentCat('Дизайн',this)" data-i18n="cat_design_ic">🎨 Дизайн</div>
+      <div class="chip" onclick="filterTalentCat('Разработка',this)" data-i18n="cat_dev_ic">💻 Разработка</div>
+      <div class="chip" onclick="filterTalentCat('Копирайтинг',this)" data-i18n="cat_copy_ic">✍️ Копирайтинг</div>
+      <div class="chip" onclick="filterTalentCat('SMM',this)" data-i18n="cat_smm_ic">📱 SMM</div>
+      <div class="chip" onclick="filterTalentCat('Видео',this)" data-i18n="cat_video_ic">🎬 Видео</div>
+      <div class="chip" onclick="filterTalentCat('Маркетинг',this)" data-i18n="cat_marketing_ic">📊 Маркетинг</div>
     </div>
     <div class="orders-grid" id="talentsGrid"></div>
   </section>
 
   <!-- CTA под резюме -->
   <section class="post-section" id="talentPostCta" style="display:none; background:linear-gradient(135deg,#1e8a4a,#27AE60)">
-    <h2>Вы фрилансер? ✨</h2>
-    <p>Разместите резюме бесплатно — сотни предпринимателей ищут таланты прямо сейчас</p>
-    <button class="btn btn-sun" onclick="requireAuth(()=>openPostTalent())">🌟 Разместить резюме бесплатно</button>
+    <h2 data-i18n="talents_cta_title">Вы фрилансер? ✨</h2>
+    <p data-i18n="talents_cta_sub">Разместите резюме бесплатно — сотни предпринимателей ищут таланты прямо сейчас</p>
+    <button class="btn btn-sun" onclick="requireAuth(()=>openPostTalent())" data-i18n="talents_cta_btn">🌟 Разместить резюме бесплатно</button>
   </section>
 
   <!-- ═══════════════════════════════════
@@ -1328,8 +1336,8 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   ════════════════════════════════════ -->
   <section class="section" id="reviewsSection" style="display:none;">
     <div class="section-header" style="margin-top:0">
-      <h2>⭐ Отзывы о заказчиках</h2>
-      <p>Реальные отзывы фрилансеров о работе с предпринимателями на FreeSun</p>
+      <h2 data-i18n="reviews_clients_title">⭐ Отзывы о заказчиках</h2>
+      <p data-i18n="reviews_clients_sub">Реальные отзывы фрилансеров о работе с предпринимателями на FreeSun</p>
     </div>
     <div id="allReviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:24px"></div>
   </section>
@@ -1339,13 +1347,13 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   ════════════════════════════════════ -->
   <section class="section" id="reviewsSection" style="display:none;">
     <div class="section-header" style="margin-top:0">
-      <h2>⭐ Отзывы о платформе</h2>
-      <p>Реальные истории фрилансеров и предпринимателей, которые нашли друг друга на FreeSun</p>
+      <h2 data-i18n="reviews_platform_title">⭐ Отзывы о платформе</h2>
+      <p data-i18n="reviews_platform_sub">Реальные истории фрилансеров и предпринимателей, которые нашли друг друга на FreeSun</p>
     </div>
     <div id="allReviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:8px"></div>
   </section>
 
-  <footer><strong>FreeSun</strong> — летняя биржа фриланса &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Все права защищены</footer>
+  <footer><strong>FreeSun</strong> — <span data-i18n="footer_text">летняя биржа фриланса</span> &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; <span data-i18n="footer_rights">Все права защищены</span></footer>
 </div>
 
 <!-- ══════════════════════════════════ -->
@@ -1354,18 +1362,18 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 <div class="page" id="pageTalentDetail">
   <div class="detail-page">
     <nav class="detail-nav">
-      <a class="back-btn" href="#/talents" data-route onclick="switchMainSector('talent')">← Назад к специалистам</a>
+      <a class="back-btn" href="#/talents" data-route onclick="switchMainSector('talent')" data-i18n="detail_back_talents_nav">← Назад к специалистам</a>
       <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
         <div class="nav-user" id="navUserTalentDetail" style="display:none">
-          <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</a>
+          <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))" data-i18n="nav_chats">💬 Чаты</a>
           <div class="user-chip">
             <div class="user-avatar-sm" id="navAvatarTalentDetail">ИИ</div>
             <span id="navNameTalentDetail">Иван</span>
           </div>
         </div>
         <div id="navGuestTalentDetail">
-          <button class="btn btn-sky btn-sm" onclick="openAuth('login')">Войти</button>
+          <button class="btn btn-sky btn-sm" onclick="openAuth('login')" data-i18n="nav_login">Войти</button>
         </div>
       </div>
     </nav>
@@ -1379,18 +1387,18 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 <div class="page" id="pageDetail">
   <div class="detail-page">
     <nav class="detail-nav">
-      <a class="back-btn" href="#/orders" data-route onclick="switchMainSector('work')">← Назад к заказам</a>
+      <a class="back-btn" href="#/orders" data-route onclick="switchMainSector('work')" data-i18n="detail_back_orders_nav">← Назад к заказам</a>
       <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
         <div class="nav-user" id="navUserDetail">
-          <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))">💬 Чаты</a>
+          <a class="chat-nav-btn" href="#/chat" data-route onclick="requireAuth(()=>goPage('pageChats'))" data-i18n="nav_chats">💬 Чаты</a>
           <div class="user-chip">
             <div class="user-avatar-sm" id="navAvatarDetail">ИИ</div>
             <span id="navNameDetail">Иван</span>
           </div>
         </div>
         <div id="navGuestDetail">
-          <button class="btn btn-sky btn-sm" onclick="openAuth('login')">Войти</button>
+          <button class="btn btn-sky btn-sm" onclick="openAuth('login')" data-i18n="nav_login">Войти</button>
         </div>
       </div>
     </nav>
@@ -1405,7 +1413,7 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
   <nav>
     <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
     <div class="nav-links">
-      <a href="#/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
+      <a href="#/orders" data-route onclick="switchMainSector('work')" data-i18n="nav_back_orders">← К заказам</a>
     </div>
     <div class="nav-actions">
       <div class="nav-user show" id="navUserChats">
@@ -1413,22 +1421,22 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
           <div class="user-avatar-sm" id="navAvatarChats">ИИ</div>
           <span id="navNameChats">Иван</span>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()" data-i18n="nav_logout">Выйти</button>
       </div>
     </div>
   </nav>
   <div class="chats-layout">
     <div class="chats-sidebar">
       <div class="chats-sidebar-header">
-        <h3>💬 Мои чаты</h3>
+        <h3 data-i18n="chats_my_chats">💬 Мои чаты</h3>
       </div>
       <div id="chatList"></div>
     </div>
     <div class="chat-window" id="chatWindow">
       <div class="no-chat-selected">
         <div class="ncs-icon">💬</div>
-        <h3>Выберите чат слева</h3>
-        <p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Здесь будет переписка с предпринимателем или фрилансером</p>
+        <h3 data-i18n="chats_select">Выберите чат слева</h3>
+        <p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px" data-i18n="chats_select_hint">Здесь будет переписка с предпринимателем или фрилансером</p>
       </div>
     </div>
   </div>
@@ -1442,7 +1450,7 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
     <nav>
       <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div class="nav-links">
-        <a href="#/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
+        <a href="#/orders" data-route onclick="switchMainSector('work')" data-i18n="nav_back_orders">← К заказам</a>
       </div>
       <div class="nav-actions">
         <div class="nav-user show">
@@ -1450,14 +1458,14 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
             <div class="user-avatar-sm" id="navAvatarProfile">ИИ</div>
             <span id="navNameProfile">Пользователь</span>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+          <button class="btn btn-ghost btn-sm" onclick="doLogout()" data-i18n="nav_logout">Выйти</button>
         </div>
       </div>
     </nav>
     <div class="profile-body">
       <!-- AVATAR + NAME CARD -->
       <div class="profile-card">
-        <label class="avatar-upload-wrap" title="Сменить фото профиля">
+        <label class="avatar-upload-wrap" title="Сменить фото профиля" data-i18n-title="profile_change_avatar">
           <div class="profile-avatar-big" id="profileAvatarBig" style="margin:0;cursor:pointer">ИИ</div>
           <div class="avatar-upload-overlay">📷</div>
           <input type="file" class="avatar-upload-input" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)"/>
@@ -1467,58 +1475,64 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 
         <!-- PROFILE TABS -->
         <div class="profile-tabs" id="profileTabs">
-          <button class="profile-tab active" onclick="switchProfileTab('main',this)">👤 Профиль</button>
-          <button class="profile-tab" onclick="switchProfileTab('dashboard',this)">📊 Аналитика</button>
-          <button class="profile-tab" onclick="switchProfileTab('portfolio',this)">🖼 Портфолио</button>
-          <button class="profile-tab" onclick="switchProfileTab('bookmarks',this)">🔖 Избранное</button>
+          <button class="profile-tab active" onclick="switchProfileTab('main',this)" data-i18n="profile_tab_main">👤 Профиль</button>
+          <button class="profile-tab" onclick="switchProfileTab('dashboard',this)" data-i18n="profile_tab_dashboard">📊 Аналитика</button>
+          <button class="profile-tab" onclick="switchProfileTab('portfolio',this)" data-i18n="profile_tab_portfolio">🖼 Портфолио</button>
+          <button class="profile-tab" onclick="switchProfileTab('bookmarks',this)" data-i18n="profile_tab_bookmarks">🔖 Избранное</button>
         </div>
 
         <!-- TAB: MAIN -->
         <div id="profileTabMain">
-          <div class="profile-section-title">✏️ Сменить имя</div>
+          <div class="profile-section-title" data-i18n="profile_change_name">✏️ Сменить имя</div>
           <div class="form-group" style="margin-bottom:10px">
-            <input type="text" id="profileNameInput" placeholder="Введите новое имя"/>
+            <input type="text" id="profileNameInput" placeholder="Введите новое имя" data-i18n-placeholder="profile_name_ph"/>
           </div>
-          <button class="btn btn-sky" style="width:100%;justify-content:center" onclick="saveProfileName()">Сохранить имя</button>
+          <button class="btn btn-sky" style="width:100%;justify-content:center" onclick="saveProfileName()" data-i18n="profile_save_name">Сохранить имя</button>
 
-          <div class="profile-section-title">🎨 Тема оформления</div>
+          <div class="profile-section-title" data-i18n="profile_theme">🎨 Тема оформления</div>
           <div class="theme-selector">
-            <div class="theme-option active" id="themeLight" onclick="setTheme('light')">☀️ Белая</div>
-            <div class="theme-option" id="themeDark" onclick="setTheme('dark')">🌙 Чёрная</div>
+            <div class="theme-option active" id="themeLight" onclick="setTheme('light')" data-i18n="profile_theme_light">☀️ Белая</div>
+            <div class="theme-option" id="themeDark" onclick="setTheme('dark')" data-i18n="profile_theme_dark">🌙 Чёрная</div>
           </div>
 
-          <div class="profile-section-title">📅 Моя доступность</div>
-          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:10px">Отметьте дни, когда вы свободны для работы</p>
+          <div class="profile-section-title" data-i18n="profile_language">🌐 Язык интерфейса</div>
+          <div class="theme-selector">
+            <div class="theme-option" id="langRu" onclick="setLanguage('ru')" data-i18n="profile_lang_ru">🇷🇺 Русский</div>
+            <div class="theme-option" id="langEn" onclick="setLanguage('en')" data-i18n="profile_lang_en">🇬🇧 English</div>
+          </div>
+
+          <div class="profile-section-title" data-i18n="profile_availability">📅 Моя доступность</div>
+          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:10px" data-i18n="profile_availability_hint">Отметьте дни, когда вы свободны для работы</p>
           <div id="availCalendarWrap"></div>
           <div class="avail-legend">
-            <div class="avail-legend-item"><div class="avail-dot" style="background:#A8E6CF"></div>Свободен</div>
-            <div class="avail-legend-item"><div class="avail-dot" style="background:#F1948A"></div>Занят</div>
+            <div class="avail-legend-item"><div class="avail-dot" style="background:#A8E6CF"></div><span data-i18n="profile_avail_free">Свободен</span></div>
+            <div class="avail-legend-item"><div class="avail-dot" style="background:#F1948A"></div><span data-i18n="profile_avail_busy">Занят</span></div>
           </div>
 
-          <div class="profile-section-title">📄 Экспорт резюме</div>
-          <button class="btn btn-outline" style="width:100%;justify-content:center;margin-bottom:10px" onclick="generateCV()">📥 Скачать CV (текст)</button>
+          <div class="profile-section-title" data-i18n="profile_export_cv">📄 Экспорт резюме</div>
+          <button class="btn btn-outline" style="width:100%;justify-content:center;margin-bottom:10px" onclick="generateCV()" data-i18n="profile_export_cv_btn">📥 Скачать CV (текст)</button>
         </div>
 
         <!-- TAB: DASHBOARD -->
         <div id="profileTabDashboard" style="display:none">
-          <div class="profile-section-title" style="margin-top:0">📊 Статистика</div>
+          <div class="profile-section-title" style="margin-top:0" data-i18n="profile_stats">📊 Статистика</div>
           <div class="dashboard-grid" id="dashGrid"></div>
           <div class="dash-chart">
-            <h4>Активность за 7 дней</h4>
+            <h4 data-i18n="profile_activity_7d">Активность за 7 дней</h4>
             <div class="chart-bars" id="activityChart"></div>
           </div>
-          <div class="profile-section-title">⭐ Мои отзывы</div>
-          <div id="myReviewsList" style="font-size:.88rem;color:var(--text-soft)">Нет отзывов</div>
+          <div class="profile-section-title" data-i18n="profile_my_reviews">⭐ Мои отзывы</div>
+          <div id="myReviewsList" style="font-size:.88rem;color:var(--text-soft)" data-i18n="profile_no_reviews">Нет отзывов</div>
         </div>
 
         <!-- TAB: PORTFOLIO -->
         <div id="profileTabPortfolio" style="display:none">
-          <div class="profile-section-title" style="margin-top:0">🖼 Мои работы</div>
-          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:14px">Загружайте скриншоты и фото готовых проектов</p>
+          <div class="profile-section-title" style="margin-top:0" data-i18n="profile_my_works">🖼 Мои работы</div>
+          <p style="font-size:.83rem;color:var(--text-soft);margin-bottom:14px" data-i18n="profile_my_works_hint">Загружайте скриншоты и фото готовых проектов</p>
           <div class="portfolio-grid" id="portfolioGrid">
             <div class="portfolio-item portfolio-add" onclick="document.getElementById('portfolioFileInput').click()">
               <div class="portfolio-add-icon">+</div>
-              <span>Добавить</span>
+              <span data-i18n="profile_add">Добавить</span>
             </div>
           </div>
           <input type="file" id="portfolioFileInput" accept="image/*" multiple style="display:none" onchange="handlePortfolioUpload(event)"/>
@@ -1526,7 +1540,7 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 
         <!-- TAB: BOOKMARKS -->
         <div id="profileTabBookmarks" style="display:none">
-          <div class="profile-section-title" style="margin-top:0">🔖 Сохранённые</div>
+          <div class="profile-section-title" style="margin-top:0" data-i18n="profile_saved">🔖 Сохранённые</div>
           <div id="bookmarksContent"></div>
         </div>
       </div>
@@ -1542,79 +1556,79 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
     <nav>
       <a class="logo" href="#/" data-route onclick="goPage('pageMain')">Free<span>Sun</span></a>
       <div class="nav-links">
-        <a href="#/orders" data-route onclick="switchMainSector('work')">← К заказам</a>
+        <a href="#/orders" data-route onclick="switchMainSector('work')" data-i18n="nav_back_orders">← К заказам</a>
       </div>
       <div class="nav-actions">
         <div id="navGuestAbout" style="display:flex;gap:10px">
-          <button class="btn btn-outline btn-sm" onclick="openAuth('login')">Войти</button>
-          <button class="btn btn-sun btn-sm" onclick="openAuth('register')">Регистрация</button>
+          <button class="btn btn-outline btn-sm" onclick="openAuth('login')" data-i18n="nav_login">Войти</button>
+          <button class="btn btn-sun btn-sm" onclick="openAuth('register')" data-i18n="nav_register">Регистрация</button>
         </div>
         <div class="nav-user" id="navUserAbout">
           <a class="user-chip" href="#/profile" data-route onclick="requireAuth(()=>goPage('pageProfile'))" style="cursor:pointer">
             <div class="user-avatar-sm" id="navAvatarAbout">ИИ</div>
             <span id="navNameAbout">Пользователь</span>
           </a>
-          <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+          <button class="btn btn-ghost btn-sm" onclick="doLogout()" data-i18n="nav_logout">Выйти</button>
         </div>
       </div>
     </nav>
     <div class="about-hero">
-      <h1>О платформе</h1>
-      <p>FreeSun — маркетплейс для поиска работы и специалистов с защищённой системой расчётов через эскроу. Прозрачные условия для обеих сторон, без скрытых комиссий и мелкого шрифта.</p>
+      <h1 data-i18n="about_h1">О платформе</h1>
+      <p data-i18n="about_p">FreeSun — маркетплейс для поиска работы и специалистов с защищённой системой расчётов через эскроу. Прозрачные условия для обеих сторон, без скрытых комиссий и мелкого шрифта.</p>
     </div>
     <div class="about-body">
       <div class="about-grid">
         <div class="about-card">
           <div class="about-card-icon">⚡</div>
-          <h3>Быстрые выплаты</h3>
-          <p>Средства поступают на счёт сразу после того, как обе стороны подтвердят завершение работы.</p>
+          <h3 data-i18n="about_card1_title">Быстрые выплаты</h3>
+          <p data-i18n="about_card1_desc">Средства поступают на счёт сразу после того, как обе стороны подтвердят завершение работы.</p>
         </div>
         <div class="about-card">
           <div class="about-card-icon">🔒</div>
-          <h3>Защита персональных данных</h3>
-          <p>Мы не передаём и не продаём ваши данные третьим лицам. Информация используется только для работы сервиса.</p>
+          <h3 data-i18n="about_card2_title">Защита персональных данных</h3>
+          <p data-i18n="about_card2_desc">Мы не передаём и не продаём ваши данные третьим лицам. Информация используется только для работы сервиса.</p>
         </div>
         <div class="about-card">
           <div class="about-card-icon">💳</div>
-          <h3>Прозрачная комиссия</h3>
-          <p>Размер комиссии известен заранее и не меняется в процессе сделки. Никаких скрытых удержаний.</p>
+          <h3 data-i18n="about_card3_title">Прозрачная комиссия</h3>
+          <p data-i18n="about_card3_desc">Размер комиссии известен заранее и не меняется в процессе сделки. Никаких скрытых удержаний.</p>
         </div>
         <div class="about-card">
           <div class="about-card-icon">🏆</div>
-          <h3>Много лет в рынке</h3>
-          <p>FreeSun работает с 2018 года. За это время мы выплатили более $1.2М фрилансерам по всему миру.</p>
+          <h3 data-i18n="about_card4_title">Много лет в рынке</h3>
+          <p data-i18n="about_card4_desc">FreeSun работает с 2018 года. За это время мы выплатили более $1.2М фрилансерам по всему миру.</p>
         </div>
         <div class="about-card">
           <div class="about-card-icon">🛡️</div>
-          <h3>Escrow-защита сделок</h3>
-          <p>Оплата удерживается смарт-контрактом до подтверждения результата — деньги не проходят через счета платформы напрямую.</p>
+          <h3 data-i18n="about_card5_title">Escrow-защита сделок</h3>
+          <p data-i18n="about_card5_desc">Оплата удерживается смарт-контрактом до подтверждения результата — деньги не проходят через счета платформы напрямую.</p>
         </div>
         <div class="about-card">
           <div class="about-card-icon">🌍</div>
-          <h3>Работаем по всему миру</h3>
-          <p>Фрилансеры и заказчики из десятков стран. Работайте с кем угодно на одинаковых, понятных условиях.</p>
+          <h3 data-i18n="about_card6_title">Работаем по всему миру</h3>
+          <p data-i18n="about_card6_desc">Фрилансеры и заказчики из десятков стран. Работайте с кем угодно на одинаковых, понятных условиях.</p>
         </div>
       </div>
 
-      <div class="about-highlight">
+      <div class="about-highlight" data-i18n="about_quote">
         💬 «Мне важно, что деньги при эскроу-сделке не зависят от одной компании — они лежат в смарт-контракте, и я вижу это сам. Впервые за долгое время фриланса я не переживаю за оплату.» — Дмитрий К., веб-разработчик
       </div>
 
-      <div class="about-section-title">Как мы обращаемся с вашими данными</div>
-      <p class="about-text">Мы собираем только то, что необходимо для работы платформы: имя, email и данные о сделках, к которым вы имеете отношение. Мы не запрашиваем доступ к данным, не связанным с использованием сервиса, и не отслеживаем вашу активность за пределами сайта.</p>
-      <p class="about-text">Ваши данные не передаются рекламным сетям, брокерам данных или другим третьим лицам в коммерческих целях. Переписка в чатах видна только участникам конкретной сделки.</p>
-      <p class="about-text">При использовании Web3-эскроу оплата удерживается смарт-контрактом в блокчейне, а не на счетах FreeSun — мы физически не можем получить доступ к этим средствам, пока сделка не завершена по правилам, на которые согласились обе стороны.</p>
-      <p class="about-text">Мы обрабатываем данные пользователей ответственно и в соответствии с применимыми нормами о защите персональных данных. Если у вас есть вопросы о том, какие данные мы храним, или вы хотите их удалить — напишите нам, и мы ответим.</p>
+      <div class="about-section-title" data-i18n="about_data_title">Как мы обращаемся с вашими данными</div>
+      <p class="about-text" data-i18n="about_data_p1">Мы собираем только то, что необходимо для работы платформы: имя, email и данные о сделках, к которым вы имеете отношение. Мы не запрашиваем доступ к данным, не связанным с использованием сервиса, и не отслеживаем вашу активность за пределами сайта.</p>
+      <p class="about-text" data-i18n="about_data_p2">Ваши данные не передаются рекламным сетям, брокерам данных или другим третьим лицам в коммерческих целях. Переписка в чатах видна только участникам конкретной сделки.</p>
+      <p class="about-text" data-i18n="about_data_p3">При использовании Web3-эскроу оплата удерживается смарт-контрактом в блокчейне, а не на счетах FreeSun — мы физически не можем получить доступ к этим средствам, пока сделка не завершена по правилам, на которые согласились обе стороны.</p>
+      <p class="about-text" data-i18n="about_data_p4">Мы обрабатываем данные пользователей ответственно и в соответствии с применимыми нормами о защите персональных данных. Если у вас есть вопросы о том, какие данные мы храним, или вы хотите их удалить — напишите нам, и мы ответим.</p>
 
-      <div class="about-section-title">Почему выбирают FreeSun?</div>
-      <p class="about-text">Мы создавали платформу с одной мыслью: фрилансер и заказчик должны договориться быстро, работать комфортно и получить деньги без лишних вопросов. За годы работы мы выполнили тысячи проектов в дизайне, разработке, маркетинге, копирайтинге и видео.</p>
-      <p class="about-text">Наш принцип — минимум барьеров, максимум дела: понятные правила, честная комиссия и защита средств на каждом этапе сделки.</p>
+      <div class="about-section-title" data-i18n="about_why_title">Почему выбирают FreeSun?</div>
+      <p class="about-text" data-i18n="about_why_p1">Мы создавали платформу с одной мыслью: фрилансер и заказчик должны договориться быстро, работать комфортно и получить деньги без лишних вопросов. За годы работы мы выполнили тысячи проектов в дизайне, разработке, маркетинге, копирайтинге и видео.</p>
+      <p class="about-text" data-i18n="about_why_p2">Наш принцип — минимум барьеров, максимум дела: понятные правила, честная комиссия и защита средств на каждом этапе сделки.</p>
 
       <div style="text-align:center;margin-top:40px">
-        <button class="btn btn-sun" style="font-size:1.05rem;padding:15px 36px" onclick="requireAuth(()=>openPost())">📋 Разместить заказ бесплатно</button>
+        <button class="btn btn-sun" style="font-size:1.05rem;padding:15px 36px" onclick="requireAuth(()=>openPost())" data-i18n="about_cta_btn">📋 Разместить заказ бесплатно</button>
       </div>
     </div>
-    <footer><strong>FreeSun</strong> — биржа фриланса &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Все права защищены</footer>
+    <footer><strong>FreeSun</strong> — <span data-i18n="footer_text">биржа фриланса</span> &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; <span data-i18n="footer_rights">Все права защищены</span></footer>
   </div>
 </div>
 
@@ -1624,28 +1638,28 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
 <!-- ══════ NOTIFICATIONS PANEL ══════ -->
 <div class="notif-panel" id="notifPanel">
   <div class="notif-header">
-    <h4>🔔 Уведомления</h4>
-    <button class="notif-clear" onclick="clearNotifs()">Очистить все</button>
+    <h4 data-i18n="notif_title">🔔 Уведомления</h4>
+    <button class="notif-clear" onclick="clearNotifs()" data-i18n="notif_clear">Очистить все</button>
   </div>
   <div class="notif-list" id="notifList">
-    <div class="notif-empty">Нет уведомлений</div>
+    <div class="notif-empty" data-i18n="notif_empty">Нет уведомлений</div>
   </div>
 </div>
 
 <!-- ══════ FILTER SIDEBAR ══════ -->
 <div class="filter-sidebar-overlay" id="filterOverlay" onclick="closeFilterSidebar()"></div>
 <div class="filter-sidebar" id="filterSidebar">
-  <h3>🎛 Фильтры <button class="filter-close" onclick="closeFilterSidebar()">✕</button></h3>
+  <h3><span data-i18n="filter_title">🎛 Фильтры</span> <button class="filter-close" onclick="closeFilterSidebar()">✕</button></h3>
   <div class="filter-group">
-    <div class="filter-label">💰 Бюджет / Ставка ($)</div>
+    <div class="filter-label" data-i18n="filter_price">💰 Бюджет / Ставка ($)</div>
     <div class="filter-range">
-      <input type="number" id="filterPriceMin" placeholder="От" min="0"/>
+      <input type="number" id="filterPriceMin" placeholder="От" data-i18n-placeholder="filter_from" min="0"/>
       <span>—</span>
-      <input type="number" id="filterPriceMax" placeholder="До" min="0"/>
+      <input type="number" id="filterPriceMax" placeholder="До" data-i18n-placeholder="filter_to" min="0"/>
     </div>
   </div>
   <div class="filter-group">
-    <div class="filter-label">🏷 Навыки / Теги</div>
+    <div class="filter-label" data-i18n="filter_tags">🏷 Навыки / Теги</div>
     <div class="filter-tags" id="filterTagsContainer">
       <span class="filter-tag" onclick="toggleFilterTag(this,'React')">React</span>
       <span class="filter-tag" onclick="toggleFilterTag(this,'Figma')">Figma</span>
@@ -1660,24 +1674,24 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
     </div>
   </div>
   <div class="filter-group">
-    <div class="filter-label">⭐ Минимальный рейтинг</div>
+    <div class="filter-label" data-i18n="filter_rating">⭐ Минимальный рейтинг</div>
     <div class="filter-tags">
-      <span class="filter-tag" onclick="setFilterRating(0,this)">Любой</span>
+      <span class="filter-tag" onclick="setFilterRating(0,this)" data-i18n="filter_rating_any">Любой</span>
       <span class="filter-tag" onclick="setFilterRating(4,this)">4.0+</span>
       <span class="filter-tag" onclick="setFilterRating(4.5,this)">4.5+</span>
       <span class="filter-tag" onclick="setFilterRating(4.8,this)">4.8+</span>
     </div>
   </div>
-  <button class="filter-apply" onclick="applyFilters()">✅ Применить фильтры</button>
-  <button class="filter-reset" onclick="resetFilters()">↺ Сбросить всё</button>
+  <button class="filter-apply" onclick="applyFilters()" data-i18n="filter_apply">✅ Применить фильтры</button>
+  <button class="filter-reset" onclick="resetFilters()" data-i18n="filter_reset">↺ Сбросить всё</button>
 </div>
 
 <!-- ══════ RATE REVIEW MODAL ══════ -->
 <div class="overlay" id="reviewOverlay" onclick="closeReviewModal()" style="display:none">
   <div class="modal" id="reviewModal" onclick="event.stopPropagation()" style="display:block">
     <button class="modal-close" onclick="closeReviewModal()">✕</button>
-    <h2>⭐ Оставить отзыв</h2>
-    <p class="modal-sub" id="reviewModalSub">Оцените сотрудничество</p>
+    <h2 data-i18n="review_title">⭐ Оставить отзыв</h2>
+    <p class="modal-sub" id="reviewModalSub" data-i18n="review_subtitle">Оцените сотрудничество</p>
     <div class="star-row" id="starRow">
       <span class="star-btn" onclick="setReviewStar(1)">⭐</span>
       <span class="star-btn" onclick="setReviewStar(2)">⭐</span>
@@ -1686,10 +1700,10 @@ body.dark .search-history-item{background:#2d3650;color:#8a9bb5}
       <span class="star-btn" onclick="setReviewStar(5)">⭐</span>
     </div>
     <div class="form-group">
-      <label>Ваш отзыв</label>
-      <textarea id="reviewText" placeholder="Расскажите о своём опыте сотрудничества..." rows="4"></textarea>
+      <label data-i18n="review_text_label">Ваш отзыв</label>
+      <textarea id="reviewText" placeholder="Расскажите о своём опыте сотрудничества..." data-i18n-placeholder="review_text_ph" rows="4"></textarea>
     </div>
-    <button class="btn btn-sun btn-full" onclick="submitReview()">Опубликовать отзыв</button>
+    <button class="btn btn-sun btn-full" onclick="submitReview()" data-i18n="review_submit">Опубликовать отзыв</button>
   </div>
 </div>
 
@@ -1705,6 +1719,443 @@ const LS_USER    = 'fs_user';
 const LS_CHATS   = 'fs_chats';   // shared: fs_chats_<orderId>  — ALL users read/write same key
 const LS_THEME   = 'fs_theme';
 const LS_TALENTS = 'fs_talents';
+const LS_LANG    = 'fs_lang';
+
+// ═══════════════════════════════════════════════════════════════
+//   I18N — переключение языка интерфейса (ru / en)
+// ═══════════════════════════════════════════════════════════════
+const I18N = {
+  ru: {
+    // Навигация
+    nav_find_work: '💼 Найти работу', nav_find_talent: '🌟 Найти талант', nav_reviews: '⭐ Отзывы',
+    nav_about: 'О сайте', nav_post_order: 'Разместить заказ', nav_login: 'Войти', nav_register: 'Регистрация',
+    nav_chats: '💬 Чаты', nav_profile: 'Мой профиль', nav_logout: 'Выйти', nav_menu: 'Меню',
+    nav_mob_about: 'ℹ️ О сайте', nav_mob_post: '📋 Разместить заказ', nav_mob_bookmarks: '🔖 Избранное',
+    nav_notifications: 'Уведомления', nav_back_orders: '← К заказам',
+    // Лендинг
+    landing_tagline: 'Лучшая биржа фриланса — моментальные выплаты, честные условия, без лишних барьеров',
+    landing_work_title: 'Найти работу', landing_work_desc: 'Для фрилансеров. Просматривайте заказы от предпринимателей, откликайтесь и зарабатывайте.', landing_work_btn: 'Я фрилансер →',
+    landing_talent_title: 'Найти талант', landing_talent_desc: 'Для бизнеса. Найдите лучших специалистов — просматривайте профили фрилансеров и нанимайте.', landing_talent_btn: 'Я предприниматель →',
+    landing_footer: 'FreeSun · Биржа фриланса · 2026',
+    // Auth modal
+    auth_welcome: 'Добро пожаловать ☀️', auth_subtitle: 'Войдите или создайте аккаунт, чтобы начать',
+    auth_tab_login: 'Вход', auth_tab_register: 'Регистрация',
+    auth_google_login: 'Войти через Google', auth_google_register: 'Зарегистрироваться через Google',
+    auth_or: 'или', auth_or_form: 'или заполните форму',
+    auth_email: 'Email', auth_password: 'Пароль', auth_login_btn: 'Войти в аккаунт',
+    auth_your_name: 'Ваше имя', auth_password_min: 'Минимум 8 символов',
+    auth_role_label: 'Я регистрируюсь как', auth_role_placeholder: 'Выберите роль...',
+    auth_role_entrepreneur: '🏢 Предприниматель — размещаю заказы', auth_role_freelancer: '💼 Фрилансер — ищу проекты',
+    auth_register_btn: 'Создать аккаунт',
+    auth_almost_done: 'Почти готово! ☀️', auth_google_role_hint: 'Укажите вашу роль на платформе',
+    auth_signing_in_as: 'Вы входите как ',
+    auth_finish_btn: '✅ Завершить регистрацию',
+    // Post order modal
+    post_order_title: 'Новый заказ 📋', post_order_subtitle: 'Опишите задачу — фрилансеры увидят её сразу',
+    post_order_heading: 'Заголовок заказа', post_order_heading_ph: 'Например: Разработка лендинга',
+    post_category: 'Категория', post_category_ph: 'Выберите категорию...',
+    post_order_desc: 'Описание задачи', post_order_desc_ph: 'Подробно опишите, что нужно сделать, требования, сроки...',
+    post_budget_from: 'Бюджет от ($)', post_budget_to: 'Бюджет до ($)',
+    post_order_submit: '✨ Опубликовать заказ',
+    // Post talent modal
+    post_talent_title: 'Моё портфолио 🌟', post_talent_subtitle: 'Расскажите о себе — предприниматели найдут вас',
+    post_talent_name: 'Ваше имя / псевдоним',
+    post_talent_spec: 'Специализация', post_talent_about: 'О себе', post_talent_about_ph: 'Опишите опыт, подход к работе, достижения...',
+    post_talent_skills: 'Навыки (через запятую)', post_talent_skills_ph: 'Figma, Photoshop, Illustrator',
+    post_rate_from: 'Ставка от ($/ч)', post_rate_to: 'Ставка до ($/ч)',
+    post_photos_label: '📸 Фото проектов (необязательно)', post_photos_upload: '+ Загрузить фото', post_photos_count: '0 фото выбрано',
+    post_talent_submit: '✨ Опубликовать портфолио',
+    // Категории (используются и в чипах, и в select, и на карточках)
+    cat_all: 'Все', cat_design: 'Дизайн', cat_dev: 'Разработка', cat_copy: 'Копирайтинг',
+    cat_smm: 'SMM', cat_video: 'Видео', cat_marketing: 'Маркетинг',
+    cat_design_ic: '🎨 Дизайн', cat_dev_ic: '💻 Разработка', cat_copy_ic: '✍️ Копирайтинг',
+    cat_smm_ic: '📱 SMM', cat_video_ic: '🎬 Видео', cat_marketing_ic: '📊 Маркетинг',
+    // Hero — work
+    hero_work_badge: '💼 Раздел для фрилансеров',
+    hero_work_h1_pre: 'Найдите ', hero_work_h1_em: 'заказы', hero_work_h1_post: 'и зарабатывайте на своих навыках',
+    hero_work_p: 'Сотни открытых проектов от предпринимателей — выберите подходящий заказ, напишите в чат и начните работу уже сегодня.',
+    hero_work_btn1: '🔍 Смотреть заказы', hero_work_btn2: '🌟 Я предприниматель',
+    hero_work_stat1: 'Открытых заказов', hero_work_stat2: 'Выплачено фрилансерам', hero_work_stat3: 'Средняя оценка', hero_work_stat4: 'Вывод без верификации',
+    hero_work_cta_text: '📋 <strong>Вы предприниматель?</strong> Разместите заказ — фрилансеры увидят его мгновенно',
+    hero_work_cta_btn: '+ Разместить заказ',
+    // Hero — talent
+    hero_talent_badge: '🌟 Раздел для предпринимателей',
+    hero_talent_h1_pre: 'Найдите ', hero_talent_h1_em: 'таланты', hero_talent_h1_post: 'для вашего бизнеса',
+    hero_talent_p: 'Просматривайте резюме фрилансеров и нанимайте лучших. Или разместите заказ — специалисты сами откликнутся.',
+    hero_talent_btn1: '🌟 Смотреть резюме', hero_talent_btn2: '📋 Разместить заказ',
+    hero_talent_stat1: 'Фрилансеров в базе', hero_talent_stat2: 'Первый отклик', hero_talent_stat3: 'Гарантия результата', hero_talent_stat4: 'Размещение бесплатно',
+    hero_talent_cta_text: '☀️ <strong>Вы фрилансер?</strong> Разместите резюме — предприниматели найдут вас',
+    hero_talent_cta_btn: '+ Разместить резюме',
+    // How it works
+    how_title: 'Как это работает', how_subtitle: 'Три простых шага от идеи до готового проекта',
+    how_step1_title: 'Разместите заказ', how_step1_desc: 'Опишите задачу, укажите бюджет и требования. Займёт меньше 2 минут.',
+    how_step2_title: 'Получите отклики', how_step2_desc: 'Фрилансеры просматривают заказы и пишут вам. Выберите лучшего.',
+    how_step3_title: 'Запустите проект', how_step3_desc: 'Общайтесь в чате, оплачивайте после подтверждения результата.',
+    // Orders section
+    orders_banner_title: '📋 Вы предприниматель?', orders_banner_sub: 'Разместите заказ — фрилансеры увидят его мгновенно', orders_banner_btn: '+ Разместить заказ',
+    orders_title: 'Открытые заказы', orders_subtitle: 'Фрилансеры: выберите проект, нажмите «Подробнее» и напишите предпринимателю',
+    orders_filters: '🎛 Фильтры', orders_search_ph: '🔍  Поиск заказов...', orders_search_btn: 'Найти',
+    orders_not_found_title: 'Заказы не найдены', orders_not_found_desc: 'Попробуйте изменить фильтры',
+    orders_per_project: '/ проект', orders_more_btn: 'Подробнее →',
+    orders_cta_title: 'Вы предприниматель? 🚀', orders_cta_sub: 'Разместите заказ бесплатно и получите первые отклики уже через час',
+    orders_cta_btn: '📋 Разместить заказ бесплатно',
+    // Talents section
+    talents_banner_title: '🌟 Вы фрилансер?', talents_banner_sub: 'Разместите резюме — предприниматели найдут вас', talents_banner_btn: '+ Разместить резюме',
+    talents_title: 'Каталог фрилансеров', talents_subtitle: 'Предприниматели: найдите специалиста, нажмите «Написать» и начните сотрудничество',
+    talents_filters: '🎛 Фильтры', talents_search_ph: '🔍  Поиск по специалистам...', talents_search_btn: 'Найти',
+    talents_not_found_title: 'Специалисты не найдены', talents_not_found_desc: 'Попробуйте изменить фильтры',
+    talents_per_hour: '/ час', talents_more_btn: 'Подробнее →',
+    talents_cta_title: 'Вы фрилансер? ✨', talents_cta_sub: 'Разместите резюме бесплатно — сотни предпринимателей ищут таланты прямо сейчас',
+    talents_cta_btn: '🌟 Разместить резюме бесплатно',
+    // Reviews section
+    reviews_clients_title: '⭐ Отзывы о заказчиках', reviews_clients_sub: 'Реальные отзывы фрилансеров о работе с предпринимателями на FreeSun',
+    reviews_platform_title: '⭐ Отзывы о платформе', reviews_platform_sub: 'Реальные истории фрилансеров и предпринимателей, которые нашли друг друга на FreeSun',
+    reviews_none: 'Пока нет отзывов.',
+    reviews_open_profile: 'Открыть профиль',
+    // Footer
+    footer_text: 'летняя биржа фриланса', footer_rights: 'Все права защищены',
+    // About page
+    about_h1: 'О платформе',
+    about_p: 'FreeSun — маркетплейс для поиска работы и специалистов с защищённой системой расчётов через эскроу. Прозрачные условия для обеих сторон, без скрытых комиссий и мелкого шрифта.',
+    about_card1_title: 'Быстрые выплаты', about_card1_desc: 'Средства поступают на счёт сразу после того, как обе стороны подтвердят завершение работы.',
+    about_card2_title: 'Защита персональных данных', about_card2_desc: 'Мы не передаём и не продаём ваши данные третьим лицам. Информация используется только для работы сервиса.',
+    about_card3_title: 'Прозрачная комиссия', about_card3_desc: 'Размер комиссии известен заранее и не меняется в процессе сделки. Никаких скрытых удержаний.',
+    about_card4_title: 'Много лет в рынке', about_card4_desc: 'FreeSun работает с 2018 года. За это время мы выплатили более $1.2М фрилансерам по всему миру.',
+    about_card5_title: 'Escrow-защита сделок', about_card5_desc: 'Оплата удерживается смарт-контрактом до подтверждения результата — деньги не проходят через счета платформы напрямую.',
+    about_card6_title: 'Работаем по всему миру', about_card6_desc: 'Фрилансеры и заказчики из десятков стран. Работайте с кем угодно на одинаковых, понятных условиях.',
+    about_quote: '💬 «Мне важно, что деньги при эскроу-сделке не зависят от одной компании — они лежат в смарт-контракте, и я вижу это сам. Впервые за долгое время фриланса я не переживаю за оплату.» — Дмитрий К., веб-разработчик',
+    about_data_title: 'Как мы обращаемся с вашими данными',
+    about_data_p1: 'Мы собираем только то, что необходимо для работы платформы: имя, email и данные о сделках, к которым вы имеете отношение. Мы не запрашиваем доступ к данным, не связанным с использованием сервиса, и не отслеживаем вашу активность за пределами сайта.',
+    about_data_p2: 'Ваши данные не передаются рекламным сетям, брокерам данных или другим третьим лицам в коммерческих целях. Переписка в чатах видна только участникам конкретной сделки.',
+    about_data_p3: 'При использовании Web3-эскроу оплата удерживается смарт-контрактом в блокчейне, а не на счетах FreeSun — мы физически не можем получить доступ к этим средствам, пока сделка не завершена по правилам, на которые согласились обе стороны.',
+    about_data_p4: 'Мы обрабатываем данные пользователей ответственно и в соответствии с применимыми нормами о защите персональных данных. Если у вас есть вопросы о том, какие данные мы храним, или вы хотите их удалить — напишите нам, и мы ответим.',
+    about_why_title: 'Почему выбирают FreeSun?',
+    about_why_p1: 'Мы создавали платформу с одной мыслью: фрилансер и заказчик должны договориться быстро, работать комфортно и получить деньги без лишних вопросов. За годы работы мы выполнили тысячи проектов в дизайне, разработке, маркетинге, копирайтинге и видео.',
+    about_why_p2: 'Наш принцип — минимум барьеров, максимум дела: понятные правила, честная комиссия и защита средств на каждом этапе сделки.',
+    about_cta_btn: '📋 Разместить заказ бесплатно',
+    // Notifications
+    notif_title: '🔔 Уведомления', notif_clear: 'Очистить все', notif_empty: 'Нет уведомлений',
+    // Filter sidebar
+    filter_title: '🎛 Фильтры', filter_price: '💰 Бюджет / Ставка ($)', filter_from: 'От', filter_to: 'До',
+    filter_tags: '🏷 Навыки / Теги', filter_rating: '⭐ Минимальный рейтинг', filter_rating_any: 'Любой',
+    filter_apply: '✅ Применить фильтры', filter_reset: '↺ Сбросить всё',
+    // Review modal
+    review_title: '⭐ Оставить отзыв', review_subtitle: 'Оцените сотрудничество',
+    review_subtitle_named: 'Оцените: ',
+    review_text_label: 'Ваш отзыв', review_text_ph: 'Расскажите о своём опыте сотрудничества...',
+    review_submit: 'Опубликовать отзыв',
+    // Profile page
+    profile_change_name: '✏️ Сменить имя', profile_name_ph: 'Введите новое имя', profile_save_name: 'Сохранить имя',
+    profile_theme: '🎨 Тема оформления', profile_theme_light: '☀️ Белая', profile_theme_dark: '🌙 Чёрная',
+    profile_language: '🌐 Язык интерфейса', profile_lang_ru: '🇷🇺 Русский', profile_lang_en: '🇬🇧 English',
+    profile_availability: '📅 Моя доступность', profile_availability_hint: 'Отметьте дни, когда вы свободны для работы',
+    profile_avail_free: 'Свободен', profile_avail_busy: 'Занят',
+    profile_export_cv: '📄 Экспорт резюме', profile_export_cv_btn: '📥 Скачать CV (текст)',
+    profile_tab_main: '👤 Профиль', profile_tab_dashboard: '📊 Аналитика', profile_tab_portfolio: '🖼 Портфолио', profile_tab_bookmarks: '🔖 Избранное',
+    profile_stats: '📊 Статистика', profile_activity_7d: 'Активность за 7 дней', profile_my_reviews: '⭐ Мои отзывы', profile_no_reviews: 'Нет отзывов',
+    profile_my_works: '🖼 Мои работы', profile_my_works_hint: 'Загружайте скриншоты и фото готовых проектов', profile_add: 'Добавить',
+    profile_saved: '🔖 Сохранённые',
+    profile_change_avatar: 'Сменить фото профиля',
+    avatar_alt: 'Аватар',
+    // Dashboard cards
+    dash_my_orders: 'Мои заказы', dash_resumes_posted: 'Резюме опубликовано', dash_active_chats: 'Активных чатов', dash_bookmarked: 'В избранном',
+    dash_days: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+    dash_no_reviews_left: 'Вы ещё не оставляли отзывов.',
+    // Bookmarks
+    bookmarks_empty_title: 'Пока ничего не сохранено.', bookmarks_empty_hint: 'Нажмите 🔖 на карточке заказа или специалиста',
+    bookmarks_order: 'Заказ', bookmarks_talent: 'Специалист', bookmarks_open: 'Открыть',
+    bookmarks_add_title: 'В избранное',
+    // Search history
+    search_history_label: 'История:',
+    // Toasts / alerts — auth
+    t_google_unavailable: '⚠️ Google авторизация недоступна. Проверьте соединение.',
+    t_google_no_data: '⚠️ Не удалось получить данные от Google',
+    t_google_token_error: '⚠️ Ошибка обработки Google токена',
+    t_google_error_prefix: '⚠️ Google: ',
+    t_google_no_data2: '⚠️ Не удалось получить данные Google',
+    t_welcome_back: '🎉 Вы вошли как ',
+    t_choose_role: '⚠️ Выберите роль',
+    t_welcome_new: '🎉 Добро пожаловать, ',
+    t_fill_email_pass: '⚠️ Заполните email и пароль',
+    t_account_not_found: '⚠️ Аккаунт с таким email не найден',
+    t_wrong_password: '⚠️ Неверный пароль',
+    t_fill_all_fields: '⚠️ Заполните все поля',
+    t_email_invalid: '⚠️ Email введён неверно. Используйте Gmail, Mail.ru, Yahoo и др.',
+    t_password_min: '⚠️ Пароль должен быть минимум 8 символов',
+    t_account_exists: '⚠️ Аккаунт с таким email уже существует',
+    t_name_taken: '⚠️ Это имя уже занято. Выберите другое.',
+    t_logged_out: '👋 Вы вышли из аккаунта',
+    t_login_first: '🔒 Сначала войдите в аккаунт',
+    t_loading: 'Загрузка…',
+    wallet_refresh_title: 'Обновить баланс USDT',
+    // Toasts — orders/talents
+    t_login_to_post_order: '🔒 Войдите, чтобы разместить заказ',
+    t_order_published: '✅ Заказ опубликован! Фрилансеры уже видят его.',
+    t_login_to_post_talent: '🔒 Войдите, чтобы разместить портфолио',
+    t_talent_published: '✅ Резюме опубликовано! Предприниматели уже видят вас.',
+    t_login_to_write: '🔒 Войдите, чтобы написать',
+    t_name_updated: '✅ Имя обновлено!',
+    t_enter_name: '⚠️ Введите имя',
+    t_name_taken_other: '⚠️ Это имя уже занято другим пользователем',
+    // Bookmarks / notifications toasts
+    t_removed_bookmark: '🔖 Удалено из избранного',
+    t_added_bookmark: '🔖 Добавлено в избранное!',
+    t_saved_notif: 'Сохранено: ',
+    t_new_message_order: 'Новое сообщение по заказу',
+    t_avatar_too_big: '⚠️ Файл слишком большой (максимум 2 МБ)',
+    t_avatar_updated: '✅ Фото профиля обновлено!',
+    t_avatar_updated_notif: 'Фото профиля успешно обновлено',
+    t_portfolio_file_too_big: '⚠️ Файл слишком большой (>3МБ)',
+    t_portfolio_file_too_big_named: '⚠️ Файл «%s» слишком большой (>3МБ)',
+    t_portfolio_uploaded: '✅ Загружено фото!',
+    t_portfolio_uploaded_notif: 'Добавлено новых работ в портфолио',
+    t_photos_selected: 'фото выбрано',
+    t_cv_downloaded: '📥 CV скачан!',
+    t_choose_rating: '⚠️ Выберите оценку',
+    t_write_review: '⚠️ Напишите отзыв',
+    t_review_published: '✅ Отзыв опубликован!',
+    t_left_review_notif: 'Вы оставили отзыв на ',
+    t_order_published_notif: 'Ваш заказ опубликован — ждите откликов!',
+    t_order_deleted_hint: 'Заказ не найден или был удалён', t_talent_not_found: 'Специалист не найден',
+    // Order/talent detail
+    detail_home: 'Главная', detail_orders_crumb: 'Заказы', detail_talents_crumb: 'Специалисты',
+    detail_budget: '💰 Бюджет', detail_category: '📂 Категория', detail_published: '📅 Опубликован',
+    detail_reviews: 'Отзывы', detail_review_word: 'отзыв', detail_review_word_plural: 'отзыва',
+    detail_skills_tech: '🛠 Технологии / Навыки', detail_skills_talent: '🛠 Навыки и технологии',
+    detail_chat_title: 'Чат по заказу', detail_chat_talent_title: 'Написать специалисту',
+    detail_chat_write_hint: 'Напишите — задайте вопросы по заказу или предложите своё решение',
+    detail_chat_talent_hint: 'Опишите задачу и договоритесь об условиях сотрудничества',
+    detail_chat_input_ph: 'Написать сообщение...', detail_login_to_write: '🔒 Войдите, чтобы написать',
+    detail_back_orders: '← Вернуться к списку заказов', detail_back_talents: '← Вернуться к каталогу',
+    detail_back_orders_nav: '← Назад к заказам', detail_back_talents_nav: '← Назад к специалистам',
+    detail_leave_review: '⭐ Оставить отзыв',
+    detail_client_label: 'Заказчик', detail_rate_hour: '💰 Ставка / час', detail_specialization: '📂 Специализация', detail_rating: '⭐ Рейтинг',
+    detail_portfolio: '🖼 Портфолио', detail_work_word: 'работ',
+    detail_delete_order: '🗑 Удалить заказ',
+    // Chats page
+    chats_my_chats: '💬 Мои чаты', chats_select: 'Выберите чат слева', chats_select_hint: 'Здесь будет переписка с предпринимателем или фрилансером',
+    chats_none_yet: 'Пока нет чатов', chats_no_active: 'Нет активных чатов', chats_no_messages: 'Нет сообщений',
+    chats_support: '🎧 Поддержка', chats_support_full: '🎧 Поддержка FreeSun', chats_support_ticket: 'Обращение в поддержку', chats_support_reply_hint: 'Мы отвечаем как можно скорее',
+    chats_support_sender_name: 'Поддержка FreeSun',
+    chats_interlocutor: 'Собеседник', chats_order_link: 'Заказ →', chats_start_dialog: 'Начните диалог', chats_order_prefix: 'По заказу: ',
+    // CV export
+    cv_header: '=== РЕЗЮМЕ FreeSun ===', cv_name: 'Имя: ', cv_role: 'Роль: ', cv_freelancer: 'Фрилансер', cv_entrepreneur: 'Предприниматель',
+    cv_prof_info: '--- ПРОФЕССИОНАЛЬНАЯ ИНФОРМАЦИЯ ---', cv_specialization: 'Специализация: ', cv_category: 'Категория: ',
+    cv_about: 'О себе: ', cv_skills: 'Навыки: ', cv_rate: 'Ставка: ', cv_rating: 'Рейтинг: ',
+    cv_activity: '--- АКТИВНОСТЬ ---', cv_free_days: 'Свободных дней (ближайшие 4 нед.): ', cv_saved_items: 'Сохранённых объектов: ',
+    cv_generated: 'Сгенерировано: ', cv_platform: 'Платформа: FreeSun — freesun.io',
+    // Review author suffix
+    review_author_freelancer: 'фрилансер', review_author_entrepreneur: 'предприниматель', review_just_now: 'Только что',
+    // Talent published role suffix
+    talent_role_specialist: 'специалист',
+  },
+  en: {
+    nav_find_work: '💼 Find Work', nav_find_talent: '🌟 Find Talent', nav_reviews: '⭐ Reviews',
+    nav_about: 'About', nav_post_order: 'Post a Project', nav_login: 'Log In', nav_register: 'Sign Up',
+    nav_chats: '💬 Chats', nav_profile: 'My Profile', nav_logout: 'Log Out', nav_menu: 'Menu',
+    nav_mob_about: 'ℹ️ About', nav_mob_post: '📋 Post a Project', nav_mob_bookmarks: '🔖 Bookmarks',
+    nav_notifications: 'Notifications', nav_back_orders: '← To Projects',
+    landing_tagline: 'The best freelance marketplace — instant payouts, fair terms, no unnecessary barriers',
+    landing_work_title: 'Find Work', landing_work_desc: 'For freelancers. Browse projects from entrepreneurs, apply, and earn.', landing_work_btn: "I'm a freelancer →",
+    landing_talent_title: 'Find Talent', landing_talent_desc: 'For businesses. Find the best specialists — browse freelancer profiles and hire.', landing_talent_btn: "I'm an entrepreneur →",
+    landing_footer: 'FreeSun · Freelance Marketplace · 2026',
+    auth_welcome: 'Welcome ☀️', auth_subtitle: 'Log in or create an account to get started',
+    auth_tab_login: 'Log In', auth_tab_register: 'Sign Up',
+    auth_google_login: 'Sign in with Google', auth_google_register: 'Sign up with Google',
+    auth_or: 'or', auth_or_form: 'or fill out the form',
+    auth_email: 'Email', auth_password: 'Password', auth_login_btn: 'Log In',
+    auth_your_name: 'Your Name', auth_password_min: 'Minimum 8 characters',
+    auth_role_label: "I'm signing up as", auth_role_placeholder: 'Select a role...',
+    auth_role_entrepreneur: '🏢 Entrepreneur — I post projects', auth_role_freelancer: '💼 Freelancer — I look for projects',
+    auth_register_btn: 'Create Account',
+    auth_almost_done: 'Almost done! ☀️', auth_google_role_hint: 'Please specify your role on the platform',
+    auth_signing_in_as: 'You are signing in as ',
+    auth_finish_btn: '✅ Finish Sign Up',
+    post_order_title: 'New Project 📋', post_order_subtitle: 'Describe the task — freelancers will see it right away',
+    post_order_heading: 'Project Title', post_order_heading_ph: 'E.g.: Landing Page Development',
+    post_category: 'Category', post_category_ph: 'Select a category...',
+    post_order_desc: 'Task Description', post_order_desc_ph: 'Describe in detail what needs to be done, requirements, deadlines...',
+    post_budget_from: 'Budget from ($)', post_budget_to: 'Budget to ($)',
+    post_order_submit: '✨ Publish Project',
+    post_talent_title: 'My Portfolio 🌟', post_talent_subtitle: 'Tell us about yourself — entrepreneurs will find you',
+    post_talent_name: 'Your Name / Alias',
+    post_talent_spec: 'Specialization', post_talent_about: 'About You', post_talent_about_ph: 'Describe your experience, approach to work, achievements...',
+    post_talent_skills: 'Skills (comma-separated)', post_talent_skills_ph: 'Figma, Photoshop, Illustrator',
+    post_rate_from: 'Rate from ($/hr)', post_rate_to: 'Rate to ($/hr)',
+    post_photos_label: '📸 Project Photos (optional)', post_photos_upload: '+ Upload Photos', post_photos_count: '0 photos selected',
+    post_talent_submit: '✨ Publish Portfolio',
+    cat_all: 'All', cat_design: 'Design', cat_dev: 'Development', cat_copy: 'Copywriting',
+    cat_smm: 'SMM', cat_video: 'Video', cat_marketing: 'Marketing',
+    cat_design_ic: '🎨 Design', cat_dev_ic: '💻 Development', cat_copy_ic: '✍️ Copywriting',
+    cat_smm_ic: '📱 SMM', cat_video_ic: '🎬 Video', cat_marketing_ic: '📊 Marketing',
+    hero_work_badge: '💼 For Freelancers',
+    hero_work_h1_pre: 'Find ', hero_work_h1_em: 'projects', hero_work_h1_post: 'and earn using your skills',
+    hero_work_p: 'Hundreds of open projects from entrepreneurs — pick a project that fits, message the client, and start working today.',
+    hero_work_btn1: '🔍 Browse Projects', hero_work_btn2: "🌟 I'm an Entrepreneur",
+    hero_work_stat1: 'Open Projects', hero_work_stat2: 'Paid to Freelancers', hero_work_stat3: 'Average Rating', hero_work_stat4: 'No-KYC Withdrawals',
+    hero_work_cta_text: '📋 <strong>Are you an entrepreneur?</strong> Post a project — freelancers will see it instantly',
+    hero_work_cta_btn: '+ Post a Project',
+    hero_talent_badge: '🌟 For Entrepreneurs',
+    hero_talent_h1_pre: 'Find ', hero_talent_h1_em: 'talent', hero_talent_h1_post: 'for your business',
+    hero_talent_p: 'Browse freelancer portfolios and hire the best. Or post a project — specialists will reach out to you.',
+    hero_talent_btn1: '🌟 Browse Portfolios', hero_talent_btn2: '📋 Post a Project',
+    hero_talent_stat1: 'Freelancers Listed', hero_talent_stat2: 'First Response', hero_talent_stat3: 'Result Guarantee', hero_talent_stat4: 'Free to List',
+    hero_talent_cta_text: "☀️ <strong>Are you a freelancer?</strong> Post your portfolio — entrepreneurs will find you",
+    hero_talent_cta_btn: '+ Post Your Portfolio',
+    how_title: 'How It Works', how_subtitle: 'Three simple steps from idea to finished project',
+    how_step1_title: 'Post a Project', how_step1_desc: 'Describe the task, set a budget and requirements. Takes less than 2 minutes.',
+    how_step2_title: 'Get Responses', how_step2_desc: 'Freelancers browse projects and message you. Pick the best one.',
+    how_step3_title: 'Launch the Project', how_step3_desc: 'Chat, then pay once the result is confirmed.',
+    orders_banner_title: '📋 Are you an entrepreneur?', orders_banner_sub: 'Post a project — freelancers will see it instantly', orders_banner_btn: '+ Post a Project',
+    orders_title: 'Open Projects', orders_subtitle: 'Freelancers: pick a project, click "Details" and message the entrepreneur',
+    orders_filters: '🎛 Filters', orders_search_ph: '🔍  Search projects...', orders_search_btn: 'Search',
+    orders_not_found_title: 'No projects found', orders_not_found_desc: 'Try adjusting your filters',
+    orders_per_project: '/ project', orders_more_btn: 'Details →',
+    orders_cta_title: 'Are you an entrepreneur? 🚀', orders_cta_sub: 'Post a project for free and get your first responses within an hour',
+    orders_cta_btn: '📋 Post a Project for Free',
+    talents_banner_title: '🌟 Are you a freelancer?', talents_banner_sub: 'Post your portfolio — entrepreneurs will find you', talents_banner_btn: '+ Post Portfolio',
+    talents_title: 'Freelancer Directory', talents_subtitle: 'Entrepreneurs: find a specialist, click "Contact" and start collaborating',
+    talents_filters: '🎛 Filters', talents_search_ph: '🔍  Search specialists...', talents_search_btn: 'Search',
+    talents_not_found_title: 'No specialists found', talents_not_found_desc: 'Try adjusting your filters',
+    talents_per_hour: '/ hour', talents_more_btn: 'Details →',
+    talents_cta_title: 'Are you a freelancer? ✨', talents_cta_sub: 'Post your portfolio for free — hundreds of entrepreneurs are looking for talent right now',
+    talents_cta_btn: '🌟 Post Portfolio for Free',
+    reviews_clients_title: '⭐ Client Reviews', reviews_clients_sub: "Real reviews from freelancers about working with entrepreneurs on FreeSun",
+    reviews_platform_title: '⭐ Platform Reviews', reviews_platform_sub: 'Real stories from freelancers and entrepreneurs who found each other on FreeSun',
+    reviews_none: 'No reviews yet.',
+    reviews_open_profile: 'Open profile',
+    footer_text: 'summer freelance marketplace', footer_rights: 'All rights reserved',
+    about_h1: 'About the Platform',
+    about_p: 'FreeSun is a marketplace for finding work and specialists, with a secure escrow-based payment system. Transparent terms for both sides, no hidden fees or fine print.',
+    about_card1_title: 'Fast Payouts', about_card1_desc: 'Funds are released as soon as both parties confirm the work is complete.',
+    about_card2_title: 'Personal Data Protection', about_card2_desc: "We don't share or sell your data to third parties. Information is used only for running the service.",
+    about_card3_title: 'Transparent Fees', about_card3_desc: 'Fee amounts are known upfront and never change mid-deal. No hidden deductions.',
+    about_card4_title: 'Years in the Market', about_card4_desc: 'FreeSun has been running since 2018. In that time we\'ve paid out over $1.2M to freelancers worldwide.',
+    about_card5_title: 'Escrow-Protected Deals', about_card5_desc: "Payment is held by a smart contract until the result is confirmed — funds never pass directly through the platform's accounts.",
+    about_card6_title: 'We Work Worldwide', about_card6_desc: 'Freelancers and clients from dozens of countries. Work with anyone under the same clear terms.',
+    about_quote: '💬 "What matters to me is that the money in an escrow deal isn\'t tied to one company — it sits in a smart contract, and I can see that for myself. For the first time in a long freelance career, I\'m not worried about getting paid." — Dmitry K., web developer',
+    about_data_title: 'How We Handle Your Data',
+    about_data_p1: "We only collect what's necessary to run the platform: your name, email, and data about deals you're involved in. We don't request access to data unrelated to using the service, and we don't track your activity outside the site.",
+    about_data_p2: "Your data is never shared with ad networks, data brokers, or other third parties for commercial purposes. Chat messages are visible only to the participants of that specific deal.",
+    about_data_p3: "When using Web3 escrow, payment is held by a smart contract on the blockchain, not in FreeSun's accounts — we physically cannot access those funds until the deal is completed under terms both parties agreed to.",
+    about_data_p4: "We handle user data responsibly and in line with applicable personal data protection standards. If you have questions about what data we store, or want it deleted, reach out and we'll respond.",
+    about_why_title: 'Why Choose FreeSun?',
+    about_why_p1: "We built this platform around one idea: freelancers and clients should be able to agree quickly, work comfortably, and get paid without hassle. Over the years we've completed thousands of projects in design, development, marketing, copywriting, and video.",
+    about_why_p2: 'Our principle: minimum friction, maximum results — clear rules, a fair fee, and protected funds at every stage of the deal.',
+    about_cta_btn: '📋 Post a Project for Free',
+    notif_title: '🔔 Notifications', notif_clear: 'Clear All', notif_empty: 'No notifications',
+    filter_title: '🎛 Filters', filter_price: '💰 Budget / Rate ($)', filter_from: 'From', filter_to: 'To',
+    filter_tags: '🏷 Skills / Tags', filter_rating: '⭐ Minimum Rating', filter_rating_any: 'Any',
+    filter_apply: '✅ Apply Filters', filter_reset: '↺ Reset All',
+    review_title: '⭐ Leave a Review', review_subtitle: 'Rate your collaboration',
+    review_subtitle_named: 'Rate: ',
+    review_text_label: 'Your Review', review_text_ph: 'Tell us about your experience working together...',
+    review_submit: 'Publish Review',
+    profile_change_name: '✏️ Change Name', profile_name_ph: 'Enter new name', profile_save_name: 'Save Name',
+    profile_theme: '🎨 Theme', profile_theme_light: '☀️ Light', profile_theme_dark: '🌙 Dark',
+    profile_language: '🌐 Interface Language', profile_lang_ru: '🇷🇺 Русский', profile_lang_en: '🇬🇧 English',
+    profile_availability: '📅 My Availability', profile_availability_hint: "Mark the days you're free to work",
+    profile_avail_free: 'Free', profile_avail_busy: 'Busy',
+    profile_export_cv: '📄 Export Resume', profile_export_cv_btn: '📥 Download CV (text)',
+    profile_tab_main: '👤 Profile', profile_tab_dashboard: '📊 Analytics', profile_tab_portfolio: '🖼 Portfolio', profile_tab_bookmarks: '🔖 Bookmarks',
+    profile_stats: '📊 Stats', profile_activity_7d: 'Activity (7 days)', profile_my_reviews: '⭐ My Reviews', profile_no_reviews: 'No reviews',
+    profile_my_works: '🖼 My Work', profile_my_works_hint: 'Upload screenshots and photos of finished projects', profile_add: 'Add',
+    profile_saved: '🔖 Saved',
+    profile_change_avatar: 'Change profile photo',
+    avatar_alt: 'Avatar',
+    dash_my_orders: 'My Projects', dash_resumes_posted: 'Portfolios Posted', dash_active_chats: 'Active Chats', dash_bookmarked: 'Bookmarked',
+    dash_days: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    dash_no_reviews_left: "You haven't left any reviews yet.",
+    bookmarks_empty_title: "Nothing saved yet.", bookmarks_empty_hint: 'Tap 🔖 on a project or specialist card',
+    bookmarks_order: 'Project', bookmarks_talent: 'Specialist', bookmarks_open: 'Open',
+    bookmarks_add_title: 'Add to bookmarks',
+    search_history_label: 'History:',
+    t_google_unavailable: '⚠️ Google sign-in unavailable. Check your connection.',
+    t_google_no_data: '⚠️ Could not get data from Google',
+    t_google_token_error: '⚠️ Error processing Google token',
+    t_google_error_prefix: '⚠️ Google: ',
+    t_google_no_data2: '⚠️ Could not get Google data',
+    t_welcome_back: '🎉 Signed in as ',
+    t_choose_role: '⚠️ Please select a role',
+    t_welcome_new: '🎉 Welcome, ',
+    t_fill_email_pass: '⚠️ Please fill in email and password',
+    t_account_not_found: '⚠️ No account found with this email',
+    t_wrong_password: '⚠️ Wrong password',
+    t_fill_all_fields: '⚠️ Please fill in all fields',
+    t_email_invalid: '⚠️ Invalid email. Use Gmail, Mail.ru, Yahoo, etc.',
+    t_password_min: '⚠️ Password must be at least 8 characters',
+    t_account_exists: '⚠️ An account with this email already exists',
+    t_name_taken: '⚠️ This name is already taken. Please choose another.',
+    t_logged_out: '👋 You have been logged out',
+    t_login_first: '🔒 Please log in first',
+    t_loading: 'Loading…',
+    wallet_refresh_title: 'Refresh USDT balance',
+    t_login_to_post_order: '🔒 Log in to post a project',
+    t_order_published: '✅ Project published! Freelancers can see it now.',
+    t_login_to_post_talent: '🔒 Log in to post your portfolio',
+    t_talent_published: '✅ Portfolio published! Entrepreneurs can see you now.',
+    t_login_to_write: '🔒 Log in to send a message',
+    t_name_updated: '✅ Name updated!',
+    t_enter_name: '⚠️ Please enter a name',
+    t_name_taken_other: '⚠️ This name is already taken by another user',
+    t_removed_bookmark: '🔖 Removed from bookmarks',
+    t_added_bookmark: '🔖 Added to bookmarks!',
+    t_saved_notif: 'Saved: ',
+    t_new_message_order: 'New message about the project',
+    t_avatar_too_big: '⚠️ File is too large (max 2 MB)',
+    t_avatar_updated: '✅ Profile photo updated!',
+    t_avatar_updated_notif: 'Profile photo updated successfully',
+    t_portfolio_file_too_big: '⚠️ File is too large (>3MB)',
+    t_portfolio_file_too_big_named: '⚠️ File "%s" is too large (>3MB)',
+    t_portfolio_uploaded: '✅ Photos uploaded!',
+    t_portfolio_uploaded_notif: 'Added new work to portfolio',
+    t_photos_selected: 'photos selected',
+    t_cv_downloaded: '📥 CV downloaded!',
+    t_choose_rating: '⚠️ Please select a rating',
+    t_write_review: '⚠️ Please write a review',
+    t_review_published: '✅ Review published!',
+    t_left_review_notif: 'You left a review for ',
+    t_order_published_notif: 'Your project has been published — awaiting responses!',
+    t_order_deleted_hint: 'Project not found or was deleted', t_talent_not_found: 'Specialist not found',
+    detail_home: 'Home', detail_orders_crumb: 'Projects', detail_talents_crumb: 'Specialists',
+    detail_budget: '💰 Budget', detail_category: '📂 Category', detail_published: '📅 Published',
+    detail_reviews: 'Reviews', detail_review_word: 'review', detail_review_word_plural: 'reviews',
+    detail_skills_tech: '🛠 Technologies / Skills', detail_skills_talent: '🛠 Skills & Technologies',
+    detail_chat_title: 'Project Chat', detail_chat_talent_title: 'Message the Specialist',
+    detail_chat_write_hint: 'Ask questions about the project or propose your solution',
+    detail_chat_talent_hint: 'Describe the task and agree on the terms of collaboration',
+    detail_chat_input_ph: 'Type a message...', detail_login_to_write: '🔒 Log in to send a message',
+    detail_back_orders: '← Back to project list', detail_back_talents: '← Back to directory',
+    detail_back_orders_nav: '← Back to Projects', detail_back_talents_nav: '← Back to Specialists',
+    detail_leave_review: '⭐ Leave a Review',
+    detail_client_label: 'Client', detail_rate_hour: '💰 Rate / Hour', detail_specialization: '📂 Specialization', detail_rating: '⭐ Rating',
+    detail_portfolio: '🖼 Portfolio', detail_work_word: 'items',
+    detail_delete_order: '🗑 Delete Project',
+    chats_my_chats: '💬 My Chats', chats_select: 'Select a chat on the left', chats_select_hint: 'Your conversation with the entrepreneur or freelancer will appear here',
+    chats_none_yet: 'No chats yet', chats_no_active: 'No active chats', chats_no_messages: 'No messages',
+    chats_support: '🎧 Support', chats_support_full: '🎧 FreeSun Support', chats_support_ticket: 'Support Ticket', chats_support_reply_hint: 'We reply as soon as possible',
+    chats_support_sender_name: 'FreeSun Support',
+    chats_interlocutor: 'Chat partner', chats_order_link: 'Project →', chats_start_dialog: 'Start the conversation', chats_order_prefix: 'Re: project: ',
+    cv_header: '=== FreeSun RESUME ===', cv_name: 'Name: ', cv_role: 'Role: ', cv_freelancer: 'Freelancer', cv_entrepreneur: 'Entrepreneur',
+    cv_prof_info: '--- PROFESSIONAL INFO ---', cv_specialization: 'Specialization: ', cv_category: 'Category: ',
+    cv_about: 'About: ', cv_skills: 'Skills: ', cv_rate: 'Rate: ', cv_rating: 'Rating: ',
+    cv_activity: '--- ACTIVITY ---', cv_free_days: 'Free days (next 4 weeks): ', cv_saved_items: 'Saved items: ',
+    cv_generated: 'Generated: ', cv_platform: 'Platform: FreeSun — freesun.io',
+    review_author_freelancer: 'freelancer', review_author_entrepreneur: 'entrepreneur', review_just_now: 'Just now',
+    talent_role_specialist: 'specialist',
+  }
+};
+
+let currentLang = lsGet(LS_LANG, 'ru');
+if (currentLang !== 'ru' && currentLang !== 'en') currentLang = 'ru';
+
+function t(key) {
+  const dict = I18N[currentLang] || I18N.ru;
+  if (key in dict) return dict[key];
+  if (key in I18N.ru) return I18N.ru[key]; // fallback to ru if a key is missing in en
+  return key; // last-resort fallback so a typo'd key never crashes rendering
+}
+
 
 const API_URL = (function(){ return './' + ['api','.php'].join(''); })();
 
@@ -1725,7 +2176,7 @@ async function serverSet(key, val) {
   } catch(e) { /* offline — не страшно */ }
 }
 
-const DEFAULT_ORDERS = [
+const DEFAULT_ORDERS_RU = [
   { id:1, title:"Разработка сайта для ресторана", cat:"Разработка",
     desc:"Нужен современный сайт с меню, онлайн-бронированием столиков и полностью адаптивным дизайном для мобильных устройств. Стек на ваш выбор — важна скорость загрузки, SEO-оптимизация и красота визуала. Желательно наличие портфолио схожих работ. Возможна долгосрочная поддержка проекта.",
     priceMin:800, priceMax:1500, author:"АК", authorName:"Алексей К.", date:"Сегодня", isNew:true,
@@ -1796,6 +2247,80 @@ const DEFAULT_ORDERS = [
       {author:'Макс Д., иллюстратор', rating:4, text:'Хороший заказчик, референсы подробные. Сроки сжатые, но выполнимые.', date:'2 месяца назад'}
     ] },
 ];
+
+const DEFAULT_ORDERS_EN = [
+  { id:1, title:"Restaurant Website Development", cat:"Development",
+    desc:"Need a modern website with a menu, online table booking, and a fully responsive design for mobile devices. Tech stack is your choice — loading speed, SEO optimization, and visual polish matter most. Portfolio of similar work preferred. Long-term project support possible.",
+    priceMin:800, priceMax:1500, author:"АК", authorName:"Alexey K.", date:"Today", isNew:true,
+    tags:["React","Node.js","PostgreSQL","Responsive Design"],
+    clientReviews:[
+      {author:'Igor S., web developer', rating:5, text:'Clear spec, quick to answer questions, got paid same-day after delivery.', date:'2 months ago'},
+      {author:'Kirill M., frontend developer', rating:5, text:'Great client — knows what he wants, doesn\'t change requirements mid-project. Recommend.', date:'3 months ago'},
+      {author:'Anya D., fullstack', rating:4, text:'Pleasant to work with, paid on time. Minor revisions at the end, but all within scope.', date:'4 months ago'}
+    ] },
+  { id:2, title:"Logo and Brand Identity", cat:"Design",
+    desc:"A young natural cosmetics brand is looking for a designer to create a logo, color palette, and basic brand book elements (business cards, letterhead, packaging). Style — minimalism with natural motifs. References and brief will be provided.",
+    priceMin:300, priceMax:700, author:"МС", authorName:"Maria S.", date:"Yesterday", isNew:true,
+    tags:["Figma","Illustrator","Brand Book"],
+    clientReviews:[
+      {author:'Vera L., designer', rating:5, text:'Pleasant to work with — immediately clear what the client wants, minimal revisions.', date:'1 month ago'},
+      {author:'Oleg P., graphic designer', rating:5, text:'Detailed brief, clear references. Got it right almost the first time.', date:'2 months ago'},
+      {author:'Liza K., illustrator', rating:5, text:'Maria is very polite, pays fast, and gives full creative freedom within the style.', date:'2.5 months ago'}
+    ] },
+  { id:3, title:"Instagram SMM for a Shop", cat:"SMM",
+    desc:"I run a handmade silver jewelry shop. Need a specialist for full Instagram management: content plan development, posts and stories, targeted ad setup, audience engagement. Experience in fashion/jewelry is a plus.",
+    priceMin:200, priceMax:400, author:"ДП", authorName:"Daria P.", date:"2 days ago", isNew:false,
+    tags:["Instagram","Targeted Ads","Content"],
+    clientReviews:[
+      {author:'Timur A., SMM specialist', rating:4, text:'Good client, but the brief was delayed a couple of days at the start.', date:'3 weeks ago'},
+      {author:'Sonya R., content manager', rating:5, text:'Daria is very open to ideas, easy to align content with. A pleasure to work with.', date:'1.5 months ago'}
+    ] },
+  { id:4, title:"SEO Copywriting for a Website", cat:"Copywriting",
+    desc:"Need an experienced copywriter to write 10 SEO-optimized articles on country home construction. Each article at least 2000 words. Keywords and brief will be provided. Need strong grammar, expertise, and 95%+ uniqueness.",
+    priceMin:150, priceMax:300, author:"ВТ", authorName:"Viktor T.", date:"3 days ago", isNew:false,
+    tags:["SEO","Copywriting","WordPress"],
+    clientReviews:[
+      {author:'Polina Zh., copywriter', rating:5, text:'Paid right after delivery, the brief was extremely detailed.', date:'1 month ago'},
+      {author:'Anton V., SEO writer', rating:5, text:'Viktor is one of the best clients I\'ve worked with. Clear keywords, clear structure.', date:'2 months ago'},
+      {author:'Masha E., content writer', rating:4, text:'Good brief, paid on time. Asked for a couple of minor revisions — reasonable ones.', date:'2.5 months ago'}
+    ] },
+  { id:5, title:"Mobile App (iOS/Android)", cat:"Development",
+    desc:"A fitness startup is looking for a developer to build an MVP mobile app with a workout tracker, food diary, and Apple Health / Google Fit integration. Experience with React Native or Flutter needed. NDA required.",
+    priceMin:3000, priceMax:6000, author:"НЛ", authorName:"Nikita L.", date:"3 days ago", isNew:false,
+    tags:["React Native","Flutter","Firebase"],
+    clientReviews:[
+      {author:'Vlad K., Flutter developer', rating:5, text:'Serious approach, contract and NDA were arranged without issues.', date:'2 months ago'},
+      {author:'Rustam I., mobile developer', rating:5, text:'Nikita understands the product clearly, doesn\'t micromanage. Paid on contract, no delays.', date:'3 months ago'}
+    ] },
+  { id:6, title:"YouTube Video Editing", cat:"Video",
+    desc:"Looking for an editor for ongoing collaboration. Processing 8–10 videos per month (~10–15 min each). Topic — business and finance. Style — dynamic, with text animation, soundtrack, and color grading. Need samples of similar work.",
+    priceMin:400, priceMax:800, author:"ЕВ", authorName:"Elena V.", date:"4 days ago", isNew:false,
+    tags:["Premiere Pro","After Effects","Motion"],
+    clientReviews:[
+      {author:'Sasha R., video editor', rating:5, text:'Working together for six months now on an ongoing basis — reliable, no payment delays.', date:'2 weeks ago'},
+      {author:'Dima F., motion designer', rating:5, text:'Elena knows what she wants, sends materials in an organized way. Pleasant client.', date:'1 month ago'},
+      {author:'Katya N., video editor', rating:5, text:'A regular client — reliable payment, interesting content. Recommend to all editors.', date:'2 months ago'}
+    ] },
+  { id:7, title:"Google Ads Campaign Setup", cat:"Marketing",
+    desc:"Need a PPC specialist to set up and manage ad campaigns for a clothing e-commerce store. Ad budget — from $2000/mo. Need an audit of current campaigns, restructuring, A/B testing. Google certification preferred.",
+    priceMin:500, priceMax:1000, author:"РМ", authorName:"Roman M.", date:"5 days ago", isNew:false,
+    tags:["Google Ads","Analytics","CRO"],
+    clientReviews:[
+      {author:'Nastya V., PPC specialist', rating:4, text:'Reasonable budget and realistic timeline expectations.', date:'1 month ago'},
+      {author:'Artem S., marketer', rating:5, text:'Roman clearly defined KPIs, doesn\'t shift goals mid-project. Results visible within 2 weeks.', date:'1.5 months ago'}
+    ] },
+  { id:8, title:"Illustrations for a Children's Book", cat:"Design",
+    desc:"A small publishing house is looking for an illustrator to create 20 color illustrations for a children's book (ages 6+) in a warm watercolor style. Text and detailed scene descriptions will be provided. Rights transfer to client. Deadline — 6 weeks.",
+    priceMin:1200, priceMax:2500, author:"ОК", authorName:"Olga K.", date:"6 days ago", isNew:false,
+    tags:["Watercolor","Procreate","Illustration"],
+    clientReviews:[
+      {author:'Zhenya T., illustrator', rating:5, text:'Clear scene brief, rights to the work were formally arranged by contract.', date:'3 weeks ago'},
+      {author:'Lera S., artist', rating:5, text:'Olga gives freedom in interpreting scenes — that\'s rare. Everyone loved the result.', date:'1.5 months ago'},
+      {author:'Max D., illustrator', rating:4, text:'Good client, detailed references. Tight but doable deadlines.', date:'2 months ago'}
+    ] },
+];
+
+let DEFAULT_ORDERS = currentLang === 'en' ? DEFAULT_ORDERS_EN : DEFAULT_ORDERS_RU;
 
 const ORDER_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 const TIMESTAMP_THRESHOLD = 1577836800000; // 2020-01-01 ms — ids below this are demo orders
@@ -1992,7 +2517,7 @@ const GOOGLE_CLIENT_ID = (function(){ const p=['689975466319-','7rgsk6brqja3lrl1
 
 function signInWithGoogle() {
   if (typeof google === 'undefined' || !google.accounts) {
-    showToast('⚠️ Google авторизация недоступна. Проверьте соединение.','#e74c3c');
+    showToast(t('t_google_unavailable'),'#e74c3c');
     return;
   }
   // Directly use the popup OAuth2 flow — works reliably on all origins
@@ -2004,7 +2529,7 @@ function _googlePopupFallback() {
     client_id: GOOGLE_CLIENT_ID,
     scope: 'openid email profile',
     callback: (tokenResponse) => {
-      if (tokenResponse.error) { showToast('⚠️ Google: ' + tokenResponse.error,'#e74c3c'); return; }
+      if (tokenResponse.error) { showToast(t('t_google_error_prefix') + tokenResponse.error,'#e74c3c'); return; }
       fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
       })
@@ -2012,7 +2537,7 @@ function _googlePopupFallback() {
       .then(profile => {
         _processGoogleProfile(profile.name, profile.email, profile.sub);
       })
-      .catch(() => showToast('⚠️ Не удалось получить данные от Google','#e74c3c'));
+      .catch(() => showToast(t('t_google_no_data'),'#e74c3c'));
     }
   });
   tokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -2023,12 +2548,12 @@ function handleGoogleCredential(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
     _processGoogleProfile(payload.name, payload.email, payload.sub);
   } catch(e) {
-    showToast('⚠️ Ошибка обработки Google токена','#e74c3c');
+    showToast(t('t_google_token_error'),'#e74c3c');
   }
 }
 
 function _processGoogleProfile(name, email, googleId) {
-  if (!name || !email) { showToast('⚠️ Не удалось получить данные Google','#e74c3c'); return; }
+  if (!name || !email) { showToast(t('t_google_no_data2'),'#e74c3c'); return; }
 
   const users = lsGet('fs_users', []);
   let found = users.find(u => u.email === email.toLowerCase());
@@ -2036,7 +2561,7 @@ function _processGoogleProfile(name, email, googleId) {
   if (found) {
     setCurrentUser({ name: found.name, email: found.email, role: found.role || 'freelancer', initials: found.initials });
     closeAllModals();
-    showToast('🎉 Вы вошли как ' + found.name);
+    showToast(t('t_welcome_back') + found.name);
   } else {
     closeAllModals();
     _showGoogleRoleModal(name, email, googleId);
@@ -2050,18 +2575,18 @@ function _showGoogleRoleModal(name, email, googleId) {
   const originalContent = modal.innerHTML;
   modal.innerHTML = `
     <button class="modal-close" onclick="_restoreAuthModal()">✕</button>
-    <h2>Почти готово! ☀️</h2>
-    <p class="modal-sub">Вы входите как <strong>${name}</strong> (${email})<br>Укажите вашу роль на платформе</p>
+    <h2>${t('auth_almost_done')}</h2>
+    <p class="modal-sub">${t('auth_signing_in_as')}<strong>${name}</strong> (${email})<br>${t('auth_google_role_hint')}</p>
     <div class="form-group" style="margin-top:20px">
-      <label>Я регистрируюсь как</label>
+      <label>${t('auth_role_label')}</label>
       <select id="googleRoleSelect" style="width:100%;padding:13px 17px;border:2px solid #E8EEF4;border-radius:13px;font-family:'Inter',sans-serif;font-size:1rem;color:var(--text);background:var(--sand);outline:none">
-        <option value="">Выберите роль...</option>
-        <option value="entrepreneur">🏢 Предприниматель — размещаю заказы</option>
-        <option value="freelancer">💼 Фрилансер — ищу проекты</option>
+        <option value="">${t('auth_role_placeholder')}</option>
+        <option value="entrepreneur">${t('auth_role_entrepreneur')}</option>
+        <option value="freelancer">${t('auth_role_freelancer')}</option>
       </select>
     </div>
     <button class="btn btn-sun btn-full" style="margin-top:8px" onclick="_finishGoogleRegister('${name.replace(/'/g,"\\'")}','${email}','${googleId}')">
-      ✅ Завершить регистрацию
+      ${t('auth_finish_btn')}
     </button>
   `;
   modal._originalContent = originalContent;
@@ -2072,7 +2597,7 @@ function _showGoogleRoleModal(name, email, googleId) {
 
 function _finishGoogleRegister(name, email, googleId) {
   const role = document.getElementById('googleRoleSelect').value;
-  if (!role) { showToast('⚠️ Выберите роль','#F5A623'); return; }
+  if (!role) { showToast(t('t_choose_role'),'#F5A623'); return; }
 
   const users = lsGet('fs_users', []);
   let finalName = name;
@@ -2087,7 +2612,7 @@ function _finishGoogleRegister(name, email, googleId) {
   setCurrentUser({ name: finalName, email: email.toLowerCase(), role, initials });
   _restoreAuthModal();
   closeAllModals();
-  showToast('🎉 Добро пожаловать, ' + finalName + '!');
+  showToast(t('t_welcome_new') + finalName + '!');
 }
 
 function _restoreAuthModal() {
@@ -2102,16 +2627,16 @@ function _restoreAuthModal() {
 function doLogin() {
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('loginPass').value.trim();
-  if (!email || !pass) { showToast('⚠️ Заполните email и пароль','#F5A623'); return; }
+  if (!email || !pass) { showToast(t('t_fill_email_pass'),'#F5A623'); return; }
   const users = lsGet('fs_users', []);
   const found = users.find(u => u.email === email);
   if (!found) {
-    showToast('⚠️ Аккаунт с таким email не найден','#e74c3c');
+    showToast(t('t_account_not_found'),'#e74c3c');
     document.getElementById('loginEmail').style.borderColor = '#e74c3c';
     return;
   }
   if (found.pass !== pass) {
-    showToast('⚠️ Неверный пароль','#e74c3c');
+    showToast(t('t_wrong_password'),'#e74c3c');
     document.getElementById('loginPass').style.borderColor = '#e74c3c';
     return;
   }
@@ -2119,7 +2644,7 @@ function doLogin() {
   document.getElementById('loginPass').style.borderColor = '';
   setCurrentUser({ name: found.name, email: found.email, role: found.role, initials: found.initials });
   closeAllModals();
-  showToast('🎉 Вы вошли как ' + found.name);
+  showToast(t('t_welcome_back') + found.name);
 }
 
 function validateEmail(email) {
@@ -2133,21 +2658,21 @@ function doRegister() {
   const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('regPass').value.trim();
   const role  = document.getElementById('regRole').value;
-  if (!name||!email||!pass||!role) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  if (!name||!email||!pass||!role) { showToast(t('t_fill_all_fields'),'#F5A623'); return; }
   if (!validateEmail(email)) {
-    showToast('⚠️ Email введён неверно. Используйте Gmail, Mail.ru, Yahoo и др.','#e74c3c');
+    showToast(t('t_email_invalid'),'#e74c3c');
     document.getElementById('regEmail').style.borderColor = '#e74c3c';
     return;
   }
-  if (pass.length < 8) { showToast('⚠️ Пароль должен быть минимум 8 символов','#F5A623'); return; }
+  if (pass.length < 8) { showToast(t('t_password_min'),'#F5A623'); return; }
   const users = lsGet('fs_users', []);
   if (users.find(u => u.email === email)) {
-    showToast('⚠️ Аккаунт с таким email уже существует','#e74c3c');
+    showToast(t('t_account_exists'),'#e74c3c');
     document.getElementById('regEmail').style.borderColor = '#e74c3c';
     return;
   }
   if (users.find(u => u.name.toLowerCase() === name.toLowerCase())) {
-    showToast('⚠️ Это имя уже занято. Выберите другое.','#e74c3c');
+    showToast(t('t_name_taken'),'#e74c3c');
     document.getElementById('regName').style.borderColor = '#e74c3c';
     return;
   }
@@ -2158,7 +2683,7 @@ function doRegister() {
   lsSet('fs_users', users);
   setCurrentUser({ name, email, role, initials });
   closeAllModals();
-  showToast('🎉 Добро пожаловать, ' + name + '!');
+  showToast(t('t_welcome_new') + name + '!');
 }
 function setCurrentUser(u) {
   currentUser = u;
@@ -2167,7 +2692,7 @@ function setCurrentUser(u) {
   if (wbb) {
     wbb.classList.remove('show');
     const wbbTotal = document.getElementById('wbbTotal');
-    if (wbbTotal) wbbTotal.innerHTML = '<span class="wbb-loading">Загрузка…</span>';
+    if (wbbTotal) wbbTotal.innerHTML = `<span class="wbb-loading">${t('t_loading')}</span>`;
   }
   rebuildChatsCache();
   const first = u.name.split(' ')[0];
@@ -2196,7 +2721,7 @@ function setCurrentUser(u) {
   const _avSm = document.getElementById('navAvatar');
   const _storedAvatar = lsGet('fs_avatar_' + u.email, null);
   if (_storedAvatar) {
-    _avBig.innerHTML = `<img src="${_storedAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Аватар"/>`;
+    _avBig.innerHTML = `<img src="${_storedAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${t('avatar_alt')}"/>`;
     _avSm.innerHTML = `<img src="${_storedAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt=""/>`;
   } else {
     _avBig.textContent = u.initials;
@@ -2215,7 +2740,7 @@ function doLogout() {
   chats = {};
   activeChatId = null;
   document.getElementById('walletBalanceBar').classList.remove('show');
-  document.getElementById('wbbTotal').innerHTML = '<span class="wbb-loading">Загрузка…</span>';
+  document.getElementById('wbbTotal').innerHTML = `<span class="wbb-loading">${t('t_loading')}</span>`;
   document.getElementById('navGuest').style.display = 'flex';
   document.getElementById('navUser').classList.remove('show');
   document.getElementById('navGuestDetail').style.display = 'block';
@@ -2225,10 +2750,10 @@ function doLogout() {
   document.getElementById('navGuestAbout').style.display = 'flex';
   document.getElementById('navUserAbout').classList.remove('show');
   goPage('pageMain');
-  showToast('👋 Вы вышли из аккаунта');
+  showToast(t('t_logged_out'));
 }
 function requireAuth(cb) {
-  if (!currentUser) { openAuth('login'); showToast('🔒 Сначала войдите в аккаунт','#F5A623'); return; }
+  if (!currentUser) { openAuth('login'); showToast(t('t_login_first'),'#F5A623'); return; }
   cb();
 }
 
@@ -2243,7 +2768,7 @@ function goPage(id) {
           const merged = [...new Set([...srvIds, ...loadMyOrderIds()])];
           lsSet(myChatsKey(), merged);
         }
-        renderChatList();
+        if (activeChatId) openChatWindow(activeChatId); else renderChatList();
       });
     } else { renderChatList(); }
   }
@@ -2292,12 +2817,12 @@ function pruneExpiredOrders(list) {
 function renderOrders(list) {
   const grid = document.getElementById('ordersGrid');
   if (!list.length) {
-    grid.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><h3>Заказы не найдены</h3><p>Попробуйте изменить фильтры</p></div>`;
+    grid.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><h3>${t('orders_not_found_title')}</h3><p>${t('orders_not_found_desc')}</p></div>`;
     return;
   }
   grid.innerHTML = list.map(o => `
     <div class="order-card" onclick="openOrderDetail(${o.id})">
-      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('order',o.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('order',${o.id},'${o.title.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
+      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('order',o.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('order',${o.id},'${o.title.replace(/'/g,"\\'")}')" title="${t('bookmarks_add_title')}">🔖</button>
       <div class="order-cat">${o.cat}</div>${o.isNew?'<span class="badge-new">new</span>':''}
 
       <div class="order-meta">
@@ -2308,8 +2833,8 @@ function renderOrders(list) {
       <div class="order-title">${o.title}</div>
       <div class="order-desc">${o.desc}</div>
       <div class="order-footer">
-        <div class="order-price">$${o.priceMin}–$${o.priceMax} <span>/ проект</span></div>
-        <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">Подробнее →</button>
+        <div class="order-price">$${o.priceMin}–$${o.priceMax} <span>${t('orders_per_project')}</span></div>
+        <button class="btn-take" onclick="event.stopPropagation();openOrderDetail(${o.id})">${t('orders_more_btn')}</button>
       </div>
     </div>
   `).join('');
@@ -2337,18 +2862,18 @@ function filterCat(cat,el) {
   el.classList.add('active'); filterOrders();
 }
 function submitOrder() {
-  if (!currentUser) { showToast('🔒 Войдите, чтобы разместить заказ','#F5A623'); return; }
+  if (!currentUser) { showToast(t('t_login_to_post_order'),'#F5A623'); return; }
   const title = document.getElementById('orderTitle').value.trim();
   const cat   = document.getElementById('orderCat').value;
   const desc  = document.getElementById('orderDesc').value.trim();
   const pMin  = parseInt(document.getElementById('orderPriceMin').value)||0;
   const pMax  = parseInt(document.getElementById('orderPriceMax').value)||0;
-  if (!title||!cat||!desc||!pMin) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  if (!title||!cat||!desc||!pMin) { showToast(t('t_fill_all_fields'),'#F5A623'); return; }
   const catClean = cat.replace(/^[^\s]+ /,'');
   const o = {
     id:Date.now(), title, cat:catClean, desc, priceMin:pMin, priceMax:pMax||pMin,
     author:currentUser.initials, authorName:currentUser.name.split(' ')[0],
-    date:'Только что', isNew:true, tags:[]
+    date:t('review_just_now'), isNew:true, tags:[]
   };
   orders.unshift(o);
   lsSet(LS_ORDERS, orders); // persist so other tabs/accounts see it
@@ -2363,7 +2888,7 @@ function submitOrder() {
   closeAllModals();
   goPage('pageMain');
   filterOrders();
-  showToast('✅ Заказ опубликован! Фрилансеры уже видят его.');
+  showToast(t('t_order_published'));
   setTimeout(()=>{ const el=document.querySelector(`[onclick="openOrderDetail(${o.id})"]`); if(el)el.scrollIntoView({behavior:'smooth',block:'center'}); },300);
 }
 
@@ -2396,15 +2921,15 @@ function openOrderDetail(id) {
   const msgs = chat ? chat.messages : [];
 
   const tagsHtml = o.tags && o.tags.length
-    ? `<div style="margin-bottom:28px"><div class="detail-section-title">🛠 Технологии / Навыки</div><div class="detail-tags">${o.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div></div>`
+    ? `<div style="margin-bottom:28px"><div class="detail-section-title">${t('detail_skills_tech')}</div><div class="detail-tags">${o.tags.map(tg=>`<span class="detail-tag">${tg}</span>`).join('')}</div></div>`
     : '';
 
   document.getElementById('detailBody').innerHTML = `
     <!-- BREADCRUMB -->
     <div class="breadcrumb">
-      <a onclick="goPage('pageMain');switchMainSector('work')">Главная</a>
+      <a onclick="goPage('pageMain');switchMainSector('work')">${t('detail_home')}</a>
       <span class="bc-sep">›</span>
-      <a onclick="goPage('pageMain');switchMainSector('work')">Заказы</a>
+      <a onclick="goPage('pageMain');switchMainSector('work')">${t('detail_orders_crumb')}</a>
       <span class="bc-sep">›</span>
       <span>${o.title.length > 40 ? o.title.substring(0,40)+'...' : o.title}</span>
     </div>
@@ -2414,8 +2939,8 @@ function openOrderDetail(id) {
         <div class="detail-avatar">${o.author}</div>
         <div class="detail-author-info">
           <h4>${o.authorName}</h4>
-          <span>Предприниматель · ${o.date} ·
-            <button class="reviews-link" onclick="document.getElementById('clientReviews').scrollIntoView({behavior:'smooth',block:'start'})">Отзывы (${(o.clientReviews||[]).length})</button>
+          <span>${t('detail_client_label')} · ${o.date} ·
+            <button class="reviews-link" onclick="document.getElementById('clientReviews').scrollIntoView({behavior:'smooth',block:'start'})">${t('detail_reviews')} (${(o.clientReviews||[]).length})</button>
           </span>
         </div>
         <span class="order-cat" style="margin-left:auto">${o.cat}</span>
@@ -2424,24 +2949,24 @@ function openOrderDetail(id) {
       <div class="detail-title">${o.title}</div>
       <p class="detail-desc">${o.desc}</p>
       ${tagsHtml}
-      ${currentUser && currentUser.isAdmin ? `<button class="btn" style="background:#e74c3c;color:#fff;margin-bottom:20px" onclick="adminDeleteOrder(${o.id});goPage('pageMain')">🗑 Удалить объявление (админ)</button>` : ''}
+      ${currentUser && currentUser.isAdmin ? `<button class="btn" style="background:#e74c3c;color:#fff;margin-bottom:20px" onclick="adminDeleteOrder(${o.id});goPage('pageMain')">${t('detail_delete_order')}</button>` : ''}
       <div class="detail-info-grid">
         <div class="detail-info-item">
-          <div class="detail-info-label">💰 Бюджет</div>
+          <div class="detail-info-label">${t('detail_budget')}</div>
           <div class="detail-info-value green">$${o.priceMin}–$${o.priceMax}</div>
         </div>
         <div class="detail-info-item">
-          <div class="detail-info-label">📂 Категория</div>
+          <div class="detail-info-label">${t('detail_category')}</div>
           <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${o.cat}</div>
         </div>
         <div class="detail-info-item">
-          <div class="detail-info-label">📅 Опубликован</div>
+          <div class="detail-info-label">${t('detail_published')}</div>
           <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${o.date}</div>
         </div>
         ${(o.clientReviews && o.clientReviews.length > 0) ? `
         <button class="detail-info-item-btn" style="background:#1e2a4a;border-radius:14px;padding:16px 18px;border:none;width:100%;text-align:left;display:flex;flex-direction:column;justify-content:center;min-height:80px;cursor:pointer;" onclick="document.getElementById('clientReviews').scrollIntoView({behavior:'smooth'})">
-          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 Отзывы</div>
-          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${o.clientReviews.length} отзыв${o.clientReviews.length > 1 ? 'а' : ''}</div>
+          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 ${t('detail_reviews')}</div>
+          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${o.clientReviews.length} ${o.clientReviews.length > 1 ? t('detail_review_word_plural') : t('detail_review_word')}</div>
         </button>` : ''}
       </div>
     </div>
@@ -2456,7 +2981,7 @@ function openOrderDetail(id) {
       <div class="chat-header">
         <div class="chat-header-avatar">${o.author}</div>
         <div class="chat-header-info">
-          <h4>Чат по заказу</h4>
+          <h4>${t('detail_chat_title')}</h4>
           <span>«${o.title.length>40?o.title.substring(0,40)+'...':o.title}»</span>
         </div>
         <div class="chat-online"></div>
@@ -2465,25 +2990,25 @@ function openOrderDetail(id) {
         ${msgs.length===0 ? `
           <div class="chat-empty">
             <div class="ce-icon">✉️</div>
-            <p>Напишите — задайте вопросы по заказу или предложите своё решение</p>
+            <p>${t('detail_chat_write_hint')}</p>
           </div>` : renderMessagesHtml(msgs)}
       </div>
       <div class="chat-input-area" id="chatInputArea">
         ${currentUser ? `
-          <textarea class="chat-input" id="detailChatInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleChatKey(event,${id})"></textarea>
+          <textarea class="chat-input" id="detailChatInput" placeholder="${t('detail_chat_input_ph')}" rows="1" onkeydown="handleChatKey(event,${id})"></textarea>
           <button class="chat-send" onclick="sendDetailMessage(${id})">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
           </button>
         ` : `
           <div style="width:100%;text-align:center;padding:4px 0">
-            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать</button>
+            <button class="btn btn-sky" onclick="openAuth('login')">${t('detail_login_to_write')}</button>
           </div>
         `}
       </div>
     </div>
 
     <div style="text-align:center;padding:10px 0 20px">
-      <button class="btn btn-ghost" onclick="goPage('pageMain')" style="font-size:.88rem">← Вернуться к списку заказов</button>
+      <button class="btn btn-ghost" onclick="goPage('pageMain')" style="font-size:.88rem">${t('detail_back_orders')}</button>
     </div>
   `;
 
@@ -2515,8 +3040,8 @@ function renderMessagesHtml(msgs) {
 function renderReviewsHtml(reviews, sectionId) {
   if (!reviews || !reviews.length) {
     return `<div class="reviews-section" id="${sectionId}">
-      <div class="reviews-section-title">💬 Отзывы</div>
-      <p style="color:var(--text-soft);font-size:.9rem">Пока нет отзывов.</p>
+      <div class="reviews-section-title">💬 ${t('detail_reviews')}</div>
+      <p style="color:var(--text-soft);font-size:.9rem">${t('reviews_none')}</p>
     </div>`;
   }
   const cards = reviews.map(r => `
@@ -2529,7 +3054,7 @@ function renderReviewsHtml(reviews, sectionId) {
       <p class="review-text">${r.text}</p>
     </div>`).join('');
   return `<div class="reviews-section" id="${sectionId}">
-    <div class="reviews-section-title">💬 Отзывы (${reviews.length})</div>
+    <div class="reviews-section-title">💬 ${t('detail_reviews')} (${reviews.length})</div>
     ${cards}
   </div>`;
 }
@@ -2601,8 +3126,8 @@ function renderChatList() {
   const list = document.getElementById('chatList');
   const ids = Object.keys(chats).sort((a,b) => (isSupportChat(a)?-1:0) - (isSupportChat(b)?-1:0));
   if (!ids.length) {
-    list.innerHTML=`<div style="padding:32px 20px;text-align:center;color:var(--text-soft)"><div style="font-size:2rem;margin-bottom:10px">💬</div><p style="font-size:.9rem">Пока нет чатов.<br>Откликнитесь на заказ, чтобы начать общение.</p></div>`;
-    document.getElementById('chatWindow').innerHTML=`<div class="no-chat-selected"><div class="ncs-icon">💬</div><h3>Нет активных чатов</h3><p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">Перейдите к заказу и напишите предпринимателю</p><button class="btn btn-sky" style="margin-top:16px" onclick="goPage('pageMain')">← К заказам</button></div>`;
+    list.innerHTML=`<div style="padding:32px 20px;text-align:center;color:var(--text-soft)"><div style="font-size:2rem;margin-bottom:10px">💬</div><p style="font-size:.9rem">${t('chats_none_yet')}.<br>${t('chats_start_dialog')}.</p></div>`;
+    document.getElementById('chatWindow').innerHTML=`<div class="no-chat-selected"><div class="ncs-icon">💬</div><h3>${t('chats_no_active')}</h3><p style="font-size:.9rem;color:var(--text-soft);text-align:center;max-width:260px">${t('chats_start_dialog')}</p><button class="btn btn-sky" style="margin-top:16px" onclick="goPage('pageMain')">${t('nav_back_orders')}</button></div>`;
     return;
   }
   const readState = loadReadState();
@@ -2619,28 +3144,27 @@ function renderChatList() {
     if (isSupportChat(oid)) {
       if (currentUser.isAdmin) {
         otherInitials = 'SU';
-        otherName = '🎧 Поддержка · ' + (c.supportUserEmail || '');
+        otherName = t('chats_support') + ' · ' + (c.supportUserEmail || '');
       } else {
         otherInitials = 'SU';
-        otherName = '🎧 Поддержка';
+        otherName = t('chats_support');
       }
     } else {
       const o = orders.find(x=>x.id==oid);
       const other = c.messages.find(m => m.sender !== currentUser.email);
       otherInitials = other ? other.senderInitials : (o ? o.author : '??');
-      otherName = other ? other.senderName : (o ? o.authorName : 'Собеседник');
+      otherName = other ? other.senderName : (o ? o.authorName : t('chats_interlocutor'));
     }
     return `<div class="chat-list-item${isActive?' active':''}" onclick="openChatWindow('${oid}')">
       <div class="cli-avatar">${otherInitials}</div>
       <div class="cli-info">
         <div class="cli-name">${otherName}</div>
-        <div class="cli-preview">${last ? last.text : 'Нет сообщений'}</div>
+        <div class="cli-preview">${last ? last.text : t('chats_no_messages')}</div>
       </div>
       ${last?`<div class="cli-time">${last.time}</div>`:''}
       ${unreadInThread > 0 && !isActive ? `<div class="cli-unread">${unreadInThread > 99 ? '99+' : unreadInThread}</div>` : ''}
     </div>`;
   }).join('');
-  if (activeChatId) openChatWindow(activeChatId);
 }
 
 function openChatWindow(orderId) {
@@ -2652,27 +3176,27 @@ function openChatWindow(orderId) {
   let otherInitials, otherName, headerSubtitle;
   if (isSupport) {
     otherInitials = 'SU';
-    otherName = currentUser.isAdmin ? ('🎧 ' + (chat.supportUserEmail || '')) : '🎧 Поддержка FreeSun';
-    headerSubtitle = currentUser.isAdmin ? 'Обращение в поддержку' : 'Мы отвечаем как можно скорее';
+    otherName = currentUser.isAdmin ? ('🎧 ' + (chat.supportUserEmail || '')) : t('chats_support_full');
+    headerSubtitle = currentUser.isAdmin ? t('chats_support_ticket') : t('chats_support_reply_hint');
   } else {
     const o = orders.find(x=>x.id==orderId)||{};
     const other = chat.messages.find(m => m.sender !== (currentUser&&currentUser.email));
     otherInitials = other ? other.senderInitials : (o.author||'??');
-    otherName = other ? other.senderName : (o.authorName||'Собеседник');
-    headerSubtitle = 'По заказу: ' + (chat.orderTitle||o.title||'').substring(0,50);
+    otherName = other ? other.senderName : (o.authorName||t('chats_interlocutor'));
+    headerSubtitle = t('chats_order_prefix') + (chat.orderTitle||o.title||'').substring(0,50);
   }
   const win = document.getElementById('chatWindow');
   win.innerHTML = `
     <div class="chat-window-header">
       <div class="detail-avatar" style="width:42px;height:42px;font-size:.9rem;flex-shrink:0">${otherInitials}</div>
       <div><h4>${otherName}</h4><span>${headerSubtitle}</span></div>
-      ${isSupport ? '' : `<button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${orderId})">Заказ →</button>`}
+      ${isSupport ? '' : `<button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="openOrderDetail(${orderId})">${t('chats_order_link')}</button>`}
     </div>
     <div class="chat-window-messages" id="cwMessages">
-      ${chat.messages.length ? renderMessagesHtml(chat.messages) : '<div class="chat-empty"><div class="ce-icon">💬</div><p>Начните диалог</p></div>'}
+      ${chat.messages.length ? renderMessagesHtml(chat.messages) : `<div class="chat-empty"><div class="ce-icon">💬</div><p>${t('chats_start_dialog')}</p></div>`}
     </div>
     <div class="chat-window-input">
-      <textarea id="cwInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleCwKey(event,'${orderId}')"></textarea>
+      <textarea id="cwInput" placeholder="${t('detail_chat_input_ph')}" rows="1" onkeydown="handleCwKey(event,'${orderId}')"></textarea>
       <button class="chat-send" onclick="sendCwMessage('${orderId}')">
         <svg viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
@@ -2693,7 +3217,7 @@ function sendCwMessage(orderId) {
   if (!chat) {
     if (isSupport) {
       const ownerEmail = currentUser.isAdmin ? (chats[orderId] && chats[orderId].supportUserEmail) : currentUser.email;
-      chat = { orderId, orderTitle:'Поддержка', messages:[], supportUserEmail: ownerEmail };
+      chat = { orderId, orderTitle:t('chats_support'), messages:[], supportUserEmail: ownerEmail };
     } else {
       const o = orders.find(x=>x.id===orderId) || {};
       chat = { orderId, orderTitle:o.title||'', messages:[] };
@@ -2702,7 +3226,7 @@ function sendCwMessage(orderId) {
   const now=new Date(); const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
   chat.messages.push({
     sender: currentUser.email,
-    senderName: currentUser.isAdmin ? 'Поддержка FreeSun' : currentUser.name,
+    senderName: currentUser.isAdmin ? t('chats_support_sender_name') : currentUser.name,
     senderInitials: currentUser.isAdmin ? 'SU' : currentUser.initials,
     text, time
   });
@@ -2730,11 +3254,11 @@ function showToast(msg, bg) {
 function saveProfileName() {
   if (!currentUser) return;
   const newName = document.getElementById('profileNameInput').value.trim();
-  if (!newName) { showToast('⚠️ Введите имя','#F5A623'); return; }
+  if (!newName) { showToast(t('t_enter_name'),'#F5A623'); return; }
   const users = lsGet('fs_users', []);
   const conflict = users.find(u => u.name.toLowerCase() === newName.toLowerCase() && u.email !== currentUser.email);
   if (conflict) {
-    showToast('⚠️ Это имя уже занято другим пользователем','#e74c3c');
+    showToast(t('t_name_taken_other'),'#e74c3c');
     document.getElementById('profileNameInput').style.borderColor = '#e74c3c';
     return;
   }
@@ -2744,7 +3268,7 @@ function saveProfileName() {
   currentUser.name = newName;
   currentUser.initials = newName.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
   setCurrentUser(currentUser);
-  showToast('✅ Имя обновлено!');
+  showToast(t('t_name_updated'));
 }
 
 function setTheme(theme) {
@@ -2758,6 +3282,96 @@ function setTheme(theme) {
     document.getElementById('themeDark').classList.remove('active');
   }
   lsSet(LS_THEME, theme);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//   Применение языка ко всему интерфейсу
+// ═══════════════════════════════════════════════════════════════
+function applyLanguage() {
+  // 1. Атрибут <html lang="..">, чтобы браузер/скринридеры знали текущий язык
+  document.documentElement.lang = currentLang;
+
+  // 1.5. Заголовок вкладки браузера
+  document.title = currentLang === 'en' ? 'FreeSun — Freelance Marketplace' : 'FreeSun — Биржа фриланса';
+
+  // 1.6. Переключить demo-seed данные (заказы/специалисты) на текущий язык и
+  //      перезалить их в рабочие массивы orders/talents — refreshSeedData уже
+  //      умеет обновлять только seed-записи (по id), не трогая реальные заказы
+  //      пользователей, поэтому переиспользуем этот же механизм здесь.
+  DEFAULT_ORDERS = currentLang === 'en' ? DEFAULT_ORDERS_EN : DEFAULT_ORDERS_RU;
+  if (typeof DEFAULT_TALENTS_EN !== 'undefined') {
+    DEFAULT_TALENTS = currentLang === 'en' ? DEFAULT_TALENTS_EN : DEFAULT_TALENTS_RU;
+  }
+  if (typeof orders !== 'undefined' && Array.isArray(orders)) {
+    const ro = refreshSeedData(orders, DEFAULT_ORDERS);
+    orders = ro.merged;
+  }
+  if (typeof talents !== 'undefined' && Array.isArray(talents) && typeof DEFAULT_TALENTS !== 'undefined') {
+    const rt = refreshSeedData(talents, DEFAULT_TALENTS);
+    talents = rt.merged;
+  }
+
+  // 2. Простой текстовый контент — элементы с data-i18n="key"
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    // data-i18n-html помечает элементы, где перевод содержит разметку (напр. <strong>)
+    if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+    else el.textContent = val;
+  });
+
+  // 3. Атрибут placeholder — элементы с data-i18n-placeholder="key"
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+
+  // 4. Атрибут title — элементы с data-i18n-title="key"
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.getAttribute('data-i18n-title'));
+  });
+
+  // 5. Кнопки-переключатели языка — подсветить активную
+  const rb = document.getElementById('langRu'), eb = document.getElementById('langEn');
+  if (rb && eb) {
+    rb.classList.toggle('active', currentLang === 'ru');
+    eb.classList.toggle('active', currentLang === 'en');
+  }
+
+  // 5.5. Компактная кнопка языка в навбаре — всегда показывает противоположный
+  //      язык (тот, на который переключит клик), а не текущий.
+  const navLangLabel = document.getElementById('navLangLabel');
+  if (navLangLabel) navLangLabel.textContent = currentLang === 'en' ? 'RU' : 'EN';
+  const navLangLabelMobile = document.getElementById('navLangLabelMobile');
+  if (navLangLabelMobile) navLangLabelMobile.textContent = currentLang === 'en' ? 'RU' : 'EN';
+
+  // 6. Динамически генерируемый контент — карточки, чипы категорий, детальные
+  //    страницы и т.д. рендерятся через JS-шаблоны, а не статичный HTML,
+  //    поэтому их нужно перерисовать явно после смены языка.
+  if (typeof window.filterOrders === 'function') window.filterOrders();
+  if (typeof window.filterTalents === 'function') window.filterTalents();
+  if (typeof renderChatList === 'function') { try { if (activeChatId) openChatWindow(activeChatId); else renderChatList(); } catch(e){} }
+  if (typeof renderAllReviews === 'function') { try { renderAllReviews(); } catch(e){} }
+  if (typeof window.renderPortfolioGrid === 'function') { try { window.renderPortfolioGrid(); } catch(e){} }
+  if (typeof window.renderBookmarksTab === 'function') { try { window.renderBookmarksTab(); } catch(e){} }
+  if (typeof window.renderDashboard === 'function') { try { window.renderDashboard(); } catch(e){} }
+  if (typeof window.renderNotifPanel === 'function') { try { window.renderNotifPanel(); } catch(e){} }
+  if (typeof window.renderAvailCalendar === 'function') { try { window.renderAvailCalendar(); } catch(e){} }
+
+  // 7. Категорийные чипы (Все/Дизайн/Разработка/...) — рендерятся статично в HTML,
+  //    но их подписи идут через data-i18n уже покрыты шагом 2 выше.
+
+  // 8. <select> плейсхолдер-опции (категория в модалках постинга) — data-i18n покрывает и <option>.
+}
+
+function setLanguage(lang) {
+  if (lang !== 'ru' && lang !== 'en') return;
+  currentLang = lang;
+  lsSet(LS_LANG, lang);
+  applyLanguage();
+}
+
+function toggleNavLang() {
+  setLanguage(currentLang === 'en' ? 'ru' : 'en');
 }
 
 let currentSector = 'work'; // 'work' | 'talent'
@@ -2824,25 +3438,25 @@ function renderAllReviews() {
   orders.forEach(o => {
     (o.clientReviews || []).forEach(r => {
       cards.push({ author: r.author, rating: r.rating, text: r.text, date: r.date,
-        subject: o.authorName, subjectRole: 'Заказчик', tag: o.cat, onClick: `openOrderDetail(${o.id})`, label: o.title });
+        subject: o.authorName, subjectRole: t('detail_client_label'), tag: o.cat, onClick: `openOrderDetail(${o.id})`, label: o.title });
     });
   });
 
   // Collect reviews from talents
-  talents.forEach(t => {
-    (t.reviews || []).forEach(r => {
+  talents.forEach(tal => {
+    (tal.reviews || []).forEach(r => {
       cards.push({ author: r.author, rating: r.rating, text: r.text, date: r.date,
-        subject: t.name, subjectRole: t.role, tag: t.cat, onClick: `openTalentDetail(${t.id})`, label: t.name });
+        subject: tal.name, subjectRole: tal.role, tag: tal.cat, onClick: `openTalentDetail(${tal.id})`, label: tal.name });
     });
   });
 
   if (!cards.length) {
-    grid.innerHTML = '<p style="color:var(--text-soft)">Пока нет отзывов.</p>';
+    grid.innerHTML = `<p style="color:var(--text-soft)">${t('reviews_none')}</p>`;
     return;
   }
 
   grid.innerHTML = cards.map(c => `
-    <div class="review-card" style="cursor:pointer" onclick="${c.onClick}" title="Открыть профиль">
+    <div class="review-card" style="cursor:pointer" onclick="${c.onClick}" title="${t('reviews_open_profile')}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div>
           <div style="font-weight:800;font-size:.95rem;color:var(--text)">${c.subject}</div>
@@ -2864,7 +3478,7 @@ function scrollToTalents() {
   setTimeout(() => document.getElementById('talentsSection').scrollIntoView({ behavior: 'smooth' }), 100);
 }
 
-const DEFAULT_TALENTS = [
+const DEFAULT_TALENTS_RU = [
   { id:101, name:'Алина Горбачёва', cat:'Дизайн', role:'UI/UX Designer', desc:'5 лет опыта в создании интерфейсов для мобильных и веб-приложений. Работала с командами в США, Германии и СНГ. Люблю минимализм и пользовательский опыт.', skills:['Figma','Webflow','Illustrator','Branding'], rateMin:25, rateMax:50, initials:'АГ', stars:'⭐⭐⭐⭐⭐', rating:5.0,
     reviews:[
       {author:'Максим П., стартап-основатель', rating:5, text:'Алина сделала интерфейс приложения за 2 недели — быстро, аккуратно, с вниманием к деталям. Будем работать ещё.', date:'3 недели назад'},
@@ -2897,6 +3511,41 @@ const DEFAULT_TALENTS = [
     ] },
 ];
 
+const DEFAULT_TALENTS_EN = [
+  { id:101, name:'Alina Gorbacheva', cat:'Design', role:'UI/UX Designer', desc:'5 years of experience designing interfaces for mobile and web apps. Worked with teams in the US, Germany, and the CIS. I love minimalism and user experience.', skills:['Figma','Webflow','Illustrator','Branding'], rateMin:25, rateMax:50, initials:'АГ', stars:'⭐⭐⭐⭐⭐', rating:5.0,
+    reviews:[
+      {author:'Maxim P., startup founder', rating:5, text:'Alina built the app interface in 2 weeks — fast, clean, with attention to detail. We\'ll work together again.', date:'3 weeks ago'},
+      {author:'Irina V., product manager', rating:5, text:'Great communication, sent progress updates, incorporated feedback without pushback.', date:'1.5 months ago'}
+    ] },
+  { id:102, name:'Dmitry Kravtsov', cat:'Development', role:'Full-Stack Developer', desc:'React, Node.js, PostgreSQL — full stack. Built more than 30 commercial projects. I write clean code, meet deadlines, and work under NDA.', skills:['React','Node.js','TypeScript','Docker'], rateMin:40, rateMax:80, initials:'ДК', stars:'⭐⭐⭐⭐⭐', rating:4.9,
+    reviews:[
+      {author:'Artur S., CTO', rating:5, text:'Built the backend for our MVP in 3 weeks. Clean code, with tests — easy to pick up later.', date:'2 weeks ago'},
+      {author:'Elena T., client', rating:5, text:'Delivered on time, answered questions even in the evening. Recommend for complex projects.', date:'1 month ago'}
+    ] },
+  { id:103, name:'Olga Semyonova', cat:'Copywriting', role:'Copywriter / SEO', desc:'I write sales copy, SEO articles, and video scripts. Specialization: e-commerce, finance, technology. 98%+ uniqueness, grammar guaranteed.', skills:['SEO','Copywriting','Email Marketing'], rateMin:15, rateMax:30, initials:'ОС', stars:'⭐⭐⭐⭐½', rating:4.7,
+    reviews:[
+      {author:'Pavel R., shop owner', rating:5, text:'Product page copy noticeably boosted conversion. Olga knows the niche well.', date:'2 weeks ago'},
+      {author:'Sonya K., marketer', rating:4, text:'Good articles, but had to ask for trimming a couple of times — a bit too much filler in the first draft.', date:'1 month ago'}
+    ] },
+  { id:104, name:'Artem Volkov', cat:'SMM', role:'SMM Specialist', desc:'I run Instagram and TikTok accounts for brands from 10K to 1M followers. Build strategies, content plans, run ads. 30%+ growth in the first month.', skills:['Instagram','TikTok','Targeted Ads','Reels'], rateMin:20, rateMax:45, initials:'АВ', stars:'⭐⭐⭐⭐⭐', rating:4.8,
+    reviews:[
+      {author:'Danil Zh., brand manager', rating:5, text:'Grew 40% in followers in a month. Artem suggests ideas himself, doesn\'t wait for a brief for every post.', date:'3 weeks ago'},
+      {author:'Yulia M., client', rating:5, text:'Understands the audience, sends the content plan in advance.', date:'2 months ago'}
+    ] },
+  { id:105, name:'Kirill Ilyin', cat:'Video', role:'Videographer / Editor', desc:'I shoot and edit video for YouTube, corporate content, and ad spots. Work with color grading, animation, and soundtrack. Premiere Pro + After Effects.', skills:['Premiere Pro','After Effects','DaVinci','Motion'], rateMin:30, rateMax:60, initials:'КИ', stars:'⭐⭐⭐⭐⭐', rating:4.9,
+    reviews:[
+      {author:'Roman B., YouTube creator', rating:5, text:'Studio-level editing at a reasonable price. Delivered ahead of schedule.', date:'1 week ago'},
+      {author:'Nastya L., brand manager', rating:5, text:'The ad spot turned out even better than we imagined.', date:'1 month ago'}
+    ] },
+  { id:106, name:'Maria Fedotova', cat:'Marketing', role:'Performance Marketer', desc:'Google Ads, Yandex.Direct, Facebook Ads. I manage budgets from $5000/mo. Lower CPL and raise ROAS. Google & Meta certified. Case studies on request.', skills:['Google Ads','Meta Ads','Analytics','CRO'], rateMin:35, rateMax:70, initials:'МФ', stars:'⭐⭐⭐⭐½', rating:4.8,
+    reviews:[
+      {author:'Igor D., business owner', rating:5, text:'ROAS nearly doubled in the first month of work. Reports are clear, no unnecessary jargon.', date:'2 weeks ago'},
+      {author:'Kristina O., marketing director', rating:4, text:'Good ad results, but the first week went into setup — could have been faster.', date:'1.5 months ago'}
+    ] },
+];
+
+let DEFAULT_TALENTS = currentLang === 'en' ? DEFAULT_TALENTS_EN : DEFAULT_TALENTS_RU;
+
 let talents = lsGet(LS_TALENTS, null);
 if (!talents) { talents = DEFAULT_TALENTS; }
 {
@@ -2910,26 +3559,26 @@ let activeTalentCat = '';
 function renderTalents(list) {
   const grid = document.getElementById('talentsGrid');
   if (!list || !list.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="es-icon">🌟</div><h3>Специалисты не найдены</h3><p>Попробуйте изменить фильтры</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="es-icon">🌟</div><h3>${t('talents_not_found_title')}</h3><p>${t('talents_not_found_desc')}</p></div>`;
     return;
   }
-  grid.innerHTML = list.map(t => `
-    <div class="talent-card" onclick="openTalentDetail(${t.id})">
-      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('talent',t.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('talent',${t.id},'${t.name.replace(/'/g,"\\'")}')" title="В избранное">🔖</button>
+  grid.innerHTML = list.map(tal => `
+    <div class="talent-card" onclick="openTalentDetail(${tal.id})">
+      <button class="bookmark-btn ${(window.isBookmarked && window.isBookmarked('talent',tal.id))?'active':''}" onclick="event.stopPropagation();window.toggleBookmark && window.toggleBookmark('talent',${tal.id},'${tal.name.replace(/'/g,"\\'")}')" title="${t('bookmarks_add_title')}">🔖</button>
       <div class="talent-top">
-        <div class="talent-avatar">${t.initials}</div>
+        <div class="talent-avatar">${tal.initials}</div>
         <div>
-          <div class="talent-name">${t.name}</div>
-          <div class="talent-role">${t.role}</div>
-          <div class="talent-stars">${t.stars} ${t.rating}</div>
+          <div class="talent-name">${tal.name}</div>
+          <div class="talent-role">${tal.role}</div>
+          <div class="talent-stars">${tal.stars} ${tal.rating}</div>
         </div>
       </div>
-      <div class="order-cat">${t.cat}</div>
-      <div class="talent-desc" style="margin-top:10px">${t.desc}</div>
-      <div class="talent-skills">${t.skills.map(s=>`<span class="talent-skill">${s}</span>`).join('')}</div>
+      <div class="order-cat">${tal.cat}</div>
+      <div class="talent-desc" style="margin-top:10px">${tal.desc}</div>
+      <div class="talent-skills">${tal.skills.map(s=>`<span class="talent-skill">${s}</span>`).join('')}</div>
       <div class="talent-footer">
-        <div class="talent-rate">$${t.rateMin}–$${t.rateMax} <span>/ час</span></div>
-        <button class="btn-contact" onclick="event.stopPropagation();openTalentDetail(${t.id})">Подробнее →</button>
+        <div class="talent-rate">$${tal.rateMin}–$${tal.rateMax} <span>${t('talents_per_hour')}</span></div>
+        <button class="btn-contact" onclick="event.stopPropagation();openTalentDetail(${tal.id})">${t('talents_more_btn')}</button>
       </div>
     </div>
   `).join('');
@@ -2937,9 +3586,9 @@ function renderTalents(list) {
 
 function filterTalents() {
   const q = (document.getElementById('searchTalents')?.value || '').toLowerCase();
-  renderTalents(talents.filter(t => {
-    const mc = !activeTalentCat || t.cat.includes(activeTalentCat);
-    const mq = !q || t.name.toLowerCase().includes(q) || t.role.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+  renderTalents(talents.filter(tal => {
+    const mc = !activeTalentCat || tal.cat.includes(activeTalentCat);
+    const mq = !q || tal.name.toLowerCase().includes(q) || tal.role.toLowerCase().includes(q) || tal.desc.toLowerCase().includes(q);
     return mc && mq;
   }));
 }
@@ -2970,14 +3619,14 @@ function saveTalentChat(chat) { lsSet(talentChatKey(chat.talentId), chat); }
 
 function openTalentDetail(talentId) {
   talentId = parseInt(talentId) || talentId;
-  let t = talents.find(x => x.id === talentId);
-  if (!t) return;
+  let tal = talents.find(x => x.id === talentId);
+  if (!tal) return;
 
   // Всегда берём отзывы из DEFAULT_TALENTS для демо-специалистов (id 101–199)
   if (talentId >= 101 && talentId < 200) {
     const seed = DEFAULT_TALENTS.find(x=>x.id===talentId);
     if (seed && seed.reviews && seed.reviews.length > 0) {
-      t = Object.assign({}, t, { reviews: seed.reviews });
+      tal = Object.assign({}, tal, { reviews: seed.reviews });
     }
   }
 
@@ -2989,68 +3638,68 @@ function openTalentDetail(talentId) {
   window._currentDetailPortfolio = tPortfolio;
   const portfolioHtml = tPortfolio.length > 0 ? `
     <div class="profile-card" style="margin-bottom:24px">
-      <div class="portfolio-title">🖼 Портфолио (${tPortfolio.length} работ)</div>
-      <div class="portfolio-grid">${tPortfolio.map((img,i)=>`<div class="portfolio-item" onclick="openLightbox(window._currentDetailPortfolio[${i}])"><img src="${img}" alt="Работа ${i+1}"/></div>`).join('')}</div>
+      <div class="portfolio-title">${t('detail_portfolio')} (${tPortfolio.length} ${t('detail_work_word')})</div>
+      <div class="portfolio-grid">${tPortfolio.map((img,i)=>`<div class="portfolio-item" onclick="openLightbox(window._currentDetailPortfolio[${i}])"><img src="${img}" alt="${i+1}"/></div>`).join('')}</div>
     </div>` : '';
 
   document.getElementById('talentDetailBody').innerHTML = `
     <!-- BREADCRUMB -->
     <div class="breadcrumb">
-      <a onclick="goPage('pageMain');switchMainSector('talent')">Главная</a>
+      <a onclick="goPage('pageMain');switchMainSector('talent')">${t('detail_home')}</a>
       <span class="bc-sep">›</span>
-      <a onclick="goPage('pageMain');switchMainSector('talent')">Специалисты</a>
+      <a onclick="goPage('pageMain');switchMainSector('talent')">${t('detail_talents_crumb')}</a>
       <span class="bc-sep">›</span>
-      <span>${t.name}</span>
+      <span>${tal.name}</span>
     </div>
     <!-- TALENT PROFILE CARD -->
     <div class="detail-header-card">
       <div class="detail-author-row">
-        <div class="talent-avatar" style="width:56px;height:56px;font-size:1.2rem;flex-shrink:0">${t.initials}</div>
+        <div class="talent-avatar" style="width:56px;height:56px;font-size:1.2rem;flex-shrink:0">${tal.initials}</div>
         <div class="detail-author-info">
-          <h4 style="font-size:1.1rem">${t.name}</h4>
-          <span>${t.role}</span>
-          <div style="color:var(--sun);font-size:.9rem;margin-top:2px">${t.stars} ${t.rating} ·
-            <button class="reviews-link" onclick="document.getElementById('talentReviews').scrollIntoView({behavior:'smooth',block:'start'})">Отзывы (${(t.reviews||[]).length})</button>
+          <h4 style="font-size:1.1rem">${tal.name}</h4>
+          <span>${tal.role}</span>
+          <div style="color:var(--sun);font-size:.9rem;margin-top:2px">${tal.stars} ${tal.rating} ·
+            <button class="reviews-link" onclick="document.getElementById('talentReviews').scrollIntoView({behavior:'smooth',block:'start'})">${t('detail_reviews')} (${(tal.reviews||[]).length})</button>
           </div>
         </div>
-        <span class="order-cat" style="margin-left:auto">${t.cat}</span>
+        <span class="order-cat" style="margin-left:auto">${tal.cat}</span>
       </div>
-      <p class="detail-desc">${t.desc}</p>
+      <p class="detail-desc">${tal.desc}</p>
       <div style="margin-bottom:22px">
-        <div class="detail-section-title">🛠 Навыки и технологии</div>
-        <div class="detail-tags">${t.skills.map(s=>`<span class="detail-tag">${s}</span>`).join('')}</div>
+        <div class="detail-section-title">${t('detail_skills_talent')}</div>
+        <div class="detail-tags">${tal.skills.map(s=>`<span class="detail-tag">${s}</span>`).join('')}</div>
       </div>
       <div class="detail-info-grid">
         <div class="detail-info-item">
-          <div class="detail-info-label">💰 Ставка / час</div>
-          <div class="detail-info-value green">$${t.rateMin}–$${t.rateMax}</div>
+          <div class="detail-info-label">${t('detail_rate_hour')}</div>
+          <div class="detail-info-value green">$${tal.rateMin}–$${tal.rateMax}</div>
         </div>
         <div class="detail-info-item">
-          <div class="detail-info-label">📂 Специализация</div>
-          <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${t.cat}</div>
+          <div class="detail-info-label">${t('detail_specialization')}</div>
+          <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${tal.cat}</div>
         </div>
         <div class="detail-info-item">
-          <div class="detail-info-label">⭐ Рейтинг</div>
-          <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${t.rating} / 5.0</div>
+          <div class="detail-info-label">${t('detail_rating')}</div>
+          <div class="detail-info-value" style="font-family:'Inter',sans-serif;font-size:1rem">${tal.rating} / 5.0</div>
         </div>
-        ${(t.reviews && t.reviews.length > 0) ? `
+        ${(tal.reviews && tal.reviews.length > 0) ? `
         <button class="detail-info-item-btn" style="background:#1e2a4a;border-radius:14px;padding:16px 18px;border:none;width:100%;text-align:left;display:flex;flex-direction:column;justify-content:center;min-height:80px;cursor:pointer;" onclick="document.getElementById('talentReviews').scrollIntoView({behavior:'smooth',block:'start'})">
-          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 Отзывы</div>
-          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${t.reviews.length} отзыв${t.reviews.length > 1 ? 'а' : ''}</div>
+          <div style="font-size:.75rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">💬 ${t('detail_reviews')}</div>
+          <div style="color:#fff;font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700">${tal.reviews.length} ${tal.reviews.length > 1 ? t('detail_review_word_plural') : t('detail_review_word')}</div>
         </button>` : ''}
       </div>
     </div>
 
     ${portfolioHtml}
-    ${renderReviewsHtml(t.reviews, 'talentReviews')}
+    ${renderReviewsHtml(tal.reviews, 'talentReviews')}
 
     <!-- CHAT WITH TALENT -->
     <div class="chat-card" id="talentChatCard">
       <div class="chat-header" style="background:linear-gradient(135deg,var(--leaf),#1a7a40)">
-        <div class="chat-header-avatar">${t.initials}</div>
+        <div class="chat-header-avatar">${tal.initials}</div>
         <div class="chat-header-info">
-          <h4>Написать специалисту</h4>
-          <span>${t.name} · ${t.role}</span>
+          <h4>${t('detail_chat_talent_title')}</h4>
+          <span>${tal.name} · ${tal.role}</span>
         </div>
         <div class="chat-online"></div>
       </div>
@@ -3058,26 +3707,26 @@ function openTalentDetail(talentId) {
         ${msgs.length === 0 ? `
           <div class="chat-empty">
             <div class="ce-icon">✉️</div>
-            <p>Опишите задачу и договоритесь об условиях сотрудничества</p>
+            <p>${t('detail_chat_talent_hint')}</p>
           </div>` : renderMessagesHtml(msgs)}
       </div>
       <div class="chat-input-area">
         ${currentUser ? `
-          <textarea class="chat-input" id="talentChatInput" placeholder="Написать сообщение..." rows="1" onkeydown="handleTalentChatKey(event,${t.id})"></textarea>
-          <button class="chat-send" onclick="sendTalentMessage(${t.id})">
+          <textarea class="chat-input" id="talentChatInput" placeholder="${t('detail_chat_input_ph')}" rows="1" onkeydown="handleTalentChatKey(event,${tal.id})"></textarea>
+          <button class="chat-send" onclick="sendTalentMessage(${tal.id})">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
           </button>
         ` : `
           <div style="width:100%;text-align:center;padding:4px 0">
-            <button class="btn btn-sky" onclick="openAuth('login')">🔒 Войдите, чтобы написать</button>
+            <button class="btn btn-sky" onclick="openAuth('login')">${t('detail_login_to_write')}</button>
           </div>
         `}
       </div>
     </div>
 
     <div style="text-align:center;padding:10px 0 20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button class="btn btn-ghost" onclick="goPage('pageMain');switchMainSector('talent')" style="font-size:.88rem">← Вернуться к каталогу</button>
-      ${currentUser ? `<button class="btn btn-sun" onclick="openReviewModal(${t.id},'talent','${t.name.replace(/'/g,"\\'")}')">⭐ Оставить отзыв</button>` : ''}
+      <button class="btn btn-ghost" onclick="goPage('pageMain');switchMainSector('talent')" style="font-size:.88rem">${t('detail_back_talents')}</button>
+      ${currentUser ? `<button class="btn btn-sun" onclick="openReviewModal(${tal.id},'talent','${tal.name.replace(/'/g,"\\'")}')">${t('detail_leave_review')}</button>` : ''}
     </div>
   `;
 
@@ -3101,11 +3750,11 @@ function sendTalentMessage(talentId) {
   const input = document.getElementById('talentChatInput');
   const text = input.value.trim();
   if (!text) return;
-  const t = talents.find(x => x.id === talentId);
+  const tal = talents.find(x => x.id === talentId);
 
   let chat = loadTalentChat(talentId);
   if (!chat) {
-    chat = { talentId, talentName: t ? t.name : '', messages: [] };
+    chat = { talentId, talentName: tal ? tal.name : '', messages: [] };
   }
   const now = new Date();
   const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -3128,36 +3777,38 @@ function sendTalentMessage(talentId) {
 function openPostTalent() { openModal('postTalentModal'); }
 
 function submitTalent() {
-  if (!currentUser) { showToast('🔒 Войдите, чтобы разместить портфолио','#F5A623'); return; }
+  if (!currentUser) { showToast(t('t_login_to_post_talent'),'#F5A623'); return; }
   const name    = document.getElementById('talentName').value.trim() || currentUser.name;
   const cat     = document.getElementById('talentCat').value;
   const desc    = document.getElementById('talentDesc').value.trim();
   const skillsRaw = document.getElementById('talentSkills').value.trim();
   const rMin    = parseInt(document.getElementById('talentRateMin').value) || 0;
   const rMax    = parseInt(document.getElementById('talentRateMax').value) || 0;
-  if (!cat || !desc || !rMin) { showToast('⚠️ Заполните все поля','#F5A623'); return; }
+  if (!cat || !desc || !rMin) { showToast(t('t_fill_all_fields'),'#F5A623'); return; }
   const catClean = cat.replace(/^[^\s]+ /, '');
   const skills = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const t = {
+  const newTalent = {
     id: Date.now(), name, cat: catClean,
-    role: catClean + ' специалист',
+    role: catClean + ' ' + t('talent_role_specialist'),
     desc, skills, rateMin: rMin, rateMax: rMax || rMin,
     initials: currentUser.initials, stars: '⭐⭐⭐⭐⭐', rating: 5.0
   };
-  talents.unshift(t);
+  talents.unshift(newTalent);
   lsSet(LS_TALENTS, talents);
   ['talentName','talentDesc','talentSkills','talentRateMin','talentRateMax'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('talentCat').value = '';
   closeAllModals();
   switchMainSector('talent');
   filterTalents();
-  showToast('✅ Резюме опубликовано! Предприниматели уже видят вас.');
+  showToast(t('t_talent_published'));
 }
 
 (function init() {
 try {
   const savedTheme = lsGet(LS_THEME, 'light');
   if (savedTheme === 'dark') setTheme('dark');
+
+  applyLanguage();
 
   const savedUser = lsGet(LS_USER, null);
   if (savedUser) setCurrentUser(savedUser);
@@ -3215,7 +3866,7 @@ try {
           markChatRead(orderId);
         } else {
           updateChatBadge();
-          addNotif('💬', 'Новое сообщение по заказу', null);
+          addNotif('💬', t('t_new_message_order'), null);
         }
       }
     }
@@ -3330,6 +3981,12 @@ try {
   window.requireAuth = requireAuth;
   window.openOrderDetail = openOrderDetail;
   window.openTalentDetail = openTalentDetail;
+  window.t = t;
+  window.applyLanguage = applyLanguage;
+  window.setLanguage = setLanguage;
+  window.toggleNavLang = toggleNavLang;
+  window.renderOrders = renderOrders;
+  window.renderTalents = renderTalents;
 
 } catch (err) {
   console.error('ОШИБКА В init():', err);
@@ -3376,7 +4033,7 @@ window.updateNotifBadge = function() {
 window.renderNotifPanel = function() {
   const list = document.getElementById('notifList');
   if (!list) return;
-  if (!notifications.length) { list.innerHTML = '<div class="notif-empty">Нет уведомлений</div>'; return; }
+  if (!notifications.length) { list.innerHTML = `<div class="notif-empty">${t('notif_empty')}</div>`; return; }
   list.innerHTML = notifications.map(n => `
     <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead(${n.id})">
       <div class="notif-dot ${n.read?'read':''}"></div>
@@ -3450,14 +4107,14 @@ window.toggleBookmark = function(type, id, title) {
     saveBookmarks(bm);
     window.filterOrders && window.filterOrders();
     window.filterTalents && window.filterTalents();
-    window.showToast('🔖 Удалено из избранного');
+    window.showToast(t('t_removed_bookmark'));
   } else {
     bm.unshift({ type, id, title, savedAt: Date.now() });
     saveBookmarks(bm);
     window.filterOrders && window.filterOrders();
     window.filterTalents && window.filterTalents();
-    window.showToast('🔖 Добавлено в избранное!');
-    addNotif('🔖', `Сохранено: «${title.substring(0,40)}»`, null);
+    window.showToast(t('t_added_bookmark'));
+    addNotif('🔖', `${t('t_saved_notif')}«${title.substring(0,40)}»`, null);
   }
 }
 
@@ -3466,17 +4123,17 @@ window.renderBookmarksTab = function() {
   const el = document.getElementById('bookmarksContent');
   if (!el) return;
   if (!bm.length) {
-    el.innerHTML = `<div class="bookmarks-empty"><div class="be-icon">🔖</div><p>Пока ничего не сохранено.<br><small>Нажмите 🔖 на карточке заказа или специалиста</small></p></div>`;
+    el.innerHTML = `<div class="bookmarks-empty"><div class="be-icon">🔖</div><p>${t('bookmarks_empty_title')}<br><small>${t('bookmarks_empty_hint')}</small></p></div>`;
     return;
   }
   el.innerHTML = bm.map(b => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #EEF4FA;gap:12px">
       <div>
         <div style="font-weight:700;font-size:.9rem;color:var(--text)">${b.type === 'order' ? '📋' : '👤'} ${b.title}</div>
-        <div style="font-size:.75rem;color:var(--text-soft);margin-top:2px">${b.type === 'order' ? 'Заказ' : 'Специалист'}</div>
+        <div style="font-size:.75rem;color:var(--text-soft);margin-top:2px">${b.type === 'order' ? t('bookmarks_order') : t('bookmarks_talent')}</div>
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
-        <button class="btn-take" style="font-size:.8rem;padding:7px 14px" onclick="${b.type==='order'?`openOrderDetail(${b.id})`:`openTalentDetail(${b.id})`}">Открыть</button>
+        <button class="btn-take" style="font-size:.8rem;padding:7px 14px" onclick="${b.type==='order'?`openOrderDetail(${b.id})`:`openTalentDetail(${b.id})`}">${t('bookmarks_open')}</button>
         <button class="bookmark-btn active" style="position:static;width:30px;height:30px" onclick="toggleBookmark('${b.type}',${b.id},'${b.title.replace(/'/g,"\\'")}');renderBookmarksTab()">🔖</button>
       </div>
     </div>`).join('');
@@ -3504,12 +4161,12 @@ window.toggleFilterTag = function(el, tag) {
   if (el.classList.contains('active')) {
     if (!filterState.tags.includes(tag)) filterState.tags.push(tag);
   } else {
-    filterState.tags = filterState.tags.filter(t => t !== tag);
+    filterState.tags = filterState.tags.filter(tg => tg !== tag);
   }
 }
 
 window.setFilterRating = function(val, el) {
-  document.querySelectorAll('#filterSidebar .filter-group:nth-child(3) .filter-tag').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#filterSidebar .filter-group:nth-child(3) .filter-tag').forEach(el => el.classList.remove('active'));
   el.classList.add('active');
   filterState.rating = val;
 }
@@ -3529,7 +4186,7 @@ window.resetFilters = function() {
   filterState = { priceMin: 0, priceMax: 0, tags: [], rating: 0 };
   document.getElementById('filterPriceMin').value = '';
   document.getElementById('filterPriceMax').value = '';
-  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.filter-tag').forEach(el => el.classList.remove('active'));
   const cnt = document.getElementById('filterCount');
   if (cnt) cnt.style.display = 'none';
   closeFilterSidebar();
@@ -3551,6 +4208,7 @@ window.filterOrders = function() {
     const mt = !filterState.tags.length || filterState.tags.some(tag => (o.tags||[]).some(t=>t.includes(tag)) || o.cat.includes(tag) || o.desc.toLowerCase().includes(tag.toLowerCase()));
     return mc && mq && mp && mpx && mt;
   });
+  if (typeof window.renderOrders === 'function') window.renderOrders(list);
 };
 
 const _origFilterTalents = window.filterTalents;
@@ -3584,7 +4242,7 @@ window.renderSearchHistory = function(type) {
   const hist = window.lsGet(key, []);
   const el = document.getElementById(id);
   if (!el || !hist.length) { if(el) el.innerHTML=''; return; }
-  el.innerHTML = '<span style="font-size:.75rem;color:var(--text-soft);font-weight:700">История:</span>' + hist.map(h => `
+  el.innerHTML = `<span style="font-size:.75rem;color:var(--text-soft);font-weight:700">${t('search_history_label')}</span>` + hist.map(h => `
     <span class="search-history-item" onclick="applySearchFromHistory('${h.replace(/'/g,"\\'")}','${type}')">
       🕐 ${h} <span class="sh-remove" onclick="event.stopPropagation();removeFromHistory('${h.replace(/'/g,"\\'")}','${type}')">✕</span>
     </span>`).join('');
@@ -3617,7 +4275,7 @@ renderSearchHistory('talent');
 window.handleAvatarUpload = function(event) {
   const file = event.target.files[0];
   if (!file || !window.currentUser) return;
-  if (file.size > 2 * 1024 * 1024) { window.showToast('⚠️ Файл слишком большой (максимум 2 МБ)', '#e74c3c'); return; }
+  if (file.size > 2 * 1024 * 1024) { window.showToast(t('t_avatar_too_big'), '#e74c3c'); return; }
   const reader = new FileReader();
   reader.onload = function(e) {
     const dataUrl = e.target.result;
@@ -3625,10 +4283,10 @@ window.handleAvatarUpload = function(event) {
     // Update all avatar elements
     const bigAv = document.getElementById('profileAvatarBig');
     const smAv = document.getElementById('navAvatar');
-    if (bigAv) bigAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Аватар"/>`;
+    if (bigAv) bigAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${t('avatar_alt')}"/>`;
     if (smAv) smAv.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt=""/>`;
-    window.showToast('✅ Фото профиля обновлено!');
-    addNotif('📸', 'Фото профиля успешно обновлено', null);
+    window.showToast(t('t_avatar_updated'));
+    addNotif('📸', t('t_avatar_updated_notif'), null);
   };
   reader.readAsDataURL(file);
 };
@@ -3644,7 +4302,7 @@ window.handlePortfolioUpload = function(event) {
   let portfolio = window.lsGet(key, []);
   let loaded = 0;
   files.forEach(file => {
-    if (file.size > 3 * 1024 * 1024) { window.showToast('⚠️ Файл ' + file.name + ' слишком большой (>3МБ)', '#F5A623'); return; }
+    if (file.size > 3 * 1024 * 1024) { window.showToast(t('t_portfolio_file_too_big_named').replace('%s', file.name), '#F5A623'); return; }
     const reader = new FileReader();
     reader.onload = function(e) {
       portfolio.push(e.target.result);
@@ -3652,8 +4310,8 @@ window.handlePortfolioUpload = function(event) {
       loaded++;
       if (loaded === files.length) {
         renderPortfolioGrid();
-        window.showToast(`✅ Загружено ${loaded} фото!`);
-        addNotif('🖼', `Добавлено ${loaded} новых работ в портфолио`, null);
+        window.showToast(`${t('t_portfolio_uploaded')} (${loaded})`);
+        addNotif('🖼', `${t('t_portfolio_uploaded_notif')} (${loaded})`, null);
       }
     };
     reader.readAsDataURL(file);
@@ -3669,11 +4327,11 @@ window.renderPortfolioGrid = function() {
   if (!grid) return;
   const addBtn = `<div class="portfolio-item portfolio-add" onclick="document.getElementById('portfolioFileInput').click()">
     <div class="portfolio-add-icon">+</div>
-    <span>Добавить</span>
+    <span>${t('profile_add')}</span>
   </div>`;
   grid.innerHTML = portfolio.map((img, i) => `
     <div class="portfolio-item" onclick="openLightbox('${img}')">
-      <img src="${img}" alt="Работа ${i+1}"/>
+      <img src="${img}" alt="${i+1}"/>
       <button onclick="event.stopPropagation();removePortfolioItem(${i})" style="position:absolute;top:4px;right:4px;background:rgba(231,76,60,.85);border:none;border-radius:50%;color:#fff;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>`).join('') + addBtn;
 }
@@ -3703,7 +4361,7 @@ window.handleTalentModalPhotos = function(event) {
       _talentModalPhotos.push(e.target.result);
       loaded++;
       if (loaded === Math.min(files.length, 6)) {
-        if (count) count.textContent = _talentModalPhotos.length + ' фото выбрано';
+        if (count) count.textContent = _talentModalPhotos.length + ' ' + t('t_photos_selected');
         if (preview) preview.innerHTML = _talentModalPhotos.map((d,i) => `<img src="${d}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid var(--sky)" alt="preview ${i}"/>`).join('');
       }
     };
@@ -3724,7 +4382,7 @@ window.submitTalent = function() {
       const preview = document.getElementById('talentModalPhotoPreview');
       const count = document.getElementById('talentModalPhotoCount');
       if (preview) preview.innerHTML = '';
-      if (count) count.textContent = '0 фото выбрано';
+      if (count) count.textContent = '0 ' + t('t_photos_selected');
     }
   }
 };
@@ -3752,9 +4410,9 @@ window.switchProfileTab = function(tab, btn) {
   document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const tabs = ['main','dashboard','portfolio','bookmarks'];
-  tabs.forEach(t => {
-    const el = document.getElementById('profileTab' + t.charAt(0).toUpperCase() + t.slice(1));
-    if (el) el.style.display = t === tab ? '' : 'none';
+  tabs.forEach(tabName => {
+    const el = document.getElementById('profileTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+    if (el) el.style.display = tabName === tab ? '' : 'none';
   });
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'portfolio') renderPortfolioGrid();
@@ -3773,19 +4431,19 @@ window.renderDashboard = function() {
   const orders = (window._fs && window._fs.orders) || [];
   const myOrders = orders.filter(o => o.authorName === window.currentUser.name.split(' ')[0]);
   const talents = (window._fs && window._fs.talents) || [];
-  const myTalent = talents.filter(t => t.initials === window.currentUser.initials);
+  const myTalent = talents.filter(tal => tal.initials === window.currentUser.initials);
   const bm = loadBookmarks();
   const myChats = loadMyOrderIds();
 
   grid.innerHTML = `
-    <div class="dash-card"><div class="dash-icon">📋</div><div class="dash-num">${myOrders.length}</div><div class="dash-label">Мои заказы</div></div>
-    <div class="dash-card"><div class="dash-icon">👥</div><div class="dash-num">${myTalent.length}</div><div class="dash-label">Резюме опубликовано</div></div>
-    <div class="dash-card"><div class="dash-icon">💬</div><div class="dash-num">${myChats.length}</div><div class="dash-label">Активных чатов</div></div>
-    <div class="dash-card"><div class="dash-icon">🔖</div><div class="dash-num">${bm.length}</div><div class="dash-label">В избранном</div></div>
+    <div class="dash-card"><div class="dash-icon">📋</div><div class="dash-num">${myOrders.length}</div><div class="dash-label">${t('dash_my_orders')}</div></div>
+    <div class="dash-card"><div class="dash-icon">👥</div><div class="dash-num">${myTalent.length}</div><div class="dash-label">${t('dash_resumes_posted')}</div></div>
+    <div class="dash-card"><div class="dash-icon">💬</div><div class="dash-num">${myChats.length}</div><div class="dash-label">${t('dash_active_chats')}</div></div>
+    <div class="dash-card"><div class="dash-icon">🔖</div><div class="dash-num">${bm.length}</div><div class="dash-label">${t('dash_bookmarked')}</div></div>
   `;
 
   // Activity bars (mock 7-day data)
-  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const days = t('dash_days');
   const vals = [3, 7, 5, 9, 4, 2, 6];
   const max = Math.max(...vals);
   if (chart) {
@@ -3801,7 +4459,7 @@ window.renderDashboard = function() {
     const myRevs = [];
     orders.forEach(o => (o.clientReviews||[]).forEach(r => { if(r.author && r.author.includes(window.currentUser.name.split(' ')[0])) myRevs.push({...r, about: o.title}); }));
     if (!myRevs.length) {
-      reviewsEl.innerHTML = '<p style="color:var(--text-soft);font-size:.88rem">Вы ещё не оставляли отзывов.</p>';
+      reviewsEl.innerHTML = `<p style="color:var(--text-soft);font-size:.88rem">${t('dash_no_reviews_left')}</p>`;
     } else {
       reviewsEl.innerHTML = myRevs.map(r => `
         <div style="padding:12px 0;border-bottom:1px solid #EEF4FA">
@@ -3821,7 +4479,7 @@ window.renderAvailCalendar = function() {
   const key = 'fs_avail_' + window.currentUser && window.currentUser.email;
   let avail = window.lsGet(key, {});
   const today = new Date();
-  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const days = t('dash_days');
   let html = '<div class="avail-calendar">';
   // Header row
   days.forEach(d => { html += `<div class="avail-day-label">${d}</div>`; });
@@ -3857,49 +4515,49 @@ window.toggleAvailDay = function(dateKey, el) {
 window.generateCV = function() {
   if (!window.currentUser) return;
   const talents2 = (window._fs && window._fs.talents) || [];
-  const myTalent = talents2.find(t => t.initials === window.currentUser.initials);
+  const myTalent = talents2.find(tal => tal.initials === window.currentUser.initials);
   const bm = loadBookmarks();
   const avail = window.lsGet('fs_avail_' + window.currentUser.email, {});
   const freeDays = Object.entries(avail).filter(([,v]) => v === 'available').length;
 
-  let cv = `=== РЕЗЮМЕ FreeSun ===
+  let cv = `${t('cv_header')}
 `;
-  cv += `Имя: ${(window.currentUser||{}).name}
+  cv += `${t('cv_name')}${(window.currentUser||{}).name}
 `;
   cv += `Email: ${window.currentUser && window.currentUser.email}
 `;
-  cv += `Роль: ${window.currentUser.role === 'freelancer' ? 'Фрилансер' : 'Предприниматель'}
+  cv += `${t('cv_role')}${window.currentUser.role === 'freelancer' ? t('cv_freelancer') : t('cv_entrepreneur')}
 
 `;
 
   if (myTalent) {
-    cv += `--- ПРОФЕССИОНАЛЬНАЯ ИНФОРМАЦИЯ ---
+    cv += `${t('cv_prof_info')}
 `;
-    cv += `Специализация: ${myTalent.role}
+    cv += `${t('cv_specialization')}${myTalent.role}
 `;
-    cv += `Категория: ${myTalent.cat}
+    cv += `${t('cv_category')}${myTalent.cat}
 `;
-    cv += `О себе: ${myTalent.desc}
+    cv += `${t('cv_about')}${myTalent.desc}
 `;
-    cv += `Навыки: ${myTalent.skills.join(', ')}
+    cv += `${t('cv_skills')}${myTalent.skills.join(', ')}
 `;
-    cv += `Ставка: $${myTalent.rateMin}–$${myTalent.rateMax}/ч
+    cv += `${t('cv_rate')}$${myTalent.rateMin}–$${myTalent.rateMax}/${currentLang === 'en' ? 'hr' : 'ч'}
 `;
-    cv += `Рейтинг: ${myTalent.rating}/5.0
+    cv += `${t('cv_rating')}${myTalent.rating}/5.0
 
 `;
   }
 
-  cv += `--- АКТИВНОСТЬ ---
+  cv += `${t('cv_activity')}
 `;
-  cv += `Свободных дней (ближайшие 4 нед.): ${freeDays}
+  cv += `${t('cv_free_days')}${freeDays}
 `;
-  cv += `Сохранённых объектов: ${bm.length}
+  cv += `${t('cv_saved_items')}${bm.length}
 
 `;
-  cv += `Сгенерировано: ${new Date().toLocaleString('ru')}
+  cv += `${t('cv_generated')}${new Date().toLocaleString(currentLang === 'en' ? 'en-US' : 'ru')}
 `;
-  cv += `Платформа: FreeSun — freesun.io`;
+  cv += t('cv_platform');
 
   const blob = new Blob([cv], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -3908,7 +4566,7 @@ window.generateCV = function() {
   a.download = 'FreeSun_CV_' + (window.currentUser||{}).name.replace(/\s+/g,'_') + '.txt';
   a.click();
   URL.revokeObjectURL(url);
-  window.showToast('📥 CV скачан!');
+  window.showToast(t('t_cv_downloaded'));
 };
 
 // ══════════════════════════════════════════════════
@@ -3920,7 +4578,7 @@ let _reviewStars = 0;
 window.openReviewModal = function(id, type, name) {
   _reviewTarget = { id, type, name };
   _reviewStars = 0;
-  document.getElementById('reviewModalSub').textContent = 'Оцените: ' + name;
+  document.getElementById('reviewModalSub').textContent = t('review_subtitle_named') + name;
   document.getElementById('reviewText').value = '';
   document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
   const ro = document.getElementById('reviewOverlay');
@@ -3941,19 +4599,19 @@ window.setReviewStar = function(n) {
 
 window.submitReview = function() {
   if (!window.currentUser || !_reviewTarget) return;
-  if (!_reviewStars) { window.showToast('⚠️ Выберите оценку', '#F5A623'); return; }
+  if (!_reviewStars) { window.showToast(t('t_choose_rating'), '#F5A623'); return; }
   const text = document.getElementById('reviewText').value.trim();
-  if (!text) { window.showToast('⚠️ Напишите отзыв', '#F5A623'); return; }
+  if (!text) { window.showToast(t('t_write_review'), '#F5A623'); return; }
   const now = new Date();
   const review = {
-    author: window.currentUser.name + ', ' + (window.currentUser.role === 'freelancer' ? 'фрилансер' : 'предприниматель'),
+    author: window.currentUser.name + ', ' + (window.currentUser.role === 'freelancer' ? t('review_author_freelancer') : t('review_author_entrepreneur')),
     rating: _reviewStars,
     text,
-    date: 'Только что'
+    date: t('review_just_now')
   };
   const talents = (window._fs && window._fs.talents) || [];
   if (_reviewTarget.type === 'talent') {
-    const idx = talents.findIndex(t => t.id == _reviewTarget.id);
+    const idx = talents.findIndex(tal => tal.id == _reviewTarget.id);
     if (idx !== -1) {
       if (!talents[idx].reviews) talents[idx].reviews = [];
       talents[idx].reviews.unshift(review);
@@ -3967,8 +4625,8 @@ window.submitReview = function() {
     }
   }
   closeReviewModal();
-  window.showToast('✅ Отзыв опубликован!');
-  addNotif('⭐', `Вы оставили отзыв на «${_reviewTarget.name.substring(0,30)}»`, null);
+  window.showToast(t('t_review_published'));
+  addNotif('⭐', `${t('t_left_review_notif')}«${_reviewTarget.name.substring(0,30)}»`, null);
 };
 
 // ══════════════════════════════════════════════════
@@ -3986,9 +4644,9 @@ window.goPage = function(id) {
       document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
       mainTab.classList.add('active');
       const tabs = ['main','dashboard','portfolio','bookmarks'];
-      tabs.forEach(t => {
-        const el = document.getElementById('profileTab' + t.charAt(0).toUpperCase() + t.slice(1));
-        if (el) el.style.display = t === 'main' ? '' : 'none';
+      tabs.forEach(tabName => {
+        const el = document.getElementById('profileTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+        if (el) el.style.display = tabName === 'main' ? '' : 'none';
       });
     }
   }
@@ -4000,7 +4658,7 @@ window.goPage = function(id) {
 const _origSubmitOrder = window.submitOrder;
 window.submitOrder = function() {
   _origSubmitOrder();
-  if (window.currentUser) addNotif('📋', 'Ваш заказ опубликован — ждите откликов!', null);
+  if (window.currentUser) addNotif('📋', t('t_order_published_notif'), null);
 };
 </script>
 <!-- ══════ WEB3 ESCROW (ethers.js v5) ══════ -->
