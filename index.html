@@ -810,6 +810,101 @@ function imgErr(el, name, price) {
 }
 
 // ============================================================
+// REAL STEAM SKIN PHOTOS (progressive enhancement)
+// ============================================================
+// Every skin renders instantly with a drawn icon via si() above. In the
+// background, this fetches the public, community-maintained CS2 item
+// catalog (ByMykel/CSGO-API on GitHub — MIT licensed, actively updated,
+// no API key needed) and swaps in the real Steam photo for any skin it
+// recognizes, once. The catalog is ~5MB, so it's fetched at most once
+// per 14 days and cached as a small name→imageURL map in localStorage —
+// not the raw catalog — so repeat visits cost nothing. If Steam or
+// GitHub ever change formats, matching skins simply keep their drawn
+// icon; nothing breaks.
+const SKIN_PHOTO_CACHE_KEY = 'vd_skin_photos_v1';
+const SKIN_PHOTO_CACHE_MAX_AGE = 14*24*60*60*1000; // 14 days
+let _skinPhotoMap = null; // name -> real image URL, once loaded
+
+function _loadSkinPhotoCacheFromStorage() {
+  try {
+    const raw = localStorage.getItem(SKIN_PHOTO_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.map || !parsed.at) return null;
+    if (Date.now() - parsed.at > SKIN_PHOTO_CACHE_MAX_AGE) return null;
+    return parsed.map;
+  } catch(e) { return null; }
+}
+
+function _applyRealPhoto(name, url) {
+  // swap any already-rendered <img data-sk="Name"> to the real photo,
+  // with a graceful fallback to the drawn icon if the real photo 404s
+  document.querySelectorAll(`img[data-sk="${CSS.escape(name)}"]`).forEach(img => {
+    if (img.src === url) return;
+    const fallback = img.src;
+    img.onerror = function(){ this.onerror=null; this.src = fallback; };
+    img.src = url;
+  });
+}
+
+function _indexSkinPhotos(catalogJson) {
+  const map = {};
+  for (const entry of catalogJson) {
+    if (!entry || !entry.name || !entry.image) continue;
+    // strip the leading "★ " Steam uses for knives/gloves so it matches
+    // this site's plain "Karambit | Doppler" naming
+    const cleanName = entry.name.replace(/^★\s*/, '').trim();
+    if (!map[cleanName]) map[cleanName] = entry.image;
+  }
+  return map;
+}
+
+function _applyAllKnownPhotos() {
+  if (!_skinPhotoMap) return;
+  for (const name in _skinPhotoMap) _applyRealPhoto(name, _skinPhotoMap[name]);
+}
+
+async function loadRealSkinPhotos() {
+  const cached = _loadSkinPhotoCacheFromStorage();
+  if (cached) {
+    _skinPhotoMap = cached;
+    _applyAllKnownPhotos();
+    return;
+  }
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json');
+    if (!res.ok) return; // stay on drawn icons, no error shown to the user
+    const json = await res.json();
+    const map = _indexSkinPhotos(json);
+    _skinPhotoMap = map;
+    _applyAllKnownPhotos();
+    try {
+      localStorage.setItem(SKIN_PHOTO_CACHE_KEY, JSON.stringify({map, at: Date.now()}));
+    } catch(e) { /* storage full or blocked — fine, just won't cache */ }
+  } catch(e) {
+    // offline, blocked, or GitHub unreachable — drawn icons remain, silently
+  }
+}
+
+// Whenever new skin <img data-sk> elements are added to the page later
+// (opening a case, browsing the upgrader), apply any photos already
+// known without re-fetching the catalog.
+function applyKnownSkinPhotosIn(rootEl) {
+  if (!_skinPhotoMap || !rootEl) return;
+  rootEl.querySelectorAll('img[data-sk]').forEach(img => {
+    const name = img.getAttribute('data-sk');
+    if (name && _skinPhotoMap[name]) {
+      const url = _skinPhotoMap[name];
+      if (img.src !== url) {
+        const fallback = img.src;
+        img.onerror = function(){ this.onerror=null; this.src = fallback; };
+        img.src = url;
+      }
+    }
+  });
+}
+
+// ============================================================
 // ALL CS2 SKINS (for upgrader)
 // ============================================================
 const ALL_SKINS = [
@@ -1125,105 +1220,126 @@ function pickWindow(pool, n, offset) {
   for (let i = 0; i < n; i++) out.push(pool[(offset + i) % pool.length]);
   return out;
 }
-const mix = (common,blue,purple,red,gold,cch,bch,pch,rch,gch) => {
+// Fix (drop odds): Valve's officially disclosed CS2 case odds (2017, via
+// Perfect World / China loot-box transparency law), identical across every
+// real CS2 weapon case: Mil-Spec 79.92% / Restricted 15.98% / Classified
+// 3.20% / Covert 0.64% / Rare Special (knife/glove) 0.26%. These always sum
+// to exactly 100%, and within a tier the odds split evenly across however
+// many skins are in that tier — matching how real cases work.
+// Mapped onto this site's five buckets: common→Mil-Spec, blue→Restricted,
+// purple→Classified, red→Covert, gold→Rare Special.
+const TIER_ODDS = {common:79.92, blue:15.98, purple:3.20, red:0.64, gold:0.26};
+
+const mix = (common,blue,purple,red,gold) => {
   const off = _mixCallIndex++;
-  return [
-    ...pickWindow(SK.common, common, off*3).map(s=>({...s,ch:cch})),
-    ...pickWindow(SK.blue, blue, off*5).map(s=>({...s,ch:bch})),
-    ...pickWindow(SK.purple, purple, off*7).map(s=>({...s,ch:pch})),
-    ...pickWindow(SK.red, red, off*4).map(s=>({...s,ch:rch})),
-    ...pickWindow(SK.gold, gold, off*2).map(s=>({...s,ch:gch})),
-  ];
+  const counts = {common,blue,purple,red,gold};
+  // if a case has zero skins in a tier, that tier's percentage would
+  // otherwise vanish from the total — redistribute it proportionally
+  // across the tiers the case actually has, so every case's odds still
+  // sum to exactly 100%.
+  const activeTiers = Object.keys(counts).filter(t => counts[t] > 0);
+  const missingPct = Object.keys(counts).filter(t => counts[t] === 0)
+    .reduce((sum,t) => sum + TIER_ODDS[t], 0);
+  const activeTotal = activeTiers.reduce((sum,t) => sum + TIER_ODDS[t], 0);
+  const tierPct = {};
+  activeTiers.forEach(t => {
+    tierPct[t] = TIER_ODDS[t] + missingPct * (TIER_ODDS[t] / activeTotal);
+  });
+  const offsets = {common:3, blue:5, purple:7, red:4, gold:2};
+  return activeTiers.flatMap(t => {
+    const perSkin = tierPct[t] / counts[t];
+    return pickWindow(SK[t], counts[t], off*offsets[t]).map(s => ({...s, ch: perSkin}));
+  });
 };
 
 const CASES = [
   // ---- BUDGET (50-99₽) ----
   {id:'starter',name:'Стартовый кейс',icon:'📦',tier:'b',price:50,badge:'',
    art:caseArt({c1:'#6b7280',c2:'#374151',c3:'#9ca3af',icon:'📦',label:'s1',weapon:'pistol'}),
-   skins:mix(4,3,2,1,0, 35,3.5,0.55,0.10,0)},
+   skins:mix(4,3,2,1,0)},
   {id:'summer',name:'Летний кейс',icon:'☀️',tier:'b',price:75,badge:'new',
    art:caseArt({c1:'#fbbf24',c2:'#d97706',c3:'#fef3c7',icon:'☀️',label:'s2',weapon:'smg'}),
-   skins:mix(3,3,2,1,0, 33,4,0.65,0.12,0)},
+   skins:mix(3,3,2,1,0)},
   {id:'cold',name:'Холодный кейс',icon:'❄️',tier:'b',price:85,badge:'',
    art:caseArt({c1:'#60a5fa',c2:'#2563eb',c3:'#bfdbfe',icon:'❄️',label:'s3',weapon:'ak'}),
-   skins:mix(3,4,2,1,0, 30,4,0.7,0.13,0)},
+   skins:mix(3,4,2,1,0)},
   {id:'halloween',name:'Хэллоуин кейс',icon:'🎃',tier:'b',price:90,badge:'',
    art:caseArt({c1:'#f97316',c2:'#c2410c',c3:'#ffedd5',icon:'🎃',label:'s4',weapon:'ak'}),
-   skins:mix(3,3,2,1,0, 32,3.8,0.7,0.12,0)},
+   skins:mix(3,3,2,1,0)},
   {id:'newyr',name:'Новогодний кейс',icon:'🎆',tier:'b',price:99,badge:'new',
    art:caseArt({c1:'#4ade80',c2:'#15803d',c3:'#dcfce7',icon:'🎆',label:'s5',weapon:'pistol'}),
-   skins:mix(3,3,2,1,0, 32,4,0.75,0.14,0)},
+   skins:mix(3,3,2,1,0)},
   // ---- MID (100-250₽) ----
   {id:'ct',name:'Кейс Спецназа',icon:'🛡️',tier:'m',price:149,badge:'',
    art:caseArt({c1:'#38bdf8',c2:'#0369a1',c3:'#bae6fd',icon:'🛡️',label:'s6',weapon:'smg'}),
-   skins:mix(2,4,3,1,0, 22,4.5,0.95,0.18,0)},
+   skins:mix(2,4,3,1,0)},
   {id:'terror',name:'Кейс Террориста',icon:'💣',tier:'m',price:149,badge:'',
    art:caseArt({c1:'#f87171',c2:'#991b1b',c3:'#fee2e2',icon:'💣',label:'s7',weapon:'ak'}),
-   skins:mix(2,4,3,1,0, 22,4.5,0.95,0.18,0)},
+   skins:mix(2,4,3,1,0)},
   {id:'spring',name:'Весенний кейс',icon:'🌸',tier:'m',price:169,badge:'new',
    art:caseArt({c1:'#f472b6',c2:'#be185d',c3:'#fce7f3',icon:'🌸',label:'s8',weapon:'pistol'}),
-   skins:mix(2,3,3,2,0, 20,4.5,1.05,0.20,0)},
+   skins:mix(2,3,3,2,0)},
   {id:'night',name:'Ночной кейс',icon:'🌙',tier:'m',price:199,badge:'hot',
    art:caseArt({c1:'#818cf8',c2:'#3730a3',c3:'#e0e7ff',icon:'🌙',label:'s9',weapon:'awp'}),
-   skins:mix(2,4,3,2,0, 19,4.5,1.1,0.22,0)},
+   skins:mix(2,4,3,2,0)},
   {id:'fire',name:'Огненный кейс',icon:'🔥',tier:'m',price:199,badge:'hot',
    art:caseArt({c1:'#fb923c',c2:'#9a3412',c3:'#ffedd5',icon:'🔥',label:'s10',weapon:'ak'}),
-   skins:mix(2,3,3,2,0, 20,4.5,1.05,0.20,0)},
+   skins:mix(2,3,3,2,0)},
   {id:'desert',name:'Пустынный кейс',icon:'🏜️',tier:'m',price:229,badge:'',
    art:caseArt({c1:'#d97706',c2:'#78350f',c3:'#fef3c7',icon:'🏜️',label:'s11',weapon:'awp'}),
-   skins:mix(2,3,3,2,0, 19,4.5,1.1,0.24,0)},
+   skins:mix(2,3,3,2,0)},
   {id:'arctic',name:'Арктический кейс',icon:'🧊',tier:'m',price:199,badge:'',
    art:caseArt({c1:'#67e8f9',c2:'#0e7490',c3:'#cffafe',icon:'🧊',label:'s11b',weapon:'smg'}),
-   skins:mix(2,4,3,1,0, 20,4.5,1.0,0.20,0)},
+   skins:mix(2,4,3,1,0)},
   {id:'jungle',name:'Джунгли кейс',icon:'🌿',tier:'m',price:179,badge:'',
    art:caseArt({c1:'#86efac',c2:'#15803d',c3:'#f0fdf4',icon:'🌿',label:'s11c',weapon:'ak'}),
-   skins:mix(2,4,3,1,0, 21,4.5,1.0,0.19,0)},
+   skins:mix(2,4,3,1,0)},
   // ---- RARE (350-700₽) ----
   {id:'purple',name:'Пурпурный кейс',icon:'💜',tier:'r',price:349,badge:'',
    art:caseArt({c1:'#c084fc',c2:'#7c3aed',c3:'#f3e8ff',icon:'💜',label:'s12',weapon:'awp'}),
-   skins:mix(1,3,4,2,0, 10,4.5,1.9,0.45,0)},
+   skins:mix(1,3,4,2,0)},
   {id:'golden',name:'Золотой кейс',icon:'⭐',tier:'r',price:449,badge:'hot',
    art:caseArt({c1:'#fbbf24',c2:'#92400e',c3:'#fef9c3',icon:'⭐',label:'s13',weapon:'ak'}),
-   skins:mix(1,2,4,3,0, 9,4,2.1,0.55,0)},
+   skins:mix(1,2,4,3,0)},
   {id:'cyber',name:'Кибер кейс',icon:'🤖',tier:'r',price:499,badge:'new',
    art:caseArt({c1:'#22d3ee',c2:'#0c4a6e',c3:'#cffafe',icon:'🤖',label:'s14',weapon:'smg'}),
-   skins:mix(1,3,4,3,0, 9,4,1.9,0.50,0)},
+   skins:mix(1,3,4,3,0)},
   {id:'blood',name:'Кровавый кейс',icon:'🩸',tier:'r',price:549,badge:'',
    art:caseArt({c1:'#f87171',c2:'#7f1d1d',c3:'#fecaca',icon:'🩸',label:'s15',weapon:'pistol'}),
-   skins:mix(1,2,4,3,0, 8,4,2.2,0.60,0)},
+   skins:mix(1,2,4,3,0)},
   {id:'knife',name:'Нож кейс',icon:'🗡',tier:'r',price:699,badge:'hot',
    art:caseArt({c1:'#c084fc',c2:'#4c1d95',c3:'#f3e8ff',icon:'🗡',label:'s16',weapon:'knife'}),
-   skins:mix(0,3,4,3,2, 0,5,2.4,0.75,0.16)},
+   skins:mix(0,3,4,3,2)},
   {id:'shadow',name:'Теневой кейс',icon:'🌑',tier:'r',price:599,badge:'',
    art:caseArt({c1:'#6366f1',c2:'#1e1b4b',c3:'#c7d2fe',icon:'🌑',label:'s16b',weapon:'awp'}),
-   skins:mix(1,2,4,3,0, 9,4,2.0,0.58,0)},
+   skins:mix(1,2,4,3,0)},
   // ---- LEGENDARY (900₽+) ----
   {id:'dragon',name:'Кейс Дракона',icon:'🐉',tier:'l',price:999,badge:'hot',
    art:caseArt({c1:'#fbbf24',c2:'#dc2626',c3:'#fef08a',icon:'🐉',label:'s17',weapon:'ak'}),
-   skins:mix(0,2,3,4,2, 0,3.5,2.7,1.15,0.42)},
+   skins:mix(0,2,3,4,2)},
   {id:'elite',name:'Элитный кейс',icon:'💎',tier:'l',price:1499,badge:'new',
    art:caseArt({c1:'#60a5fa',c2:'#1e3a8a',c3:'#dbeafe',icon:'💎',label:'s18',weapon:'awp'}),
-   skins:mix(0,1,3,4,3, 0,3,2.4,1.4,0.52)},
+   skins:mix(0,1,3,4,3)},
   {id:'howl',name:'Howl Premium',icon:'🐺',tier:'l',price:2499,badge:'hot',
    art:caseArt({c1:'#f87171',c2:'#7c3aed',c3:'#fecaca',icon:'🐺',label:'s19',weapon:'knife'}),
-   skins:mix(0,1,2,4,4, 0,2.5,2.7,1.9,0.75)},
+   skins:mix(0,1,2,4,4)},
   {id:'invictus',name:'Invictus кейс',icon:'👑',tier:'l',price:1999,badge:'lim',
    art:caseArt({c1:'#fbbf24',c2:'#a855f7',c3:'#fef3c7',icon:'👑',label:'s20',weapon:'ak'}),
-   skins:mix(0,1,3,4,3, 0,3,2.5,1.6,0.6)},
+   skins:mix(0,1,3,4,3)},
 
   // ---- Fix #7: more themed cases with real CS2-flavored names ----
   {id:'scorpion',name:'Скорпион',icon:'🦂',tier:'m',price:299,badge:'new',
    art:caseArt({c1:'#eab308',c2:'#1c1917',c3:'#fef08a',icon:'🦂',label:'s21',weapon:'pistol'}),
-   skins:mix(1,3,3,2,0, 22,3.2,0.9,0.28,0)},
+   skins:mix(1,3,3,2,0)},
   {id:'cobra',name:'Кобра',icon:'🐍',tier:'m',price:349,badge:'',
    art:caseArt({c1:'#22c55e',c2:'#052e16',c3:'#bbf7d0',icon:'🐍',label:'s22',weapon:'smg'}),
-   skins:mix(1,2,3,2,1, 18,3,1.1,0.35,0.08)},
+   skins:mix(1,2,3,2,1)},
   {id:'shark',name:'Акула',icon:'🦈',tier:'r',price:699,badge:'',
    art:caseArt({c1:'#38bdf8',c2:'#0c4a6e',c3:'#e0f2fe',icon:'🦈',label:'s23',weapon:'awp'}),
-   skins:mix(0,3,3,3,1, 0,4.2,1.9,0.7,0.14)},
+   skins:mix(0,3,3,3,1)},
   {id:'phoenix',name:'Феникс',icon:'🔥',tier:'l',price:1799,badge:'hot',
    art:caseArt({c1:'#f97316',c2:'#7c2d12',c3:'#fed7aa',icon:'🔥',label:'s24',weapon:'knife'}),
-   skins:mix(0,1,2,4,4, 0,2.6,2.6,1.85,0.7)},
+   skins:mix(0,1,2,4,4)},
 ];
 
 // ============================================================
@@ -1383,15 +1499,17 @@ function openCase(id){
 }
 
 function buildSkl(c){
-  document.getElementById('skl').innerHTML=c.skins.map(s=>{
+  const skl=document.getElementById('skl');
+  skl.innerHTML=c.skins.map(s=>{
     const r=getR(s);
     return `<div class="ski">
-      <img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)">
+      <img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)">
       <div class="skin">${s.name}</div>
       <div class="skip" style="color:${RTXT[r]}">${fmtRub(s.price)}</div>
       <div class="skch">${(s.ch||1).toFixed(2)}%</div>
     </div>`;
   }).join('');
+  applyKnownSkinPhotosIn(skl);
 }
 
 function buildRou(c){
@@ -1403,10 +1521,11 @@ function buildRou(c){
   track.innerHTML=items.map(s=>{
     const r=getR(s);
     return `<div class="ri ${RC[r]}">
-      <img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)">
+      <img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)">
       <div class="rin">${s.name.substring(0,18)}</div>
     </div>`;
   }).join('');
+  applyKnownSkinPhotosIn(track);
 }
 
 function startSpin(fast){
@@ -1424,7 +1543,7 @@ function startSpin(fast){
     if(items[tIdx]){
       const r=getR(won);
       items[tIdx].className=`ri ${RC[r]}`;
-      items[tIdx].innerHTML=`<img src="${si(won.img,won.name,won.price,won.weapon)}" alt="" onerror="imgErr(this,won.name,won.price)"><div class="rin">${won.name.substring(0,18)}</div>`;
+      items[tIdx].innerHTML=`<img src="${si(won.img,won.name,won.price,won.weapon)}" data-sk="${won.name}" alt="" onerror="imgErr(this,won.name,won.price)"><div class="rin">${won.name.substring(0,18)}</div>`;
     }
     const off=tIdx*iW-330+59;
     const track=document.getElementById('rt');
@@ -1438,8 +1557,11 @@ function showWin(skin,caseObj){
   document.getElementById('cCtrl').style.display='none';
   document.getElementById('wr').classList.add('on');
   const r=getR(skin);
-  document.getElementById('wImg').src=si(skin.img,skin.name,skin.price,skin.weapon);
-  document.getElementById('wImg').onerror=function(){imgErr(this,skin.name,skin.price)};
+  const wImg=document.getElementById('wImg');
+  wImg.src=si(skin.img,skin.name,skin.price,skin.weapon);
+  wImg.setAttribute('data-sk',skin.name);
+  wImg.onerror=function(){imgErr(this,skin.name,skin.price)};
+  applyKnownSkinPhotosIn(wImg.parentElement);
   document.getElementById('wName').textContent=skin.name;
   document.getElementById('wRar').innerHTML=`<span style="color:${RTXT[r]}">${RN[r]}</span> · ${skin.wear||'Factory New'}`;
   // Fix #8: show price in rubles at the moment of the drop (the site's
@@ -1466,18 +1588,22 @@ function renderInv(){
   </div>
   <div class="igrid">${S.inv.map((item,i)=>`
     <div class="ii" onclick="openItem(${i})">
-      <img src="${si(item.img,item.name,item.price,item.weapon)}" alt="" onerror="imgErr(this,item.name,item.price)">
+      <img src="${si(item.img,item.name,item.price,item.weapon)}" data-sk="${item.name}" alt="" onerror="imgErr(this,item.name,item.price)">
       <div class="iw">${item.weapon}</div>
       <div class="in">${(item.name.split('|')[1]||item.name).trim()}</div>
       <div class="iv">${fmtRub(item.price)}</div>
       <div class="irbar" style="background:${RCOL[item.rarity]||'#6b7280'}"></div>
     </div>`).join('')}</div>`;
+  applyKnownSkinPhotosIn(el);
 }
 
 function openItem(idx){
   const item=S.inv[idx];if(!item)return;
-  document.getElementById('idImg').src=si(item.img,item.name,item.price,item.weapon);
-  document.getElementById('idImg').onerror=function(){imgErr(this,item.name,item.price)};
+  const idImg=document.getElementById('idImg');
+  idImg.src=si(item.img,item.name,item.price,item.weapon);
+  idImg.setAttribute('data-sk',item.name);
+  idImg.onerror=function(){imgErr(this,item.name,item.price)};
+  applyKnownSkinPhotosIn(idImg.parentElement);
   document.getElementById('idName').textContent=item.name;
   document.getElementById('idWep').textContent=item.weapon;
   document.getElementById('idRar').innerHTML=`<span style="color:${RCOL[item.rarity]}">${RN[item.rarity]||'—'}</span>`;
@@ -1534,20 +1660,24 @@ function initUpg(){
 function openPickMy(){
   if(!S.user){openAuth('login');return;}
   if(!S.inv.length){toast('Нет скинов в инвентаре','e');return;}
-  document.getElementById('pmGrid').innerHTML=S.inv.map((s,i)=>`
+  const pmGrid=document.getElementById('pmGrid');
+  pmGrid.innerHTML=S.inv.map((s,i)=>`
     <div class="ssi" onclick="pickMy(${i})">
-      <img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)">
+      <img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)">
       <div class="ssin">${s.name}</div>
       <div class="ssip">${fmtRub(s.price)}</div>
     </div>`).join('');
+  applyKnownSkinPhotosIn(pmGrid);
   openM('pickMyM');
 }
 
 function pickMy(idx){
   upgState.my=S.inv[idx];
   const s=upgState.my;
-  document.getElementById('mySlot').innerHTML=`<img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)"><div style="font-size:11px;font-weight:700;margin-top:5px">${s.name}</div><div style="font-size:14px;font-weight:900;color:var(--gold)">${fmtRub(s.price)}</div>`;
-  document.getElementById('mySlot').classList.add('filled');
+  const mySlot=document.getElementById('mySlot');
+  mySlot.innerHTML=`<img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)"><div style="font-size:11px;font-weight:700;margin-top:5px">${s.name}</div><div style="font-size:14px;font-weight:900;color:var(--gold)">${fmtRub(s.price)}</div>`;
+  mySlot.classList.add('filled');
+  applyKnownSkinPhotosIn(mySlot);
   closeM('pickMyM');calcChance();
 }
 
@@ -1572,19 +1702,23 @@ function filterTargetSkins(){
 }
 
 function renderTargetGrid(skins){
-  document.getElementById('ptGrid').innerHTML=skins.length?skins.map(s=>`
+  const ptGrid=document.getElementById('ptGrid');
+  ptGrid.innerHTML=skins.length?skins.map(s=>`
     <div class="ssi" onclick="pickTarget('${s.id}')">
-      <img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)">
+      <img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)">
       <div class="ssin">${s.name}</div>
       <div class="ssip">${fmtRub(s.price)}</div>
     </div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--text3);grid-column:1/-1">Нет подходящих скинов</div>';
+  applyKnownSkinPhotosIn(ptGrid);
 }
 
 function pickTarget(skinId){
   const s=ALL_SKINS.find(x=>x.id===skinId);if(!s)return;
   upgState.target=s;
-  document.getElementById('targetSlot').innerHTML=`<img src="${si(s.img,s.name,s.price,s.weapon)}" alt="" onerror="imgErr(this,s.name,s.price)"><div style="font-size:11px;font-weight:700;margin-top:5px">${s.name}</div><div style="font-size:14px;font-weight:900;color:var(--gold)">${fmtRub(s.price)}</div>`;
-  document.getElementById('targetSlot').classList.add('filled');
+  const targetSlot=document.getElementById('targetSlot');
+  targetSlot.innerHTML=`<img src="${si(s.img,s.name,s.price,s.weapon)}" data-sk="${s.name}" alt="" onerror="imgErr(this,s.name,s.price)"><div style="font-size:11px;font-weight:700;margin-top:5px">${s.name}</div><div style="font-size:14px;font-weight:900;color:var(--gold)">${fmtRub(s.price)}</div>`;
+  targetSlot.classList.add('filled');
+  applyKnownSkinPhotosIn(targetSlot);
   closeM('pickTM');calcChance();
 }
 
@@ -1650,8 +1784,11 @@ function doUpgrade(){
 
 function showUpgRes(won){
   const tgt=upgState.target;
-  document.getElementById('uresImg').src=si(tgt.img,tgt.name,tgt.price,tgt.weapon);
-  document.getElementById('uresImg').onerror=function(){imgErr(this,tgt.name,tgt.price)};
+  const uresImg=document.getElementById('uresImg');
+  uresImg.src=si(tgt.img,tgt.name,tgt.price,tgt.weapon);
+  uresImg.setAttribute('data-sk',tgt.name);
+  uresImg.onerror=function(){imgErr(this,tgt.name,tgt.price)};
+  applyKnownSkinPhotosIn(uresImg.parentElement);
   document.getElementById('uresTitle').textContent=won?'ПОБЕДА!':'НЕУДАЧА';
   document.getElementById('uresTitle').className=won?'w':'l';
   if(won){
@@ -1844,6 +1981,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const savedTheme=localStorage.getItem('theme');
   if(savedTheme)document.documentElement.setAttribute('data-theme',savedTheme);
   loadS();renderCases();buildTicker();updateUI();
+  // Fetch/apply real Steam skin photos in the background — never blocks
+  // the initial render, which already shows working drawn icons.
+  loadRealSkinPhotos();
 });
 </script>
 </body>
