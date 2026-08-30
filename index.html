@@ -537,6 +537,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <div style="font-size:26px;font-weight:900;color:var(--gold)" id="wPrice"></div>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
         <button class="btn btn-out" onclick="closeM('caseM')">Закрыть</button>
+        <button class="btn" style="background:var(--green);color:#fff" onclick="sellLastWin()">💰 Продать</button>
         <button class="btn btn-v" id="openAgain">Открыть снова</button>
       </div>
     </div>
@@ -565,7 +566,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
         <div class="idr"><div class="idl">Цена</div><div class="idv" id="idPr" style="color:var(--gold)"></div></div>
         <div class="idr"><div class="idl">Из кейса</div><div class="idv" id="idFrom"></div></div>
       </div>
-      <button class="btn" style="width:100%;padding:11px;font-size:13px;opacity:.4;cursor:not-allowed;background:var(--green);color:#fff">📤 Вывести (скоро)</button>
+      <button class="btn" id="sellItemBtn" style="width:100%;padding:11px;font-size:13px;background:var(--green);color:#fff" onclick="sellItem(_openItemIdx)">💰 Продать</button>
+      <button class="btn" style="width:100%;padding:11px;font-size:13px;opacity:.4;cursor:not-allowed;background:var(--border2);color:#fff;margin-top:7px">📤 Вывести (скоро)</button>
       <div style="font-size:10px;color:var(--text3);margin-top:6px">Вывод временно недоступен</div>
     </div>
   </div>
@@ -1084,6 +1086,21 @@ const ALL_SKINS = [
   {id:'gv07',img:'glv-broken',name:'Broken Fang Gloves | Yellow-banded',weapon:'Broken Fang Gloves',price:190,wear:'Field-Tested'},
 ];
 
+// Diagnostic helper: run `checkSkinPhotoCoverage()` in the browser console
+// to see exactly which of this site's skins the real-photo catalog didn't
+// recognize by name. Only meaningful after the catalog has loaded — if it
+// prints "catalog not loaded yet", wait a few seconds after the page loads
+// and try again.
+function checkSkinPhotoCoverage(){
+  if(!_skinPhotoMap){console.log('catalog not loaded yet — wait a few seconds and retry');return;}
+  const allNames=[...new Set(ALL_SKINS.map(s=>s.name))];
+  const missing=allNames.filter(n=>!_skinPhotoMap[n]);
+  console.log(`${allNames.length-missing.length}/${allNames.length} skins matched a real photo`);
+  console.log('NOT matched (' + missing.length + '):');
+  missing.forEach(n=>console.log(' ', n));
+  return missing;
+}
+
 // Subsets for cases
 const SK = {
   common: ALL_SKINS.filter(s=>s.price<1),
@@ -1544,6 +1561,7 @@ function startSpin(fast){
       const r=getR(won);
       items[tIdx].className=`ri ${RC[r]}`;
       items[tIdx].innerHTML=`<img src="${si(won.img,won.name,won.price,won.weapon)}" data-sk="${won.name}" alt="" onerror="imgErr(this,won.name,won.price)"><div class="rin">${won.name.substring(0,18)}</div>`;
+      applyKnownSkinPhotosIn(items[tIdx]);
     }
     const off=tIdx*iW-330+59;
     const track=document.getElementById('rt');
@@ -1597,8 +1615,10 @@ function renderInv(){
   applyKnownSkinPhotosIn(el);
 }
 
+let _openItemIdx=null;
 function openItem(idx){
   const item=S.inv[idx];if(!item)return;
+  _openItemIdx=idx;
   const idImg=document.getElementById('idImg');
   idImg.src=si(item.img,item.name,item.price,item.weapon);
   idImg.setAttribute('data-sk',item.name);
@@ -1611,6 +1631,32 @@ function openItem(idx){
   document.getElementById('idPr').textContent=fmtRub(item.price);
   document.getElementById('idFrom').textContent=item.fromCase||'—';
   openM('itemM');
+}
+
+// Sell an inventory item back for its listed price. Removes it from S.inv
+// and credits the balance — the reverse of what happens when a case drop
+// or upgrade win is added to the inventory.
+function sellItem(idx){
+  if(idx===null||idx===undefined)return;
+  const item=S.inv[idx];if(!item)return;
+  S.bal+=item.price;
+  S.inv.splice(idx,1);
+  saveS();updateUI();
+  closeM('itemM');
+  toast(`Продано за ${fmtRub(item.price)}`,'s');
+  renderInv();
+}
+
+// Sell straight from the case-open result screen — the just-dropped item
+// is always S.inv[0] since showWin() unshifts it onto the inventory.
+function sellLastWin(){
+  if(!S.inv.length)return;
+  const item=S.inv[0];
+  S.bal+=item.price;
+  S.inv.shift();
+  saveS();updateUI();
+  closeM('caseM');
+  toast(`Продано за ${fmtRub(item.price)}`,'s');
 }
 
 // ============================================================
